@@ -58,10 +58,12 @@ function spanner(k){if(options.live==='on'){
 	r.deleteContents()
 	if(k.which===13 || k.which===8 || (k.which===32 && input_history===32)){
 
-	}else if((k.which===32 && r.startOffset!==1)){
+	}else if((k.which===32 && r.startOffset!==1) || p.tagName!=='SPAN'){
 		if(k.which===32){
       insertSpace(p)
-			r.setStartAfter(p.nextSibling)
+      r.setStartAfter(p.nextSibling)
+			r.setEndAfter(p.nextSibling)
+      r.collapse()
 			k.preventDefault()
 		}else{
       e=document.createElement('span')
