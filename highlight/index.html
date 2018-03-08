@@ -1,0 +1,293 @@
+<!doctype html>
+<html><head>
+<title>adicat highlight</title>
+<link rel="icon" href="../icon.png">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<script type='text/javascript' src="../dict/liwc.js" async></script>
+<script type='text/javascript' src="../core.js" async></script>
+<script type='text/javascript' src="../highlight/highlight.js" async></script>
+<link rel='stylesheet' type='text/css' href="default.css">
+<style type="text/css">
+#input, #values, #menu, button, p{
+	margin:0;padding:0;font-size:1.2em;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+	outline-color:#e5e5e5;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:greyscale
+}
+.noint, #inp_control, #menu{-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+#menu{
+	position:fixed;overflow:auto;-webkit-overflow-scrolling:touch;right:-90%;top:0;bottom:0;width:90%;background:#cecece;z-index:2;
+	transition:right .25s;-webkit-transition:right .25s;-moz-transition:right .25s;-o-transition:right .25s
+}
+.menu_group_open, .menu_group{overflow:hidden;margin:.5em}
+.menu_group{height:0}
+.menu_group_open div{background:#fff;display:table;width:100%;height:3em;margin:.5em 0}
+.menu_group_open p:first-child{float:left;padding:1em}
+.menu_group_open p:last-child{float:right}
+.menu_group_open button{cursor:pointer;font-size:1em;border:none;padding:1em;background:#fff}
+.menu_group_open table{background:#fff;width:100%;text-align:left;font-size:.9em}
+.menu_group_open table tr td{padding:0;white-space:nowrap;overflow:hidden;cursor:pointer;max-width:100px;text-overflow:ellipsis}
+.menu_group_open table tr td button{padding:0;width:100%;height:1.5em}
+#menu_cats{max-height:15em}
+#menu_cats span{display:inline-block;padding:.3em .4em;margin:0;cursor:pointer}
+#menu_cats span:hover, #menu_cats span.off{text-decoration:line-through}
+.menu_header,.menu_header_open,.reset{text-align:left;border:none;width:100%;padding:1em;margin:0;background:#8f8f8f;color:#efefef;cursor:pointer}
+.reset{background:#9f4444;text-align:center;color:#e9e9e9}
+.menu_header::after{content:'∨';float:right}
+.menu_header_open::after{content:'∧';float:right}
+#menu div table tbody tr:hover, #opt_sort:hover,button.selected, button:hover,.reset p:hover,
+		.menu_header:hover,.menu_header_open{color:#efefef;background:#202020;cursor:pointer}
+#overlay{display:none;width:100%;height:100%;background:#000;opacity:.4;z-index:3;cursor:not-allowed}
+#values{
+	position:absolute;height:3.5em;bottom:0;right:0;left:0;background:#fff;
+	overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch
+}
+#values table{position:relative;width:100%;height:100%;text-align:center;font-size:.8em}
+#values table td,#values table th{padding:.2em .4em}
+#values table th:hover{cursor:pointer}
+#frame{
+	position:fixed;width:100%;top:0;bottom:0;right:0;overflow:hidden;
+	transition:left .25s;-webkit-transition:right .25s;-moz-transition:right, .25s;-o-transition:right .25s
+}
+#input{position:absolute;top:0;left:0;right:0;bottom:0;padding:.5em;margin:4em .1em;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.highlight span{display:inline}
+#inp_control{width:100%;top:0;position:absolute;z-index:3;text-align:center}
+#inp_control button{position:absolute;cursor:pointer;border:none;padding:.5em;font-size:1.5em}
+#inp_control button{color:#2c2c2c;background:#e5e5e5}
+#inp_control button:hover{color:#efefef;background:#202020}
+#inp_control button#inp_clear{left:0;top:0;border-radius:0 0 30px;padding:.5em 1em}
+#inp_control button#inp_refresh{position:relative;top:.15em;border-radius:25px;padding:.5em 2.5em}
+#inp_control button#menu_open{right:0;padding:.5em 1em;border-radius:0 0 0 30px}
+.zero{display:none}
+.select{background:#C4B9C5}
+@media screen and (max-width:520px){
+	#menu button, #menu p{font-size:.8em}
+	#menu p>button{font-size:1.15em}
+	#inp_control button#menu_open{right:-.5em}
+}
+@media screen and (max-width:300px){#inp_control button#inp_refresh{padding:.5em 1em}}
+</style>
+</head><body>
+<div id='menu' class='closed'>
+	<button class='menu_header' type='button'>Output Settings</button>
+	<div class='menu_group'>
+		<div><p>values</p><p id='opt_values'><button type='button'>count</button><button type='button'>percent</button></p></div>
+		<div><p>live</p><p id='opt_live'><button type='button'>on</button><button type='button'>off</button></p></div>
+	</div>
+	<button class='menu_header' type='button'>Categories</button>
+	<div class='menu_group'>
+		<div><p>composites</p><p id='toggle_comp'><button type='button'>femcomp</button><button>+</button></p></div>
+		<div><p>select</p><p id='toggle_cats'><button type='button'>all</button><button type='button'>none</button></p></div>
+		<div id='menu_cats' class='highlight'></div>
+  </div>
+	<button class='menu_header' type='button'>Saved Texts</button>
+	<div class='menu_group'>
+		<table><thead><tr><th width='50px'>ID</th><th>text</th><th width='50px'>Comparison</th><th  width='50px'>Delete</th></tr></thead><tbody id='menu_saved'></tbody></table>
+  </div>
+	<button class='menu_header' type='button'>Example Texts</button>
+	<div class='menu_group'>
+		<table><thead><tr><th width='50px'>Study</th><th width='50px'>Topic</th><th width='50px'>Style</th><th>Text</th></tr></thead><tbody id='example_texts'>
+			<tr><td>1</td><td>Relational</td><td>Feminine</td><td>So, I'm going on this trip next week, but I'm mostly concerned by the people involved. My old friend is coming, who I haven't seen in a very long time. We used to be pretty close, but have basically just drifted apart. They're a dentist now, living really far away. Another person coming just got married, and they're a new parent, so I'm not sure how much they might have changed. In my mind, of course, they're a completely different person, and we absolutely won't get along, but this is just my fear talking, since we haven't actually spent time together recently. The last person coming, I've spent plenty of time with, but this is exactly the problem: we're thoroughly sick of each other. This is the concern anyway, and I'm sure I'm blowing it all out of proportion, but I can't help but feel that anyone who's spent so much time around me would have to be quite sick of me. Thinking about all this makes me not even want to go, and despite my high hopes, that may actually be best.</td></tr>
+			<tr><td>1</td><td>Relational</td><td>Masculine</td><td>There's a trip next week. The biggest concern is the people involved, more than the plans. An old friend is coming, who has been away a long time. They lived here for 5 years until the move 2 years ago to start at a new job. They're a dentist now, which is ridiculous if you know them. Another of the people coming recently got married, and they're a new parent. Since it's been over 3 years since they were here last, they may have changed in any number of ways. Good chance they're a completely different person who will be a pain to get along with. That would be the worst case, but it's still a fear. The last person coming has been around a lot, but that's the problem: they've had way too much time with me. We can hardly stand each other now, much less throughout an entire trip. Anyone spending that much time with me is bound to be annoyed. All of these concerns end up making me want to stay here. Even though I am hopeful, canceling might end up being best.</td></tr>
+			<tr><td>2</td><td>Life Course</td><td>Feminine</td><td>I'll start by saying that life has been going well for me, and I'm pretty happy with my situation, so I'm not really looking for better opportunities or anything. That being said, a job might be opening for me, and it would be more aligned with my aspirations. I would be moving to a new city, and starting over with my social circle, which has just started feeling stable. I would also be farther from my family, and I have my partner to think about. My partner would actually be alright since their job is flexible, but I would potentially feel guilty making them uproot for me. Basically, I have two main things to consider. Overall, staying would be safe and comfortable, while going could be better for my career but also riskier. I am crazy excited about this prospective new life, so I would lean toward going, but I don't want that alone to dictate my decision. I have supportive people around me, and they all want me to be happy, but I want to be clear headed, so I don't just throw something really good away for a potentially silly dream.</td></tr>
+			<tr><td>2</td><td>Life Course</td><td>Masculine</td><td>To start with, life is going well. My situation here is pretty good. I'm not exactly looking for better opportunities. That said, there might be a job opening elsewhere, which is more in line with my aspirations. It means moving to a new city and kind of starting over. A new social circle would need building, right as the old one started feeling stable. Additionally, the majority of the family is a lot farther away from the new place, and I have a partner to think about. My partner is actually alright with it since their job is more flexible. There is, however, some potential for guilt, making them uproot for me. I have two main things to consider. Either stay, which is safe and comfortable, or go, which is better for my career but riskier. This new life is an extremely exciting prospect. This alone leans me toward going, it just shouldn't entirely dictate my decision. The people around me are very supportive. They want whatever makes me most happy. I just want to go into this with a clear head. It could ruin the good thing in place now for a potentially silly dream.</td></tr>
+			<tr><td>3</td><td>Relational</td><td>Feminine</td><td>My friend group is pretty close knit; we four have been together years now, and we've always had one other's backs. There has been dating and flirting between us, but I guess the friendships were always constant, even when flings didn't go anywhere. Two friend have gotten old and now have important careers and families and everything, so lately me and the other still child friend have been getting closer and closer. I've always felt really connected to this particular friend, but I never really thought that they could be something else until recently. Now that I think like this, I really do feel something deeper, and it's gotten me pretty excited, imagining a life together, but I really don't know how they feel. I don't know if it's just my physical age confusing things, like I have to find someone, and I'll take whoever's closes, but this person has been special. I'm not sure I want tell them about it, yet anyway, because I'm not sure I have my feelings straight. Judging from my other friend, their moving and everything, I don't think the friendship is necessarily worth abandoning a potential relationship, but I still would rather not lose it, and I might ultimately realize it's not really this person I want, but just something more meaningful.</td></tr>
+			<tr><td>3</td><td>Relational</td><td>Masculine</td><td>I've potentially started to develop feeling for a longtime friend. For a long time, it was a close knit group of four friend. We use to rely on each other entirely, but a lot of time passed. Since the past several months, two grew up. They handle important things for their careers, they started families, all that. The other friend is a different story all together. We remained children pretty much. I relate to them a lot in terms of our take on the world. I always felt a connection with them, at first entirely a friendship, other than a bit of flirting early on. More recently, I see more in that than before; I think a relationship is a potential. Of course, I am getting older, physically at least. That fact has the potential to push me in a particular direction, like I need to grab on to anyone close. This is a special person. A relationship might be worth risking the friendship over, judging from the way the other two friend went, moved away and all. I want to get some feelings sorted out before I talk to them. These feelings might be an indication of some other thing lacking in my life. I do want to maintain the friendship if possible.</td></tr>
+			<tr><td>3</td><td>Life Course</td><td>Feminine</td><td>I've had my job a few years now, and it's been going pretty well; I do enjoy it, and I think there would be room to grow. That said, I've also been podcasting in my free time, and it's really become something I'm passionate about. I've been seeing other podcasters quit their real life jobs and really make that work, so I'm starting to think about it, and get excited about it, and it's looking pretty attractive. I've talked to my boss about it, like maybe just scaling back my workload so I can take my podcasts seriously, but they didn't seem amenable; they want someone really committed, and there are others who would be happy to take my place. I think I could make my podcasts profitable if I could put more time into them, but I really wouldn't know until I try. The feedback I've gotten so far has been positive, and that makes me want to give it a real shot, but maybe it's really better suited as a hobby; maybe It's crazy to even consider discarding my stable job just so I can do something that seems fun.</td></tr>
+			<tr><td>3</td><td>Life Course</td><td>Masculine</td><td>I've worked at this job for a couple of years. It has a lot of positives; enjoyable enough work, a stable position, some room to grow. Of course, on the side, I started podcasting. The more I do of it, the more I think of it as a real passion. A lot of other podcasters in the past couple of years quit their real life jobs to take it on full time. I thought it through a bunch, and it seems feasible. As a first step, I thought about scaling down the workload at the current job. I brought up this idea to the boss; they said they wanted someone fully committed, and that others would love to get a chance at this position. With more time put into it, I think the podcast has the potential to be profitable. Of course, it isn't a sure thing. I got a whole bunch of positive feedback for the stuff up this far, which makes it all seem like something real, something to put some time into. On the other hand, the current job is stable; maybe it's crazy to discard it for something that seems fun.</td></tr>
+			<tr><td>4</td><td>Relational</td><td>Feminine</td><td>A coworker and I have been working closely on a big project assignment. When we take breaks, they talk about their children, one being autistic. I think generally they sound really attentive and caring, basically like a good parent, but with this particular child, they apparently sometimes have to "startle" them by hitting them, because, as they say, this is the only way they can even start calming them. I would usually keep to myself here, but this seems abusive, or just about. I did actually bring my concerns to them once, but they just said someone who didn't have an autistic child simply wouldn't understand. I could imagine that reporting them to CPS might just make things worse, particularly if their child is actually where they should be now. Our working relationship would also be destroyed. Then again, I do feel responsible to do something, if only gather additional information, and I don't think the actual project would suffer, even if we couldn't work together. I might even get input from someone actually familiar with autistic children, but this might all be me just getting overly nosy. Basically, however I think about it, everything seems really unclear, and I'm not sure what would really be right.</td></tr>
+			<tr><td>4</td><td>Relational</td><td>Masculine</td><td>I started an assignment on a big project, working closely with a coworker. They talk a lot about their children during breaks, one of which has some form of autism. For the most part, they seem like a good parent; attentive, caring. But with this particular child, they say that, on occasion, the only way to get them to calm down is to "startle" them by hitting them. I normally stay out of this kind of thing, but this seems at least on the verge of abuse. At one point, I brought up these concerns to them. They said someone without an autistic child wouldn't understand, leaving it at that. On the one hand, reporting them to CPS could make the situation worse, particularly in the case that the child is in the best place for them. The working relationship would also be destroyed. On the other, I feel somewhat responsible to at least look more into this, and the project itself wouldn't suffer without us specifically working on it. I want to talk to someone more familiar with dealing with autistic children for their input. All of this might be overly nosy on my part. From any direction, the most right course of action seems unclear.</td></tr>
+			<tr><td>4</td><td>Life Course</td><td>Feminine</td><td>About two years now, we've really just been bearing down and keeping stable, because we had loans to pay off and unfortunate but necessary purchases to make, and a new baby arriving just then. Now though, I've been thinking back about my old fantasies of living in Sweden. I even mentioned this, talking with my spouse and kids, and as expected, everyone was immediately thrilled; they love adventures, and have always been really supportive. I'm torn because, while I am really excited about just going and doing something so new and unknown, I also feel I should be considering things like stability, roots, and prospects, which is what we have now, even though moving has really always been the plan. Basically, I'm the deciding factor here, and that's pretty scary. If it were just me, I would be leaving right away, but because I have my family and the foundation that's here already to think about, I almost want to slap myself for even entertaining these silly dreams. When I really think about it, both options seem like the clearly right choice. Doing something long term rewarding, and doing something pragmatic and reasonable sound like great options, but I can only do one, which is why this decision seems just about impossible.</td></tr>
+			<tr><td>4</td><td>Life Course</td><td>Masculine</td><td>The last couple of years were 'bear down to stabilize' years, with some loans to pay off, some unfortunately necessary large purchases, and a new baby on top of all that. With a lot of that behind us, I feel a bit of room to breathe. In this mind set, some old dreams of living in Sweden are coming up to the surface. Of course, everyone was thrilled at the idea. Part of me wants to go all in; this was always the plan from the start. Another part looks at what we have in place at the moment: stability, roots, prospects, etc.. I almost want to slap myself for continuing to hold on to these silly fantasies. Support from the spouse and kids is firmly in place; they love a good adventure, particularly into the unknown. I'm the deciding factor in all of this, which is scary. With nothing else to consider, I'd be on the road in a heartbeat, but with a family and the partial foundation we put down, the decision seems impossible. In the best case, it's between something rewarding in the long term, and something pragmatically reasonable. In a sense, each side seems like the right choice, depending on which one I'm focusing on at the time.</td></tr>
+		</tbody></table>
+  </div>
+	<button onclick='backup(null,null,true)' class='reset' title='clear local storage' type='button'>Reset</button>
+</div>
+<div id='frame'>
+	<div id='input' class='highlight' contenteditable="true"></div>
+	<div id='values'><table><tr class='highlight'><th title='word count'>WC</th></tr><tr><td id='wc_value'>0</td></tr></table></div>
+	<div id='inp_control' class='collapse'>
+		<button title='clear input' id='inp_clear' onclick="input.innerHTML=values.innerHTML='';output=null" type='button'>&#10005;</button>
+		<button title='refresh input' id='inp_refresh' onclick='input_refresh()' type='button'>&#10227;</button>
+		<button title='toggle menu' id='menu_open' onclick='toggle_menu()' type='button'>&#9776;</button>
+	</div>
+	<div id='overlay' onclick='toggle_menu()'></div>
+</div>
+<script type="text/javascript">
+function $(e){return document.getElementById(e)}
+var frame=$('frame'), menu=$('menu'), menu_open=$('menu_open'), menu_cats=$('menu_cats'), menu_saved=$('menu_saved'), overlay=$('overlay'),
+		upload=$('upload'), file=$('file'), input=$('input'), contr=$('inp_control'), contr_items=contr.children, store=localStorage && !!JSON,
+		values=$('values'), toggle_cats=$('toggle_cats'), toggle_comp=$('toggle_comp'), input_history=0, texts={current:0, comp:null, n:0},
+		limit={proc:false, save:0}, que_proc=false, example_texts=$('example_texts')
+window.onload=function(){
+	if(store){
+		if(window.localStorage.hasOwnProperty('options')) options=JSON.parse(window.localStorage.options)
+		if(window.localStorage.hasOwnProperty('texts')) texts=JSON.parse(window.localStorage.texts)
+	}
+	patterns.dict=adicat_dict
+	fill_menu()
+	addEvent(input,'keypress',spanner)
+	addEvent(input,'keyup',process_span)
+	addEvent(input,'paste',catch_paste)
+	addEvent(input,'keydown',function(k){if(k.which===9){k.preventDefault()}})
+	addEvent(values,'click',function(t){if(t.target.tagName==='TH' && t.target.innerText!=='WC') select(t.target)})
+	addEvent(menu,'click',toggle_menu_group)
+	addEvent(menu_cats,'click',function(t){if(t.target.tagName==='SPAN') toggle_cat(t.target)})
+	addEvent(opt_values,'click',update_options)
+	addEvent(opt_live,'click',update_options)
+	addEvent(toggle_cats,'click',function(e){e.target.innerText==='all' ? composite(true,true) : composite()})
+	addEvent(toggle_comp,'click',function(e){})
+	addEvent(menu_saved,'click',fill_text)
+	addEvent(example_texts,'click',fill_text)
+	addEvent(document,'keydown',function(k){if(k.ctrlKey && k.which===83){backup(true);k.preventDefault()}})
+	setTimeout(function(){input.focus()},0)
+}
+function backup(force,wait,clear){
+	if(clear){
+		if(confirm('Are you sure you want to delete your locally stored texts, custom categories, and settings?')){
+			if(store) window.localStorage.clear()
+			window.location.reload()
+		}
+	}else if(force || limit.save<1){
+		if(store){
+			if(input.innerText!=='') texts[texts.current]=input.innerText
+			window.localStorage.options=JSON.stringify(options)
+			window.localStorage.texts=JSON.stringify(texts)
+		}
+		fill_menu()
+		limit.save=5
+		limit.timeout=false
+	}else if(wait){
+		if(limit.timeout){
+			limit.save=5
+		}else{
+			limit.timeout=true
+			setTimeout(backup,1000)
+		}
+	}else{
+		limit.save=limit.save-1
+		setTimeout(backup,1000)
+	}
+}
+function update_options(e){
+	var v=e.target, a=v.parentNode.children, i=a.length, k=v.parentNode.previousSibling.innerText
+	if(options.hasOwnProperty(k)) options[k]=v.innerText
+	while(i--){a[i].className=''}
+	v.className='selected'
+	backup(true)
+	que_proc=true
+}
+function fill_menu(){
+	var k, i, tr, n=/\d/
+	menu_cats.innerHTML=menu_saved.innerHTML=''
+	for(k in patterns.dict){if(patterns.dict.hasOwnProperty(k)){
+		append(menu_cats,'span',{className:options.blacklist.indexOf(k)===-1 ? ' '+k+' ' : '|'+k+'| off',innerText:k})
+	}}
+	for(k in texts){if(n.test(k)){
+		tr=document.createElement('tr')
+		append(tr,'td',{innerText:k})
+		append(tr,'td',{innerText:texts[k]})
+		append(tr,'td',{innerHTML:"<button type='button'>"+(texts.comp===k ? 'comparing' : 'set')+"</button>"})
+		append(tr,'td',{innerHTML:"<button type='button'>&#10005;</button>"})
+		menu_saved.appendChild(tr)
+	}}
+	if((c=opt_values.children)){i=c.length;while(i--){c[i].className=options.values===c[i].innerHTML ? 'selected' : ''}}
+	if((c=opt_live.children)){i=c.length;while(i--){c[i].className=options.live===c[i].innerHTML ? 'selected' : ''}}
+}
+function toggle_menu(e){
+	if(menu.className==='closed'){
+		menu.className='open'
+		menu.style.right=0
+		frame.style.right=overlay.style.right='90%'
+		menu_open.style.background='#cecece'
+		overlay.style.display='block'
+	}else{
+		if(input.lastElementChild){
+			var s=window.getSelection(), r=s.getRangeAt(0)
+			r.setStart(input.lastElementChild,0)
+			r.setEnd(input.lastElementChild,1)
+			r.collapse()
+			s.removeAllRanges()
+			s.addRange(r)
+		}else{input.focus()}
+		menu.className='closed'
+		menu.style.right='-90%'
+		frame.style.right=overlay.style.right=0
+		overlay.style.display='none'
+		menu_open.style.background=''
+		backup(true)
+		if(que_proc){
+			input_refresh()
+			que_proc=false
+		}
+	}
+}
+function toggle_cat(e){
+	var off=/ off$/, i=options.blacklist.indexOf(e.innerText)
+	if(off.test(e.className)){
+		e.className=e.className.replace(/\|/g,' ').replace(off,'')
+		if(i!==-1) options.blacklist.splice(i,1)
+	}else{
+		e.className=e.className.replace(/ /g,'|')+' off'
+		if(i===-1) options.blacklist.push(e.innerText)
+	}
+	patterns.matches={}
+	que_proc=true
+}
+function toggle_menu_group(t){if(/^menu_header/.test(t.target.className)){
+	if(t.target.className==='menu_header'){
+		t.target.className='menu_header_open'
+		t.target.nextElementSibling.className='menu_group_open'
+	}else{
+		t.target.className='menu_header'
+		t.target.nextElementSibling.className='menu_group'
+	}
+}}
+function composite(on,all,cats){
+	var cats=cats||[], i=cats.length, p
+	if(on){
+		if(all){
+			options.blacklist=[]
+		}else{
+			while(i--){if((p=options.blacklist.indexOf(cats[i]))!==-1) options.blacklist.splice(p,1)}
+		}
+	}else{
+		for(i in patterns.dict){if(patterns.dict.hasOwnProperty(i)){
+			if(options.blacklist.indexOf(i)===-1) options.blacklist.push(i)
+		}}
+	}
+	if(menu_cats.innerHTML===''){
+		fill_menu()
+	}else{
+		i=menu_cats.children.length
+		while(i--){
+			p=menu_cats.children[i].innerText
+			menu_cats.children[i].className=options.blacklist.indexOf(p)===-1 ? ' '+p+' ' : '|'+p+'| off'
+		}
+	}
+	patterns.matches={}
+	input_refresh()
+	backup(true)
+}
+function fill_text(t){
+	if(t.target.tagName==='TD'){
+		t=t.target.parentNode
+		input_clear()
+		display_text(t.children[t.lastElementChild.innerText==='✕' ? 1 : 3].innerText)
+		toggle_menu()
+	}else if(t.target.tagName==='BUTTON'){
+		var r=t.target.parentNode.parentNode, id=r.children[0].innerText, i, cr
+		if(t.target.innerText!=='✕'){
+			texts.current=id
+			r=r.parentNode.children
+			i=r.length
+			texts.comp=t.target.innerText==='comparing' ? null : id
+			while(i--){cr=r[i].children;if(cr[2].children) cr[2].children[0].innerText=cr[0].innerText==texts.comp ? 'comparing' : 'set'}
+		}else if(confirm('are you sure you want to delete text '+id+'?')){
+			delete texts[id]
+			fill_menu()
+		}
+	}
+}
+</script></body></html>
