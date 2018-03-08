@@ -63,7 +63,7 @@ function spanner(k){if(options.live==='on'){
       insertSpace(p)
       r.setStartAfter(p.nextSibling)
 			r.setEndAfter(p.nextSibling)
-      r.collapse()
+      r.collapse(false)
 			k.preventDefault()
 		}else{
       e=document.createElement('span')
