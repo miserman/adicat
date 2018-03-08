@@ -2,13 +2,15 @@
 A JavaScript library for simple text processing:
 **a**s-needed **di**ctionary-based **cat**egorization
 
+<img src='icon.svg' width='200px'>
+
 ## documentation and examples
 [miserman.github.io/adicat](https://miserman.github.io/adicat/)
 
 ## use in html documents
 ### include somewhere
 ```html
-<script type='text/javascript' src='//miserman.github.io/adicat/adicat.min.js' async></script>
+<script type='text/javascript' src='//miserman.github.io/adicat/core.min.js' async></script>
 ```
 
 ### include in \<script\>

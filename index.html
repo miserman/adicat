@@ -32,7 +32,7 @@ a:link,a:visited{text-decoration:none}
 var windowFrame=document.getElementById("window")
 var menuItems=document.getElementById("menu").getElementsByTagName("a")
 var menuLength=menuItems.length
-window.onload=setup
+setup()
 function setup(r){
 	for(var i=menuLength;i--;) menuItems[i].className=""
 	if("object"===typeof(r)){
