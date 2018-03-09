@@ -43,12 +43,12 @@ window.onload=function(){
 }
 function $(e){return document.getElementById(e)}
 var inp=$('input'), chat_frame=$('chat_frame'), chat=$('chat'), indicator=$('indicator'), indStat=false, log={s:'',r:''}, replies={
-	greeting:['How are you?',"What's up?",'How have you been?','How was your day?','Tell me things!','Talk to me please.',''],
-	question:['WHAT','Mmm...','Erm','Well...','Uh',"I don't know",'QUESTIONS'],
+	greeting:['How are you?',"What's up?",'How have you been?','How was your day?','Tell me things!','Talk to me please.'],
+	question:['WHAT','Mmm...','Erm','Well...','Uh',"I don't know",'QUESTIONS','let me think about that one...'],
 	general:['So...','Gherga merrr','Riiight','Well anyway','...','Whelp',"I don't really know what you're talking about..."],
 	happy:['Yay!','^_^V',"I'm so happy for you!","That's so exciting!",': )','Oh, good for you...'],
-	sad:['Aww : (','Sorry about that : (',': (','That sucks'],
-	repeat:['Yeah what','......','Whatever.',"That's what I said...",'Yeah']
+	sad:['Aww : (','Sorry about that : (',': (','That sucks','Well what can you do.','Pooo'],
+	repeat:['Yeah what','......','Whatever.',"That's what I said...",'Yeah','Work work work']
 }
 function send(t){
 	var e=document.createElement('div'), ep=document.createElement('p')

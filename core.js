@@ -13,11 +13,11 @@ var patterns={
 	space:/ (?=[ .,?!(){}[\]*&^])|^ | $/g,
 	cues:{
 		question:/\?| wha+[t ]* | whe+n+ | who+ | how| a[sk]{2} | h+u+h/,
-		greeting:/ hi[yi]* | h[ae]+[iy]+ | hello[o ]+ | yo[o ]+ | what[']*(?:s| is) (?:shak|up)/,
+		greeting:/ hi[yi]* | h[ae]+[iy]+ | hello[o ]* | yo[o ]+ | what[']*(?:s| is) (?:shak|up)/,
 		yes:/ y[ae]+s+ | su+r+[e ]+| uh+u[hu ]+ | affirm| accep/,
 		no:/ n+o+ | no+pe+ | decli| rejec/,
-		sad:/ emjsface | ba+d | sa+d+ | frustr| depres/,
-		happy:/ emjhface | happy | excited | goo+d+ /
+		sad:/ emjsface | ba+d | sa+d+ | frustr| depres| terribl| horribl/,
+		happy:/ emjhface | happy | excited | goo+d+ | gre+a+t | e+xcellent| su+per | nice /
 	},
 	matches:{},
 	dict:null,

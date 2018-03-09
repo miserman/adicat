@@ -34,7 +34,6 @@ function process_span(k){if(options.live==='on'){
 				if(c.length!==1){
 					ae=e.nextElementSibling
 					e.parentNode.removeChild(e)
-          console.log(e)
 					for(var i=0, n=c.length;i<n;i++){
 						ae.insertAdjacentElement('beforeBegin',c[i])
 						if(i!==n-1){
