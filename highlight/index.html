@@ -51,6 +51,7 @@
 	transition:left .25s;-webkit-transition:right .25s;-moz-transition:right, .25s;-o-transition:right .25s
 }
 #input{position:absolute;top:0;left:0;right:0;bottom:0;padding:.5em;margin:4em .1em;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.highlight p{font-size:1em}
 .highlight span{display:inline}
 #inp_control{width:100%;top:0;position:absolute;z-index:3;text-align:center}
 #inp_control button{position:absolute;cursor:pointer;border:none;padding:.5em;font-size:1.5em}
@@ -140,7 +141,17 @@ window.onload=function(){
 	addEvent(toggle_comp,'click',function(e){})
 	addEvent(menu_saved,'click',fill_text)
 	addEvent(example_texts,'click',fill_text)
-	addEvent(document,'keydown',function(k){if(k.ctrlKey && k.which===83){backup(true);k.preventDefault()}})
+	addEvent(document,'keydown',function(k){
+		if(k.ctrlKey){
+			if(k.which===83){
+				backup(true)
+				k.preventDefault()
+			}else if(k.which===82){
+				input_refresh()
+				k.preventDefault()
+			}
+		}
+	})
 	setTimeout(function(){input.focus()},0)
 }
 function backup(force,wait,clear){

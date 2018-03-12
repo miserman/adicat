@@ -2,7 +2,16 @@ var input=document.getElementById('input'), values=document.getElementById('valu
     options={values:'count', blacklist:[], live:'on', nback:5, space:'\u2008'}
 
 function process_span(k){if(options.live==='on'){
-	var s=window.getSelection(), r=s.getRangeAt(0), e=r.startContainer.parentNode, n=options.nback*2, c, ae, te, i
+	var s=window.getSelection(), r=s.getRangeAt(0), e=r.startContainer.parentNode, n=options.nback, c, ae, pe, i
+  if(e.tagName==='BODY'){
+    if(input.lastElementChild){
+      r.setStartBefore(input.lastElementChild)
+      r.setEndAfter(input.lastElementChild)
+      r.collapse(false)
+    }else input.focus()
+    r=s.getRangeAt(0)
+    e=r.startContainer.parentNode
+  }
 	if(e.tagName==='SPAN'){
     if(e.children.length!==0){
       c=new adicat(e.innerText).categorize(patterns.dict,options.blacklist).display()
@@ -25,30 +34,32 @@ function process_span(k){if(options.live==='on'){
 		}
 		while(n-- && e.previousElementSibling){
       e=e.previousElementSibling
-			if(e.className==='blankspace'){
-        if(e.nextSibling.className==='blankspace') e.parentNode.removeChild(e)
-      }else if(!e.history || e.history!==e.innerText || /\-\s/.test(e.innerText)){
-        if(e.nextSibling.className!=='blankspace') insertSpace(e)
-				if(e.style) e.style=''
-				c=new adicat(e.innerText).categorize(patterns.dict,options.blacklist).display()
-				if(c.length!==1){
-					ae=e.nextElementSibling
-					e.parentNode.removeChild(e)
-					for(var i=0, n=c.length;i<n;i++){
-						ae.insertAdjacentElement('beforeBegin',c[i])
-						if(i!==n-1){
-							insertSpace(ae)
-						}
-					}
-				}else{
-					e.className=c[0].className
-					e.title=c[0].title
-					e.history=c[0].innerText
-				}
-			}
-		}
-    update_table()
-	}
+      if(e.tagName==='SPAN'){
+        if(e.className==='blankspace'){
+          pe=e.previousElementSibling
+          if(pe && pe.className==='blankspace') pe.parentNode.removeChild(pe)
+        }else if(!e.history || e.history!==e.innerText || /\/\-\s/.test(e.innerText)){
+          pe=e.previousElementSibling
+          if(pe && pe.className!=='blankspace') insertSpace(e,'beforeBegin')
+  				if(e.style) e.style=''
+  				c=new adicat(e.innerText).categorize(patterns.dict,options.blacklist).display()
+  				if(c.length!==1){
+  					ae=e.nextElementSibling
+  					e.parentNode.removeChild(e)
+  					for(var i=0, n=c.length;i<n;i++){
+  						ae.insertAdjacentElement('beforeBegin',c[i])
+  						if(i!==n-1) insertSpace(ae)
+  					}
+  				}else{
+  					e.className=c[0].className
+  					e.title=c[0].title
+  					e.history=c[0].innerText
+  				}
+  			}
+        update_table()
+      }
+  	}
+  }
   s.removeAllRanges()
   s.addRange(r)
 }}

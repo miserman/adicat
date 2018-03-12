@@ -141,9 +141,9 @@ adicat.prototype={
 	detect:function(cues){
 		cues=cues||patterns.cues
 		if(!this._processLevel) this.tokenize()
-		var st=new Date().getTime()
+		var st=new Date().getTime(), k
 		this.cues={}
-		for(var k in cues){if(cues.hasOwnProperty(k)){
+		for(k in cues){if(cues.hasOwnProperty(k)){
 			this.cues[k]=cues[k].test(this.string.striped)||cues[k].test(this.string.raw)
 		}}
 		this._processTime.cue=new Date().getTime()-st
@@ -185,7 +185,9 @@ adicat.prototype={
 		var l=i=cats.length, c=''
 		while(i--){
 			c=cats[i]
-			if(this.cats.hasOwnProperty(c) && comp.hasOwnProperty(c)){this.lsm+=Math.abs(this.cats[c]-comp[c])/(this.cats[c]+comp[c]+.001)}
+			if(this.cats.hasOwnProperty(c) && comp.hasOwnProperty(c)){
+				this.lsm+=Math.abs(this.cats[c]-comp[c])/(this.cats[c]+comp[c]+.001)
+			}
 		}
 		this.lsm=1-Math.round(this.lsm/l*1000)/1000
 		return this.lsm
