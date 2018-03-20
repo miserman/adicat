@@ -1,0 +1,19 @@
+.chat_background{background:url('../icon.svg') no-repeat bottom;opacity:.12;position:absolute;width:100%;height:50%;top:0}
+.chat_frame{position:absolute;width:100%;height:100%}
+#chat_body{position:absolute;width:100%;top:0;bottom:62px;overflow-y:auto}
+#chat{position:absolute;bottom:0;width:100%;overflow:hidden}
+#chat div p{display:inline-block;padding:1em}
+.input_clamp{position:absolute;left:0;right:0;bottom:0;overflow:hidden}
+#input{width:100%;padding:1em 0;overflow:hidden;border:none;resize:none;color:#efefef;background:#202020}
+#chat span{margin:0 .2em 0 0}
+.incoming{padding:0 3em .3em 0}
+.incoming p{background:#f2e5fb;border-radius:25px 25px 25px 10px}
+.outgoing{padding:0 0 .3em 3em;text-align:right}
+.outgoing p{background:#e0fbda;border-radius:25px 25px 10px 25px;text-align:left}
+@-webkit-keyframes ddd{0%{left:0}100%{left:.8em}}@-moz-keyframes ddd{0%{left:0}100%{left:.8em}}
+@-o-keyframes ddd{0%{left:0}100%{left:.8em}}@keyframes ddd{0%{left:0}100%{left:.8em}}
+#indicator{
+	position:absolute;bottom:62px;left:0;font-size:3.5em;
+  -webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;
+	-webkit-animation:ddd .5s infinite;-moz-animation:ddd .5s infinite;-o-animation:ddd .5s infinite;animation:ddd 1s infinite
+}

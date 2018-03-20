@@ -12,12 +12,12 @@ var patterns={
 	punct:{initials:/[,.](?=\w+[.,])/g,apostrophe:/\.\'s/g,ellipses:/…|\.[. ]+\./g},
 	space:/ (?=[ .,?!(){}[\]*&^])|^ | $/g,
 	cues:{
-		question:/\?| wha+[t ]* | whe+n+ | who+ | how| a[sk]{2} | h+u+h/,
-		greeting:/ hi[yi]* | h[ae]+[iy]+ | hello[o ]* | yo[o ]+ | what[']*(?:s| is) (?:shak|up)/,
-		yes:/ y[ae]+s+ | su+r+[e ]+| uh+u[hu ]+ | affirm| accep/,
-		no:/ n+o+ | no+pe+ | decli| rejec/,
-		sad:/ emjsface | ba+d | sa+d+ | frustr| depres| terribl| horribl/,
-		happy:/ emjhface | happy | excited | goo+d+ | gre+a+t | e+xcellent| su+per | nice /
+		question:/\?| w+h+a+[t ]* | w+h+e+n+ | w+h+o+ | how| a+[sk]{2} | h+u+h/,
+		greeting:/ h+i+[yi]* | h+[ae]+[iy]+ | h+e+l+o+ | y+o+ | w+h+a+t+[']*(?:s| is) (?:shak|up)/,
+		yes:/ y+[ae]+s+ | y+e+a+h+ | s+u+r+[e ]+| u+h+u[hu ]+ | a+f+i+r+m| a+cc+e+p/,
+		no:/ n+o+ | n+o+p+e+ | d+e+c+l+i| r+e+j+e+c/,
+		sad:/ emjsface | b+a+d+ | s+a+d+ | f+r+u+s+t+r| d+e+p+r+e+s| t+e+r+i+b+l| h+o+r+i+b+l/,
+		happy:/ emjhface | h+a+p+y+ | e+x+c+i+t| g+oo+d+ | g+r+e+a+t+ | e+x+c+e+l+e+n+t| s+u+pe+r+ | n+i+c+e+ /
 	},
 	matches:{},
 	dict:null,
@@ -209,15 +209,6 @@ function adicat_readDict(obj,level){
 		op[k]=new RegExp(op[k].join('|'),t)
 	}}
 	patterns.dict_proc=true
-	return op
-}
-function adicat_parse(tree){
-	tree=tree.split('\n')
-	var i=tree.length, tm='', op={}, d=[], h=[], dc=/^[\t ]+/, hd=/^[^:'"]*:/
-	while(i--){
-		tm=tree[i].match(dc)
-		d[i]=tm ? tm[0].length : 0
-	}
 	return op
 }
 
