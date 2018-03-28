@@ -214,14 +214,14 @@ function toggle_menu(e){
 		menu_open.style.background='#cecece'
 		overlay.style.display='block'
 	}else{
-		if(input.lastElementChild){
+		if(input.lastElementChild && input.lastElementChild.tagName==='SPAN'){
 			var s=window.getSelection(), r=s.getRangeAt(0)
 			r.setStart(input.lastElementChild,0)
 			r.setEnd(input.lastElementChild,1)
 			r.collapse()
 			s.removeAllRanges()
 			s.addRange(r)
-		}else{input.focus()}
+		}else input.focus()
 		menu.className='closed'
 		menu.style.right='-90%'
 		frame.style.right=overlay.style.right=0
