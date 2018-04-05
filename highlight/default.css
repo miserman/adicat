@@ -1,8 +1,10 @@
 .highlight span{color:#bcbcbc}
 .highlight *[class*=' action ']{color:#e87676}
+.highlight *[class*=' excl_rev ']{color:#63dea6}
+.highlight *[class*=' all_disengaged ']{color:#e88de5}
 .highlight *[class*=' frustrated ']{color:#e6a9b9}
 .highlight *[class*=' inaction ']{color:#9dca64}
 .highlight *[class*=' tired ']{color:#b6a4ec}
 .highlight *[class*=' bored ']{color:#6d42ef}
-.highlight *[class*=' risy_sex ']{color:#c071ce}
+.highlight *[class*=' risky_sex ']{color:#c071ce}
 .highlight *[class*=' swear ']{color:#d48080}
