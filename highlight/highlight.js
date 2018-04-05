@@ -37,7 +37,7 @@ function process_span(k){if(options.live==='on'){
       if(e.tagName==='SPAN'){
         if(e.className==='blankspace'){
           pe=e.previousElementSibling
-          if(pe && pe.className==='blankspace') pe.parentNode.removeChild(pe)
+          if(pe && pe.innerText===options.space) pe.parentNode.removeChild(pe)
         }else if(!e.history || e.history!==e.innerText || /\/\-\s/.test(e.innerText)){
           pe=e.previousElementSibling
           if(pe && pe.className!=='blankspace') insertSpace(e,'beforeBegin')
@@ -48,7 +48,7 @@ function process_span(k){if(options.live==='on'){
   					e.parentNode.removeChild(e)
   					for(var i=0, n=c.length;i<n;i++){
   						ae.insertAdjacentElement('beforeBegin',c[i])
-  						if(i!==n-1) insertSpace(ae)
+  						if(i!==n-1) insertSpace(c[i])
   					}
   				}else{
   					e.className=c[0].className
