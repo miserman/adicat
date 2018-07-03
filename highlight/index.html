@@ -736,7 +736,7 @@ function dict_import(f,n){
 	}
 }
 function solve(eq){
-	var mr=/ |^Math\./g, ch=/[^0-9+><*%^()&|\/-]/g, nf=/^\(/, fh=/^[^(]*/, ip=/\([^(]+\)/g, bs=/ +/g, bo=/[^+><*^()&%|\/-]+/g, e={}, sp=[], te='', l=0
+	var mr=/ |^Math\./g, ch=/[^\.0-9+><*%^()&|\/-]/g, nf=/^\(/, fh=/^[^(]*/, ip=/\([^(]+\)/g, bs=/ +/g, bo=/[^+><*^()&%|\/-]+/g, e={}, sp=[], te='', l=0
 	function dict_ops(s){
 		var s=s+'', t=s.match(bo), n=t ? t.length : 0, c='', i=0
 		for(;i<n;i++){
