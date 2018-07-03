@@ -303,14 +303,14 @@ function backup(force,wait,clear){
 }
 function update_options(e){
 	if(e.target && e.target.tagName==='BUTTON'){
-		var v=e.target, a=v.parentNode.children, i=a.length, k=v.parentNode.previousSibling.innerText
+		var v=e.target, a=v.parentElement.children, i=a.length, k=v.parentElement.previousElementSibling.innerText
 		if(options.hasOwnProperty(k)) options[k]=v.innerText
 		while(i--){a[i].className=''}
 		v.className='selected'
 		backup(true)
 		que_proc=true
 	}else if(!e.target){
-		var a=e.value ? e.parentNode.parentNode.firstElementChild.innerHTML : e.parentNode.firstElementChild.innerHTML
+		var a=e.value ? e.parentElement.parentElement.firstElementChild.innerHTML : e.parentElement.firstElementChild.innerHTML
 		if(options.hasOwnProperty(a)) options[a]=e.value ? String.fromCharCode(parseInt(e.value.replace(/^\\u/,''),16)) : e.innerText.split(/ *, */)
 		backup(true)
 		que_proc=true
@@ -555,7 +555,7 @@ function toggle_edit(){
 		fill_menu()
 	}
 }
-function color_preview(cc){cc.parentElement.previousSibling.style.color=cc.innerText}
+function color_preview(cc){cc.parentElement.previousElementSibling.style.color=cc.innerText}
 function toggle_menu_group(t){if(/^menu_header/.test(t.target.className)){
 	if(t.target.className==='menu_header'){
 		t.target.className='menu_header_open'
@@ -580,7 +580,7 @@ function apply_colors(){
   var h=document.head || document.getElementsByTagName('head')[0], ss=document.getElementsByTagName('style'),
 			l=ss.length, cols=options.dict[options.use_dict].colors, c='.highlight span{color:#d4d4d4}', s=$('cat_colors'), k
   for(k in cols) if(cols.hasOwnProperty(k)) c=c+".highlight *[class*=' "+k+" ']{color:"+cols[k]+"}"
-  if(s) s.parentNode.removeChild(s)
+  if(s) s.parentElement.removeChild(s)
   s=document.createElement('style')
   s.id='cat_colors'
   if(s.styleSheet){
@@ -616,7 +616,7 @@ function addRow(cat){
 }
 function fill_text(t){
 	if(t.target.tagName==='TD'){
-		t=t.target.parentNode
+		t=t.target.parentElement
 		var s=t.lastElementChild.innerText==='✕'
 		backup(true)
 		if(s && t.children.length) texts.current=t.children[0].innerText
@@ -625,9 +625,9 @@ function fill_text(t){
 		if(!s && texts.hasOwnProperty(texts.current)) new_text()
 		toggle_menu()
 	}else if(t.target.tagName==='BUTTON'){
-		var r=t.target.parentNode.parentNode, id=r.children[0].innerText, i, cr
+		var r=t.target.parentElement.parentElement, id=r.children[0].innerText, i, cr
 		if(t.target.innerText!=='✕'){
-			r=r.parentNode.children
+			r=r.parentElement.children
 			i=r.length
 			texts.comp=t.target.innerText==='comparing' ? null : id
 			while(i--){cr=r[i].children;if(cr[2].children) cr[2].children[0].innerText=cr[0].innerText==texts.comp ? 'comparing' : 'set'}
