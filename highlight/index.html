@@ -6,20 +6,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"/>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<script type='text/javascript' src="../dict/function.js" async></script>
 <script type='text/javascript' src="../core.js" async></script>
 <script type='text/javascript' src="../highlight/highlight.js" async></script>
-<link rel='stylesheet' type='text/css' href="default.css">
 <style type="text/css">
-#input, #values, #menu, button, p{
-	margin:0;padding:0;font-size:1.2em;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
-	outline-color:#e5e5e5;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:greyscale
+body, button, p, input, div, table, #input, #values, #menu, #dictionary_menu, .port_menu{
+	margin:0;padding:0;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+	outline-color:#8a8b9e;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:greyscale
 }
-.noint, #inp_control, #menu{-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+#input, #values, #menu, #dictionary_menu, .port_menu, button, p{font-size:1.1em}
+.noint, #inp_control, #menu, #dictionay_menu, .port_menu{
+	-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none
+}
 #menu{
-	position:fixed;overflow:auto;-webkit-overflow-scrolling:touch;right:-90%;top:0;bottom:0;width:90%;background:#cecece;z-index:2;
+	position:fixed;overflow:auto;-webkit-overflow-scrolling:touch;right:-80%;top:0;bottom:0;width:80%;background:#dedede;z-index:2;
 	transition:right .25s;-webkit-transition:right .25s;-moz-transition:right .25s;-o-transition:right .25s
 }
+.opt_display{position:absolute;display:inline;font-size:.8em;text-align:right;right:5.8em;bottom:-1.3em;color:#c7c7c7}
 .menu_group_open, .menu_group{overflow:hidden;margin:.5em}
 .menu_group{height:0}
 .menu_group_open div{background:#fff;display:table;width:100%;height:3em;margin:.5em 0}
@@ -27,17 +29,24 @@
 .menu_group_open p:last-child{float:right}
 .menu_group_open button{cursor:pointer;font-size:1em;border:none;padding:1em;background:#fff}
 .menu_group_open table{background:#fff;width:100%;text-align:left;font-size:.9em}
-.menu_group_open table tr td{padding:0;white-space:nowrap;overflow:hidden;cursor:pointer;max-width:100px;text-overflow:ellipsis}
+.menu_group_open table tr td{padding:0 .2em;white-space:nowrap;overflow:hidden;cursor:pointer;max-width:100px;text-overflow:ellipsis}
 .menu_group_open table tr td button{padding:0;width:100%;height:1.5em}
-#menu_cats{max-height:15em}
-#menu_cats span{display:inline-block;padding:.3em .4em;margin:0;cursor:pointer}
-#menu_cats span:hover, #menu_cats span.off{text-decoration:line-through}
-.menu_header,.menu_header_open,.reset{text-align:left;border:none;width:100%;padding:1em;margin:0;background:#8f8f8f;color:#efefef;cursor:pointer}
-.reset{background:#9f4444;text-align:center;color:#e9e9e9}
+.menu_group_open input{padding:1em;margin:.78em;border:none;width:3.5em}
+.menu_group_open button.menu_inner_full{width:100%;background:#c1e2b3;font-weight:bolder}
+.dict_parts{max-height:15em}
+.dict_parts span{display:inline-block;padding:.3em .4em;margin:0;cursor:pointer}
+.dict_parts span:hover, .dict_parts span.off{text-decoration:line-through;color:#d4d4d4}
+.menu_header,.menu_header_open,.reset, #menu div table tbody tr td button{
+	text-align:left;border:none;width:100%;padding:1em;margin:0;background:#8f8f8f;color:#efefef;cursor:pointer;border-radius:15px
+}
+#menu div table tbody tr td button{text-align:center;padding:0}
+.reset, #menu div table tbody tr td:last-child button{background:#9f4444;text-align:center;color:#e9e9e9}
 .menu_header::after{content:'∨';float:right}
 .menu_header_open::after{content:'∧';float:right}
-#menu div table tbody tr:hover, #opt_sort:hover,button.selected, button:hover,.reset p:hover,
-		.menu_header:hover,.menu_header_open{color:#efefef;background:#202020;cursor:pointer}
+button.selected,button:hover,#menu div table tbody tr td button:hover,.reset p:hover,.menu_header:hover,.menu_header_open{
+	color:#efefef;background:#202020;cursor:pointer;border-radius:20px
+}
+#menu div table tbody tr:hover{color:#fff;background:#888;border-radius:20px}
 #overlay{display:none;width:100%;height:100%;background:#000;opacity:.4;z-index:3;cursor:not-allowed}
 #values{
 	position:absolute;height:3.5em;bottom:0;right:0;left:0;background:#fff;
@@ -51,17 +60,47 @@
 	transition:left .25s;-webkit-transition:right .25s;-moz-transition:right, .25s;-o-transition:right .25s
 }
 #input{position:absolute;top:0;left:0;right:0;bottom:0;padding:.5em;margin:4em .1em;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.highlight *{border-radius:3px}
 .highlight p{font-size:1em}
-.highlight span{display:inline}
 #inp_control{width:100%;top:0;position:absolute;z-index:3;text-align:center}
-#inp_control button{position:absolute;cursor:pointer;border:none;padding:.5em;font-size:1.5em}
-#inp_control button{color:#2c2c2c;background:#e5e5e5}
-#inp_control button:hover{color:#efefef;background:#202020}
+#inp_control button{position:absolute;cursor:pointer;border:none;padding:.5em;font-size:1.5em;color:#2c2c2c;background:#e5e5e5}
+#inp_control button:hover, .upload_group button:hover{color:#efefef;background:#202020}
 #inp_control button#inp_clear{left:0;top:0;border-radius:0 0 30px;padding:.5em 1em}
 #inp_control button#inp_refresh{position:relative;top:.15em;border-radius:25px;padding:.5em 2.5em}
 #inp_control button#menu_open{right:0;padding:.5em 1em;border-radius:0 0 0 30px}
+#dictionary_edit{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9;cursor:not-allowed;background:#000}
+#dictionary_menu, .port_menu{
+	position:relative;top:5em;margin:0 auto 5em auto;width:80%;background:#fff;z-index:10;border-radius:10px;padding:.01em .5em 2em .5em
+}
+#dictionary_menu>p, .port_menu>p{margin:1em 0;font-weight:bolder}
+#dict_name{font-weight:bold}
+#dictionary_menu button>a{position:absolute;bottom:1em;left:1em;font-size:.7em;color:#b5b5b5}
+#dictionary_menu_previous,#dictionary_menu_next{position:absolute;top:1em;height:8em;border-radius:25px}
+#dictionary_menu_previous{left:-3em}
+#dictionary_menu_next{right:-3em}
+.dict_table{width:100%;text-align:left}
+.dict_table thead tr{font-size:1.1em}
+.dict_table tr td{padding:0 .5em 0 0;vertical-align:top}
+.dict_table tr td div{font-size:.8em;padding:.2em 0;border:#f1f0f0 solid 1px}
+.dict_table button{width:100%;border:none;color:#2c2c2c;background:#e5e5e5}
+.dict_table button:hover{background:#999}
+.dict_indicator{font-size:.5em}
+#export_output{width:100%;height:20em;resize:vertical;white-space:pre;overflow:auto}
+.parts_header{position:relative;display:inline;width:100%;font-size:.7em;top:.5em;color:#777}
+.parts_header a{display:block;padding:.5em 0}
+.parts_header button{float:right;background:inherit;color:#777;padding:1em 1em .5em 1em}
+.parts_header button:hover{background:#fff;border-radius:25px 25px 0 0}
+.upload_group{padding:1.5em}
+.upload_group div{width:100%;padding:1em 0;margin:.2em 0;border:#c7c7c7 solid 1px}
+.upload_group button{width:100%;background:#dadada;padding:1em 0;border:none;text-align:center;border-radius:15px}
+.upload_group button:last-of-type{margin:1.5em 0 0 0}
+div.listentry_wide{width:auto;float:right;padding:1em .5em 0 .5em;margin:0;font-size:.9em}
+
 .zero{display:none}
 .select{background:#C4B9C5}
+.transparent{-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";filter:alpha(opacity=60);-moz-opacity:0.6;-khtml-opacity:0.6;opacity:0.6}
+
+@media screen and (max-width:600px){#dictionary_menu_next{right:-2em}#dictionary_menu_previous{left:-2em}}
 @media screen and (max-width:520px){
 	#menu button, #menu p{font-size:.8em}
 	#menu p>button{font-size:1.15em}
@@ -71,20 +110,32 @@
 </style>
 </head><body>
 <div id='menu' class='closed'>
-	<button class='menu_header' type='button'>Output Settings</button>
-	<div class='menu_group'>
-		<div><p>values</p><p id='opt_values'><button type='button'>count</button><button type='button'>percent</button></p></div>
-		<div><p>live</p><p id='opt_live'><button type='button'>on</button><button type='button'>off</button></p></div>
+	<button class='menu_header' type='button'>Settings</button>
+	<div id='opt_sets' class='menu_group'>
+		<div><p title='Which metric should be displayed for each category; percent is percent of total words.'>values</p>
+			<p><button type='button'>count</button><button type='button'>percent</button></p></div>
+		<div><p title="When live processing is on, input text is processed locally as it's entered; otherwise, input text is only processed globally, when triggered (as by the refresh button)">live</p>
+			<p><button type='button'>on</button><button type='button'>off</button></p></div>
+		<div><p title="Should categories that weren't found in the test be shown in the output?">show_zeros</p>
+			<p><button type='button'>true</button><button type='button'>false</button></p></div>
+		<div><p title='The similarity metric calculated between the current and comparison text.'>sim_metric</p>
+			<p><button type='button'>canberra</button><button type='button'>cosine</button></p></div>
+		<div><p title='The categories going into the text comparison; categories not found in the current dictionary are ignored.'>sim_cats</p>
+			<div class='listentry_wide' contenteditable='true' type='text' onblur='update_options(this)'></div></div>
+		<div><p title='The code of the character used to fill in spaces; for processing by word, each space is a <span>, but spans with only the regular space character (\u2) are automatically removed, so a different character must be used (\u2008 being the default).'>space_character</p>
+			<p><input type='text' onblur='update_options(this)'></p></div>
 	</div>
-	<button class='menu_header' type='button'>Categories</button>
+	<button class='menu_header' type='button'>Dictionary</button>
 	<div class='menu_group'>
-		<div><p>composites</p><p id='toggle_comp'><button type='button'>femcomp</button><button>+</button></p></div>
-		<div><p>select</p><p id='toggle_cats'><button type='button'>all</button><button type='button'>none</button></p></div>
-		<div id='menu_cats' class='highlight'></div>
+		<button class='menu_inner_full' onclick='toggle_edit()'>load/create/edit</button>
+		<p class='parts_header' id='toggle_cats'>Word Categories<button type='button'>none</button><button type='button'>all</button></p>
+		<div id='menu_cats' class='dict_parts highlight'></div>
+		<p class='parts_header'><a>Composites Categories</a></p>
+		<div id='menu_comps' class='dict_parts'></div>
   </div>
 	<button class='menu_header' type='button'>Saved Texts</button>
 	<div class='menu_group'>
-		<table><thead><tr><th width='50px'>ID</th><th>text</th><th width='50px'>Comparison</th><th  width='50px'>Delete</th></tr></thead><tbody id='menu_saved'></tbody></table>
+		<table><thead><tr><th width='25px'>ID</th><th>Text</th><th width='25px'>Comparison</th><th width='25px'>Delete</th></tr></thead><tbody id='menu_saved'></tbody></table>
   </div>
 	<button class='menu_header' type='button'>Example Texts</button>
 	<div class='menu_group'>
@@ -109,38 +160,107 @@
 	<div id='input' class='highlight' contenteditable="true"></div>
 	<div id='values'><table><tr class='highlight'><th title='word count'>WC</th></tr><tr><td id='wc_value'>0</td></tr></table></div>
 	<div id='inp_control' class='collapse'>
-		<button title='clear input' id='inp_clear' onclick="input.innerHTML=values.innerHTML='';output=null" type='button'>&#10005;</button>
+		<button title='clear input' id='inp_clear' onclick="input_clear(true)" type='button'>&#10005;</button>
 		<button title='refresh input' id='inp_refresh' onclick='input_refresh()' type='button'>&#10227;</button>
+		<p class='opt_display'>saved <a id='disp_saved'>0</a>, live <a id='disp_live'>on</a></p>
 		<button title='toggle menu' id='menu_open' onclick='toggle_menu()' type='button'>&#9776;</button>
 	</div>
 	<div id='overlay' onclick='toggle_menu()'></div>
 </div>
+<div id='dictionary_edit' class='transparent' style='display:none' onclick='toggle_edit()'></div>
+<div id='dictionary_menu' style='display:none'>
+	<div class='menu_group_open'>
+		<p id='dict_name' contenteditable="true">Default</p>
+		<button type='button' id='dictionary_menu_previous' title='previous dictionary' onclick='dict_cycle(true)'>&lang;</button>
+		<button type='button' id='dictionary_menu_next' title='next dictionary' onclick='dict_cycle(true,true)'>&rang;</button>
+		<p>
+			<button onclick='new_dict()' type='button'>new</button>
+			<button onclick='toggle_port(import_menu)' type='button'>load</button>
+			<button onclick='toggle_port(export_menu)' type='button'>export</button>
+		</p>
+	</div>
+	<div id='dict_words'></div>
+	<p>Composite Categories</p>
+	<div id='dict_comps'></div>
+</div>
+<div class='port_menu' id='import_menu' style='display:none'>
+	<div class='menu_group_open'>
+		<p><strong>Import dictionary</strong></p>
+		<p><button onclick='toggle_port(import_menu)' type='button'>close</button></p>
+	</div>
+	<div class='menu_group_open'><p>adicat dictionaries</p><p>
+		<button type='button' onclick="dict_import('function','default')">function</button>
+		<button type='button' onclick="dict_import('lusi')">lusi</button>
+	</p></div>
+	<div class='upload_group'>
+		<a>URL (if the source allows cross-origin requests):</a>
+		<div contenteditable="true" onkeydown='import_url(event)'></div>
+		<button onclick='import_url(event)' type='button'>Submit URL</button>
+		<button onclick='upload.click()' type='button'>Upload File</button>
+		<input type='file' style='display:none' onchange='dict_import(this)' id='upload'>
+		<p id='load_error' style='display:none;color:red;font-size:1.2em;padding:2em'>Failed to load file.<p>
+	</div>
+</div>
+<div class='port_menu' id='export_menu' style='display:none'>
+	<div class='menu_group_open'>
+		<p><strong>name:</strong> <a id='file_name' contenteditable="true">Default</a></p>
+		<p><button onclick='toggle_port(export_menu)' type='button'>close</button></p>
+	</div>
+	<textarea id='export_output'></textarea>
+	<div class='menu_group_open'><p style='padding:0'>
+			<button onclick='export_refresh(this)' class='selected' title='JavaScript Object Notation' type='button'>JSON</button>
+			<button onclick='export_refresh(this)' title='Formated for Linguistic Inquery and Word Count' type='button'>DIC</button>
+		</p><p>
+			<button onclick='export_output.focus();export_output.select();document.execCommand("copy")' type='button'>copy</button>
+			<button onclick='dict_export(filename.innerText,options.use_dict,export_format.className==="selected",true)' type='button'>download</button>
+	</p></div>
+</div>
 <script type="text/javascript">
+'use strict'
 function $(e){return document.getElementById(e)}
 var frame=$('frame'), menu=$('menu'), menu_open=$('menu_open'), menu_cats=$('menu_cats'), menu_saved=$('menu_saved'), overlay=$('overlay'),
-		upload=$('upload'), file=$('file'), input=$('input'), contr=$('inp_control'), contr_items=contr.children, store=localStorage && !!JSON,
-		values=$('values'), toggle_cats=$('toggle_cats'), toggle_comp=$('toggle_comp'), input_history=0, texts={current:0, comp:null, n:0},
-		limit={proc:false, save:0}, que_proc=false, example_texts=$('example_texts')
+		upload=$('upload'), file=$('file'), input=$('input'), contr=$('inp_control'), contr_items=contr.children, eopt={},
+		store=window.localStorage||{},values=$('values'), toggle_cats=$('toggle_cats'), menu_comps=$('menu_comps'), input_history=0,
+		texts={current:0, comp:null, last:0}, limit={proc:false, save:0}, que_proc=false, example_texts=$('example_texts'), dictionary_edit=$('dictionary_edit'),
+		dictionary_menu=$('dictionary_menu'), dict_prev=$('dictionary_menu_previous'), dict_next=$('dictionary_menu_next'), dict_name=$('dict_name'),
+		dict_words=$('dict_words'), dict_comps=$('dict_comps'), disp_live=$('disp_live'), disp_saved=$('disp_saved'), export_menu=$('export_menu'),
+		export_output=$('export_output'), export_format=$('export_menu').lastElementChild.children[0].children[1], filename=$('file_name'),
+		upload=$('upload'), opt_sets=$('opt_sets'), opt_style=$('opt_style'), import_menu=$('import_menu'), load_error=$('load_error')
 window.onload=function(){
-	if(store){
-		if(window.localStorage.hasOwnProperty('options')) options=JSON.parse(window.localStorage.options)
-		if(window.localStorage.hasOwnProperty('texts')) texts=JSON.parse(window.localStorage.texts)
+	if(store.hasOwnProperty('options')){
+		eopt=JSON.parse(store.options)
+		for(var k in options) if(eopt.hasOwnProperty(k)) options[k]=eopt[k]
 	}
-	patterns.dict=adicat_dict
+	if(store.hasOwnProperty('texts')) texts=JSON.parse(store.texts)
+	texts.current=texts.hasOwnProperty(texts.last) ? ++texts.last : texts.last
+	if(!options.dict.hasOwnProperty(options.use_dict)) options.use_dict='default'
+	if(!options.dict[options.use_dict].hasOwnProperty('cats')){
+		dict_import('function','default')
+	}
+	if(!patterns.dict_proc) patterns.dict=adicat_readDict(options.dict[options.use_dict].cats)
 	fill_menu()
-	addEvent(input,'keypress',spanner)
+	apply_colors()
+	addEvent(input,'keypress',function(k){disp_saved.style.color='#ff7b7b';spanner(k)})
 	addEvent(input,'keyup',process_span)
 	addEvent(input,'paste',catch_paste)
 	addEvent(input,'keydown',function(k){if(k.which===9){k.preventDefault()}})
-	addEvent(values,'click',function(t){if(t.target.tagName==='TH' && t.target.innerText!=='WC') select(t.target)})
+	addEvent(values,'click',function(t){if(t.target.tagName==='TH' && t.target.className!=='') select(t.target)})
 	addEvent(menu,'click',toggle_menu_group)
+	addEvent(opt_sets,'click',update_options)
 	addEvent(menu_cats,'click',function(t){if(t.target.tagName==='SPAN') toggle_cat(t.target)})
-	addEvent(opt_values,'click',update_options)
-	addEvent(opt_live,'click',update_options)
-	addEvent(toggle_cats,'click',function(e){e.target.innerText==='all' ? composite(true,true) : composite()})
-	addEvent(toggle_comp,'click',function(e){})
+	addEvent(menu_comps,'click',function(t){if(t.target.tagName==='SPAN') toggle_comp(t.target)})
+	addEvent(toggle_cats,'click',function(e){e.target.innerText==='all' ? multitog(true,true) : multitog()})
 	addEvent(menu_saved,'click',fill_text)
 	addEvent(example_texts,'click',fill_text)
+	addEvent(dictionary_menu,'keydown',enter_sub)
+	addEvent(opt_sets,'keydown',enter_sub)
+	addEvent(dict_name,'blur',dict_rename)
+	addEvent(dict_words,'blur',function(e){if(e.value){
+		var o=e.value, n=e.innerText, d=dict_name.innerText
+		options.dict[d][n]=options.dict[d][o]
+		delete options.dict[d][n]
+		set_dict(d)
+	}})
 	addEvent(document,'keydown',function(k){
 		if(k.ctrlKey){
 			if(k.which===83){
@@ -157,43 +277,54 @@ window.onload=function(){
 function backup(force,wait,clear){
 	if(clear){
 		if(confirm('Are you sure you want to delete your locally stored texts, custom categories, and settings?')){
-			if(store) window.localStorage.clear()
+			if(window.localStorage) store.clear()
 			window.location.reload()
 		}
-	}else if(force || limit.save<1){
-		if(store){
-			if(input.innerText!=='') texts[texts.current]=input.innerText
-			window.localStorage.options=JSON.stringify(options)
-			window.localStorage.texts=JSON.stringify(texts)
-		}
+	}else if(force || limit.save<1 || limit.calls>15){
+		if(patterns.char.test(input.innerText)) texts[texts.current]=input.innerText
+		store.options=JSON.stringify(options)
+		store.texts=JSON.stringify(texts)
 		fill_menu()
-		limit.save=5
+		limit.save=2
+		limit.calls=0
 		limit.timeout=false
 	}else if(wait){
 		if(limit.timeout){
-			limit.save=5
+			limit.calls++
+			limit.save=2
 		}else{
 			limit.timeout=true
 			setTimeout(backup,1000)
 		}
 	}else{
-		limit.save=limit.save-1
+		limit.save--
 		setTimeout(backup,1000)
 	}
 }
 function update_options(e){
-	var v=e.target, a=v.parentNode.children, i=a.length, k=v.parentNode.previousSibling.innerText
-	if(options.hasOwnProperty(k)) options[k]=v.innerText
-	while(i--){a[i].className=''}
-	v.className='selected'
-	backup(true)
-	que_proc=true
+	if(e.target && e.target.tagName==='BUTTON'){
+		var v=e.target, a=v.parentNode.children, i=a.length, k=v.parentNode.previousSibling.innerText
+		if(options.hasOwnProperty(k)) options[k]=v.innerText
+		while(i--){a[i].className=''}
+		v.className='selected'
+		backup(true)
+		que_proc=true
+	}else if(!e.target){
+		var a=e.value ? e.parentNode.parentNode.firstElementChild.innerHTML : e.parentNode.firstElementChild.innerHTML
+		if(options.hasOwnProperty(a)) options[a]=e.value ? String.fromCharCode(parseInt(e.value.replace(/^\\u/,''),16)) : e.innerText.split(/ *, */)
+		backup(true)
+		que_proc=true
+	}
 }
+function enter_sub(k){if(k.which===13 && k.target.tagName!=='BUTTON'){k.target.blur();k.preventDefault()}}
 function fill_menu(){
-	var k, i, tr, n=/\d/
-	menu_cats.innerHTML=menu_saved.innerHTML=''
-	for(k in patterns.dict){if(patterns.dict.hasOwnProperty(k)){
+	var k, i, c, tr, n=/\d/, dict=options.dict[options.use_dict].cats, comps=options.dict[options.use_dict].composites
+	menu_cats.innerHTML=menu_comps.innerHTML=menu_saved.innerHTML=''
+	for(k in dict){if(dict.hasOwnProperty(k)){
 		append(menu_cats,'span',{className:options.blacklist.indexOf(k)===-1 ? ' '+k+' ' : '|'+k+'| off',innerText:k})
+	}}
+	for(k in comps){if(comps.hasOwnProperty(k)){
+		append(menu_comps,'span',{className:comps[k].show ? '' : 'off',innerText:k})
 	}}
 	for(k in texts){if(n.test(k)){
 		tr=document.createElement('tr')
@@ -203,14 +334,27 @@ function fill_menu(){
 		append(tr,'td',{innerHTML:"<button type='button'>&#10005;</button>"})
 		menu_saved.appendChild(tr)
 	}}
-	if((c=opt_values.children)){i=c.length;while(i--){c[i].className=options.values===c[i].innerHTML ? 'selected' : ''}}
-	if((c=opt_live.children)){i=c.length;while(i--){c[i].className=options.live===c[i].innerHTML ? 'selected' : ''}}
+	menu.children[2].innerText='Dictionary: '+options.use_dict
+	i=opt_sets.childElementCount
+	while(i--){
+		c=opt_sets.children[i].children
+		k=c[1].childElementCount
+		if(k){
+			if(k===1 && c[1].children[0].tagName==='INPUT'){
+				c[1].children[0].value='\\u'+options[c[0].innerHTML].charCodeAt().toString(16)
+			}else while(k--) c[1].children[k].className=options[c[0].innerHTML]===c[1].children[k].innerHTML ? 'selected' : ''
+		}else if(c[1].tagName==='DIV') c[1].innerText=options[c[0].innerHTML].join(', ')
+	}
+	disp_saved.innerText=texts.current
+	disp_saved.style.color=texts.hasOwnProperty(texts.current) && texts[texts.current]===input.innerText ? '#84dc84' : '#ff7b7b'
+	disp_live.innerText=options.live
+	disp_live.style.color=options.live==='on' ? '#84dc84' : '#ff7b7b'
 }
 function toggle_menu(e){
 	if(menu.className==='closed'){
 		menu.className='open'
 		menu.style.right=0
-		frame.style.right=overlay.style.right='90%'
+		frame.style.right=overlay.style.right='80%'
 		menu_open.style.background='#cecece'
 		overlay.style.display='block'
 	}else{
@@ -218,21 +362,22 @@ function toggle_menu(e){
 			var s=window.getSelection(), r=s.getRangeAt(0)
 			r.setStart(input.lastElementChild,0)
 			r.setEnd(input.lastElementChild,1)
-			r.collapse()
+			r.collapse(false)
 			s.removeAllRanges()
 			s.addRange(r)
-		}else input.focus()
+		}
+		input.focus()
 		menu.className='closed'
-		menu.style.right='-90%'
+		menu.style.right='-80%'
 		frame.style.right=overlay.style.right=0
 		overlay.style.display='none'
 		menu_open.style.background=''
-		backup(true)
 		if(que_proc){
 			input_refresh()
 			que_proc=false
 		}
 	}
+	backup(true)
 }
 function toggle_cat(e){
 	var off=/ off$/, i=options.blacklist.indexOf(e.innerText)
@@ -246,16 +391,20 @@ function toggle_cat(e){
 	patterns.matches={}
 	que_proc=true
 }
-function toggle_menu_group(t){if(/^menu_header/.test(t.target.className)){
-	if(t.target.className==='menu_header'){
-		t.target.className='menu_header_open'
-		t.target.nextElementSibling.className='menu_group_open'
+function toggle_comp(e){
+	var i, k, co=options.dict[options.use_dict].composites[e.innerText], ca=[]
+	if(e.className==='off'){
+		e.className=''
+		co.show=true
+		for(k in options.dict[options.use_dict].cats){if(options.dict[options.use_dict].cats.hasOwnProperty(k) && co.formula.search(k)!==-1) ca.push(k)}
+		if(ca.length) multitog(true,false,ca)
 	}else{
-		t.target.className='menu_header'
-		t.target.nextElementSibling.className='menu_group'
+		e.className='off'
+		co.show=false
+		que_proc=true
 	}
-}}
-function composite(on,all,cats){
+}
+function multitog(on,all,cats){
 	var cats=cats||[], i=cats.length, p
 	if(on){
 		if(all){
@@ -264,7 +413,7 @@ function composite(on,all,cats){
 			while(i--){if((p=options.blacklist.indexOf(cats[i]))!==-1) options.blacklist.splice(p,1)}
 		}
 	}else{
-		for(i in patterns.dict){if(patterns.dict.hasOwnProperty(i)){
+		for(i in options.dict[options.use_dict].cats){if(options.dict[options.use_dict].cats.hasOwnProperty(i)){
 			if(options.blacklist.indexOf(i)===-1) options.blacklist.push(i)
 		}}
 	}
@@ -278,27 +427,350 @@ function composite(on,all,cats){
 		}
 	}
 	patterns.matches={}
-	input_refresh()
+  input_refresh()
+}
+function set_dict(d){if(options.dict.hasOwnProperty(d)){
+	patterns.dict=adicat_readDict(options.dict[d].cats)
+	patterns.dict_proc=true
+	patterns.matches={}
+	options.use_dict=d
+	apply_colors()
+	que_proc=true
+}}
+function dict_display(dict){
+	if('string'===typeof dict) dict=options.dict[dict]
+	dict_words.innerHTML=dict_comps.innerHTML=''
+	append(dict_words,'table',{className:'dict_table',innerHTML:'<thead><td style="width:25px">category</td><td style="width:25px">color</td><td>terms</td>'
+		+'<tr><td colspan="3"><button onclick="addRow(true)" type="button">+</button></td></tr></thead><tbody></tbody>'
+	})
+	var cats=dict_words.children[0].tBodies[0], comps, seeds=[], bs=/^\/|\/$/g, i=0, k, l, tr
+	for(k in colors){if(colors.hasOwnProperty(k)) seeds.push(k)}
+	l=seeds.length
+	for(k in dict.cats){if(dict.cats.hasOwnProperty(k)){
+		if(!dict.colors.hasOwnProperty(k)){
+			if(i>=l) i=0
+			dict.colors[k]=colors[seeds[i]].sample()
+			i++
+		}
+		if(dict.cats[k].test) dict.cats[k]=(dict.cats[k]+'').replace(bs,'').split('|')
+		tr=document.createElement('tr')
+		append(tr,'td',{innerHTML:'<div contenteditable="true" value="'+k+'">'+k+'</div>',style:'color:'+dict.colors[k]})
+		append(tr,'td',{innerHTML:'<div contenteditable="true" onkeyup="color_preview(this)">'+dict.colors[k]+'</div>'})
+		append(tr,'td',{innerHTML:'<div contenteditable="true">'+dict.cats[k].join(', ')+'</div>'})
+		cats.appendChild(tr)
+	}}
+	append(dict_comps,'table',{className:'dict_table',innerHTML:'<thead><td style="width:25px">name</td><td>formula</td>'
+		+'<tr><td colspan="2"><button onclick="addRow()" type="button">+</button></td></tr></thead><tbody></tbody>'
+	})
+	comps=dict_comps.children[0].tBodies[0]
+	for(k in dict.composites){if(dict.composites.hasOwnProperty(k)){
+		tr=document.createElement('tr')
+		append(tr,'td',{innerHTML:'<div contenteditable="true" value="'+k+'">'+k+'</div>'})
+		append(tr,'td',{innerHTML:'<div contenteditable="true">'+dict.composites[k].formula+'</div>'})
+		comps.appendChild(tr)
+	}}
+}
+function dict_refresh(ro){
+	var dict={cats:{},colors:{},composites:{}}, rs=dict_words.children[0].tBodies[0].children,
+	    n=rs.length, rm=/[ \r\n\t]/g, i=0, c, cn, od
+	if(rs && rs.length){
+		for(;i<n;i++){
+			c=rs[i].children
+			cn=c[0].children[0].innerText.replace(rm,'_')
+			if(cn){
+				if(dict.cats.hasOwnProperty(cn)) c[2].children[0].innerText=dict.cats[cn].join(', ')+', '+c[2].children[0].innerText
+				dict.cats[cn]=c[2].children[0].innerText.split(', ')
+				dict.colors[cn]=c[1].children[0].innerText
+			}
+		}
+		rs=dict_comps.children[0].tBodies[0].children, n=rs.length, i=0
+		if(n && options.dict[dict_name.innerText].hasOwnProperty('composites')){
+			od=options.dict[dict_name.innerText].composites
+			for(;i<n;i++){
+				cn=rs[i].children[0].innerText.replace(patterns.returns,'').replace(rm,'_')
+				if(cn) dict.composites[cn]={show:!od.hasOwnProperty(cn)||od[cn].show,formula:rs[i].children[1].innerText.replace(patterns.returns,'')}
+			}
+		}
+		options.dict[dict_name.innerText]=dict
+		if(!ro) set_dict(dict_name.innerText)
+	}else{
+		if(!ro) dict_cycle(true)
+	}
+}
+function dict_rename(){
+	var o=options.use_dict, n=dict_name.innerText
+	if(o!==n){
+		if(o==='default'){
+			options.dict[n]=JSON.parse(JSON.stringify(options.dict[o]))
+			options.use_dict=n
+		}else{
+			if(o) options.dict[n]=options.dict[o]
+			delete options.dict[o]
+			if(o) dict_cycle(true)
+		}
+	}
+}
+function dict_cycle(ch,f){
+	var ns=[], i=0, t=0, k, n
+	if(dict_words.childElementCount) dict_refresh(true)
+	for(k in options.dict){if(options.dict.hasOwnProperty(k)){
+		ns[i]=k
+		if(k===options.use_dict) t=i
+		i++
+	}}
+	n=ns.length-1
+	if(ch && n){
+		f ? t++ : t--
+		if(t>n){t=0}else if(t<0){t=n}
+	}
+	if(ns[t]!==options.use_dict) set_dict(ns[t])
+	dict_name.innerText=options.use_dict
+	i=t-1
+	k=t+1
+	if(i<0) i=n
+	if(k>n) k=0
+	n++
+	dictionary_menu_previous.innerHTML='&lang;<a>'+(i+1)+'/'+n+'</a>'
+	dictionary_menu_previous.title=ns[i]
+	dictionary_menu_next.innerHTML='&rang;<a>'+(k+1)+'/'+n+'</a>'
+	dictionary_menu_next.title=ns[k]
+	dict_display(ns[t])
+}
+function toggle_edit(){
+	if('none'===dictionary_edit.style.display){
+		if(!options.hasOwnProperty('dict')) options.dict={default:{cats:options.dict[options.use_dict].cats}}
+		if(!options.dict[options.use_dict].hasOwnProperty('colors')) assign_colors(options.use_dict)
+		if(!options.dict[options.use_dict].hasOwnProperty('composites')) options.dict[options.use_dict].composites={}
+		dict_cycle()
+		dictionary_menu.style.display=dictionary_edit.style.display=''
+	}else{
+		var wr=dict_words.getElementsByTagName('tr')
+		if(dict_name.innerText==='' || (wr.length===2 || (wr.length===3 && !wr[2].innerText))){
+			if(dict_name.innerText!=='default') delete options.dict[dict_name.innerText]
+			dict_cycle(true)
+		}else{
+			dict_refresh()
+		}
+		dictionary_menu.style.display=dictionary_edit.style.display=export_menu.style.display=import_menu.style.display='none'
+		fill_menu()
+	}
+}
+function color_preview(cc){cc.parentElement.previousSibling.style.color=cc.innerText}
+function toggle_menu_group(t){if(/^menu_header/.test(t.target.className)){
+	if(t.target.className==='menu_header'){
+		t.target.className='menu_header_open'
+		t.target.nextElementSibling.className='menu_group_open'
+	}else{
+		t.target.className='menu_header'
+		t.target.nextElementSibling.className='menu_group'
+	}
+}}
+function assign_colors(dict,reset){
+  if(reset || !options.dict[dict].hasOwnProperty('colors')) options.dict[dict].colors={}
+  var seeds=[], i=0, l, k
+  for(k in colors){if(colors.hasOwnProperty(k)) seeds.push(k)}
+  l=seeds.length
+  for(k in options.dict[dict].cats){if(options.dict[dict].cats.hasOwnProperty(k) && !options.dict[dict].colors.hasOwnProperty(k)){
+    if(i>=l) i=0
+    options.dict[dict].colors[k]=colors[seeds[i]].sample()
+    i++
+  }}
+}
+function apply_colors(){
+  var h=document.head || document.getElementsByTagName('head')[0], ss=document.getElementsByTagName('style'),
+			l=ss.length, cols=options.dict[options.use_dict].colors, c='.highlight span{color:#d4d4d4}', s=$('cat_colors'), k
+  for(k in cols) if(cols.hasOwnProperty(k)) c=c+".highlight *[class*=' "+k+" ']{color:"+cols[k]+"}"
+  if(s) s.parentNode.removeChild(s)
+  s=document.createElement('style')
+  s.id='cat_colors'
+  if(s.styleSheet){
+    s.styleSheet.cssText=c
+  }else{
+    s.appendChild(document.createTextNode(c))
+  }
+  h.appendChild(s)
+}
+function new_text(){
+	texts.current=++texts.last
+	texts[texts.current]=input.innerText
 	backup(true)
+}
+function new_dict(){
+	var wr=dict_words.getElementsByTagName('tr')
+	dict_refresh(true)
+	backup(true)
+	if(dict_name.innerText!=='' && (wr.length>2 && wr[2].innerText)){
+		options.use_dict='custom'
+		if(options.dict.hasOwnProperty('custom')) options.use_dict+='_'+rand(999,100)
+		options.dict[options.use_dict]={cats:{},colors:{},composites:{}}
+		dict_cycle()
+		addRow(true)
+	}
+}
+function addRow(cat){
+	var r=document.createElement('tr'), t=(cat ? dict_words : dict_comps).children[0].tBodies[0]
+	r.innerHTML='<td><div contenteditable="true"></div></td>'
+		+(cat ? '<td><div onkeyup="color_preview(this)" contenteditable="true"></div></td>' : '')
+		+'<td><div contenteditable="true"></div></td>'
+	t.children.length ? t.children[0].insertAdjacentElement('beforeBegin',r) : t.appendChild(r)
 }
 function fill_text(t){
 	if(t.target.tagName==='TD'){
 		t=t.target.parentNode
+		var s=t.lastElementChild.innerText==='✕'
+		backup(true)
+		if(s && t.children.length) texts.current=t.children[0].innerText
 		input_clear()
-		display_text(t.children[t.lastElementChild.innerText==='✕' ? 1 : 3].innerText)
+		display_text(t.children[s ? 1 : 3].innerText)
+		if(!s && texts.hasOwnProperty(texts.current)) new_text()
 		toggle_menu()
 	}else if(t.target.tagName==='BUTTON'){
 		var r=t.target.parentNode.parentNode, id=r.children[0].innerText, i, cr
 		if(t.target.innerText!=='✕'){
-			texts.current=id
 			r=r.parentNode.children
 			i=r.length
 			texts.comp=t.target.innerText==='comparing' ? null : id
 			while(i--){cr=r[i].children;if(cr[2].children) cr[2].children[0].innerText=cr[0].innerText==texts.comp ? 'comparing' : 'set'}
+			que_proc=true
 		}else if(confirm('are you sure you want to delete text '+id+'?')){
+			if(input.innerText===texts[id]) input_clear()
+			if(texts.comp===id) texts.comp=null
 			delete texts[id]
 			fill_menu()
 		}
 	}
+}
+function dict_export(n,d,dic,download){
+	var e=document.createElement('a')
+	if('string'===typeof d) d=options.dict[d].cats
+	if(dic){
+		d=write_dic(d)
+	}else{
+		d=JSON.stringify(d)
+		d=d.replace(/^{/,'{\n  ').replace(/}$/,'\n}').replace(/],/g,'],\n  ')
+	}
+	if(download && 'undefined'!==typeof e.download){
+		e.setAttribute('href','data:text/plain;charset=utf-8,'+encodeURIComponent(d))
+		n=n.replace(/\.\w+$/,'')+(dic ? '.dic' : '.json')
+		e.setAttribute('download',n)
+		document.body.appendChild(e)
+		e.click()
+		document.body.removeChild(e)
+	}
+	return d
+}
+function toggle_port(e){
+	if(e.style.display==='none'){
+		dictionary_menu.style.display='none'
+		e.style.display=''
+		if(e.id==='export_menu'){
+			dict_refresh()
+			filename.innerText=options.use_dict
+			export_output.value=dict_export(filename.innerText,options.use_dict,export_format.className==="selected")
+		}else{
+			load_error.display='none'
+		}
+	}else{
+		dictionary_menu.style.display=''
+		e.style.display='none'
+	}
+}
+function import_url(k){
+	if(k.type==='keydown'){
+		if(k.which===13){
+			if(k.target.innerText) dict_import(k.target.innerText)
+			k.preventDefault()
+		}
+	}else{
+		if(k.target.previousElementSibling.innerText) dict_import(k.target.previousElementSibling.innerText)
+	}
+}
+function export_refresh(e){
+	export_output.value=dict_export('',options.use_dict,e.innerText==='DIC')
+	e.className='selected'
+	e.innerText==='DIC' ? e.previousElementSibling.className='' : e.nextElementSibling.className=''
+}
+function handle_dict_import(n){
+	var waits=0
+	if(patterns.dict || waits>10){
+		if(patterns.dict){
+			if(options.dict.hasOwnProperty(n)){
+				options.dict[n].cats=patterns.dict
+			}else options.dict[n]={cats:patterns.dict}
+			if(import_menu.style.display==='') toggle_port(import_menu)
+			assign_colors(n)
+			set_dict(n)
+			dict_cycle()
+			backup(true)
+		}else{
+			load_error.display=''
+		}
+	}else{
+		waits++
+		setTimeout(function(){handle_dict_import(n)},20)
+	}
+}
+function dict_import(f,n){
+	if(patterns.dict){
+		dict_refresh()
+		backup(true)
+	}
+	patterns.dict=null
+	if('string'===typeof f){
+		var ds=['function','lusi'], nn=n||f.match(/[^/]*$/)[0]||f
+		if(ds.indexOf(f)!==-1) f='https://raw.githubusercontent.com/miserman/adicat/master/dict/'+f+'.json'
+		if(!n) if(options.dict.hasOwnProperty(nn)) nn+='_'+rand(999,100)
+		adicat_loadDict(f)
+		handle_dict_import(nn)
+	}if(f.files && f.files[0]){
+		var f=f.files[0], r=new FileReader(), c, nn
+		r.onload=function(e){
+			c=e.target.result
+			upload.value=''
+			nn=n||options.dict.hasOwnProperty(f.name) ? f.name+'_'+rand(999,100) : f.name
+			patterns.dict=/^%/.test(c) ? read_dic(c) : JSON.parse(c)
+			handle_dict_import(nn)
+		}
+		r.readAsText(f)
+		dict_cycle()
+	}
+}
+function solve(eq){
+	var mr=/ |^Math\./g, ch=/[^0-9+><*%^()&|\/-]/g, nf=/^\(/, fh=/^[^(]*/, ip=/\([^(]+\)/g, bs=/ +/g, bo=/[^+><*^()&%|\/-]+/g, e={}, sp=[], te='', l=0
+	function dict_ops(s){
+		var s=s+'', t=s.match(bo), n=t ? t.length : 0, c='', i=0
+		for(;i<n;i++){
+			c=t[i].replace(bs,'')
+			c=output.hasOwnProperty(c) ? Number(output[c]) : Number(c)
+			if(isNaN(c)) c=.0000001
+			s=s.replace(t[i],c)
+		}
+		return s
+	}
+	sp=eq.match(ip)
+	if(sp){
+		l=sp.length
+		while(l--){
+			e[sp[l]]=sp[l].replace(' ','')
+			te=e[sp[l]].replace(e[sp[l]],dict_ops(e[sp[l]]))
+			eq=eq.replace(sp[l],te)
+		}
+		sp=eq.match(/(^|[^(+><*^&|\/-]*)\([^()]*\)/g)
+		l=sp.length
+		while(l--){
+			e[sp[l]]=sp[l].replace(mr,'')
+			if(!nf.test(e[sp[l]])){
+				te=e[sp[l]].match(fh)
+				e[sp[l]]=e[sp[l]].replace(fh,'')
+				if(Math.hasOwnProperty(te)){
+					e[sp[l]]=Math[te](Number(Function('"use strict"; return '+e[sp[l]].replace(ch,''))()))
+					if(isNaN(e[sp[l]])) e[sp[l]]=.0000001
+				}
+			}
+			eq=eq.replace(sp[l],e[sp[l]])
+		}
+	}
+	eq=dict_ops(eq)
+	return Math.round(Function('"use strict"; return '+eq.replace(ch,''))()*10000)/10000
 }
 </script></body></html>

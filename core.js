@@ -1,6 +1,8 @@
+'use strict'
 var patterns={
 	word_breaks:/\s/g,
 	char:/[A-z0-9?><!@#$%^&*()_+|}{":;}'/.,-=\\\][\]]/,
+	special:/[[\]()\/\\.?$*^]/g,
 	striped:/[^a-z0-9' ]/g,
 	filter:/[$#%^*\r\n\t\-~\\—–→\+=[/({})\]]| "(?!\w)|  /g,
 	curly_quote:{s:/[‘’]/g,d:/[“”]/g},
@@ -10,7 +12,7 @@ var patterns={
 	},
 	symbols:{and:/\&/g,at:/\@/g},
 	punct:{initials:/[,.](?=\w+[.,])/g,apostrophe:/\.\'s/g,ellipses:/…|\.[. ]+\./g},
-	space:/ (?=[ .,?!(){}[\]*&^])|^ | $/g,
+	space:/ (?=[ .,?!(){}[\]*&^])|^ | $/g,returns:/[\r\n]/g,
 	cues:{
 		question:/\?| w+h+a+[t ]* | w+h+e+n+ | w+h+o+ | how| a+[sk]{2} | h+u+h/,
 		greeting:/ h+i+[yi]* | h+[ae]+[iy]+ | h+e+l+o+ | y+o+ | w+h+a+t+[']*(?:s| is) (?:shak|up)/,
@@ -82,10 +84,7 @@ adicat.prototype={
 		blacklist=blacklist||[]
 		if(!this._processLevel) this.tokenize()
 		if(!dict){
-			if(!patterns.dict_proc){
-				if(!window.hasOwnProperty('adicat_dict')) alert('no dictionary was specified')
-				patterns.dict=adicat_dict
-			}
+			if(!patterns.dict_proc) patterns.dict=adicat_readDict(patterns.dict)
 			dict=patterns.dict
 		}else for(var k in dict){if(dict.hasOwnProperty(k)){
 				if(dict[k].test){break}else{
@@ -131,6 +130,7 @@ adicat.prototype={
 	toPercent:function(round){
 		if(!this.hasOwnProperty('cats')){this.categorize()}
 		if(!this.cats_type){
+			this.cats_type=1
 			for(var k in this.cats){if(this.cats.hasOwnProperty(k)){
 				this.cats[k]=this.cats[k]/this.WC*100
 				if(round) this.cats[k]=Math.round(this.cats[k]*100)/100
@@ -171,52 +171,109 @@ adicat.prototype={
 		this._processTime.display=new Date().getTime()-st
 		return this.html
 	},
-	canberra:function(comp,cats){
+	similarity:function(comp,metric,cats){
 		cats=cats||['ppron','ipron','article','adverb','conj','prep','auxverb','negate','quant']
-		this.lsm=0
+		this.sim=0
 		if(!comp||'string'===typeof comp){
 			comp=comp && !liwc_means.hasOwnProperty(comp) ? new adicat(comp).categorize().toPercent() : liwc_means[comp||'overall']
 		}else if(comp.hasOwnProperty('cats')){
 			if(!comp.cats_type) comp.toPercent()
 			comp=comp.cats
-		}else return this.lsm
+		}else if(!comp.hasOwnProperty(cats[0])) return this.sim
 		if(!this.hasOwnProperty('cats')) this.categorize()
 		if(!this.cats_type) this.toPercent()
-		var l=i=cats.length, c=''
+		var i=cats.length, l=0, c='', cos=metric && /^co/i.test(metric)
+		if(cos) this.sim=[0,0,0]
 		while(i--){
 			c=cats[i]
-			if(this.cats.hasOwnProperty(c) && comp.hasOwnProperty(c)){
-				this.lsm+=Math.abs(this.cats[c]-comp[c])/(this.cats[c]+comp[c]+.001)
+			if(this.cats.hasOwnProperty(c) && this.cats[c]+comp[c]){
+				l++
+				if(cos){
+					this.sim[0]+=this.cats[c]*comp[c]
+					this.sim[1]+=this.cats[c]*this.cats[c]
+					this.sim[2]+=comp[c]*comp[c]
+				}else{
+					this.sim+=Math.abs(this.cats[c]-comp[c])/(this.cats[c]+comp[c])
+				}
 			}
 		}
-		this.lsm=1-Math.round(this.lsm/l*1000)/1000
-		return this.lsm
+		if(cos){
+			this.sim=Math.round((this.sim[0]/Math.sqrt(this.sim[1])/Math.sqrt(this.sim[2]))*1000)/1000
+		}else{
+			this.sim=Math.round((1-(this.sim/l))*1000)/1000
+		}
+		if(isNaN(this.sim)) this.sim=0
+		return this.sim
 	}
 }
 
 // adicat specific utility functions
 function adicat_readDict(obj,level){
-	var op={}, s=level?' ':'^', e=level?' ':'$', wildcards=level?/ *\* */g:/\^*\*\$*/g,
-			t=level?'g':'', open=/[[(](?!\\)/g, close=/[\])]/g, escape=/(?=[[()\]])|\\\\/g, k, i, p
+	var op, s=level?' ':'^', e=level?' ':'$', hf=/^\^|\$$/g, wildcards=level?/ *\* */g:/\^*\*\$*/g,
+			t=level?'g':'', open=/(^|[^\\])[[(]/, close=/(^|[^\\])[)\]]/, k, i, p
 	for(k in obj){if(obj.hasOwnProperty(k) && !obj[k].test){
+		if(!op) op={}
 		op[k]=[]
-		for(i=obj[k].length;i--;){
-			if((p=open.test(obj[k][i])+close.test(obj[k][i]))===1){
-				obj[k][i]=obj[k][i].replace(escape,'\\')
+		for(i='string'===typeof obj[k] ? 0 : obj[k].length;i--;){
+			if((open.test(obj[k][i])+close.test(obj[k][i]))===1){
+				obj[k][i]=obj[k][i].replace(patterns.special,'\\$&')
 			}
-			op[k][i]=(s+obj[k][i]+e).replace(wildcards,'')
+			op[k][i]=(s+obj[k][i].replace(hf,'')+e).replace(wildcards,'')
 		}
 		op[k]=new RegExp(op[k].join('|'),t)
 	}}
 	patterns.dict_proc=true
 	return op
 }
+function adicat_loadDict(n){
+	var f=new XMLHttpRequest()
+  f.onreadystatechange=function(){if(f.readyState===4 && f.status===200){
+      patterns.dict=/^%/.test(f.resonseTest) ? read_dic(f.resonseTest) : JSON.parse(f.responseText)
+  }}
+  f.open('GET',n,true)
+  f.send()
+}
+function read_dic(f){
+	var h=f.replace(/[\r\n]+/g,'\n').split(/%[^\n]*\n/), b=h.splice(2)[0], m={c:[],i:[]}, op={},
+	    p={ch:/^[^\d]+|[\t\r\n ]+$/g,cb:/^[\t\r\n ]+|[^\d]+$/g,tr:/\t+/,nd:/[^\d]+/g}, i=0, mi, n, l, s
+	h=h[1].match(/\d+[\t ]+[^\n]+/g)
+	n=h.length
+	for(;i<n;i++){
+		l=h[i].replace(p.ch,'').split(p.tr)
+		s=l[0].replace(p.nd,'')
+		op[l[1]]=[]
+		m.c.push(l[1])
+		m.i.push(s)
+	}
+	b=b.split('\n')
+	i=b.length
+	while(i--){
+		s=b[i].replace(p.cb,'').split(p.tr)
+		l=s.splice(1)
+		s=s[0]
+		h=l.length
+		while(h--) if((mi=m.i.indexOf(l[h]))!==-1) op[m.c[mi]].push(s)
+	}
+	return op
+}
+function write_dic(d){
+	var k, l, i=1, h=['%'], w={}
+	for(k in d){if(d.hasOwnProperty(k)){
+		h.push(i+'\t'+k)
+		l=d[k].length
+		while(l--) w.hasOwnProperty(d[k][l]) ? w[d[k][l]].push(i) : w[d[k][l]]=[i]
+		i++
+	}}
+	h.push('%')
+	for(k in w) if(w.hasOwnProperty(k)) h.push(k+'\t'+w[k].join('\t'))
+	return h.join('\n')
+}
 
 // general untility/compatibility functions
 function rand(u,l){l=l||0;return l+Math.floor(Math.random()*u+l)}
 function which(obj){for(var k in obj){if(obj.hasOwnProperty(k) && obj[k]){return k}}return false}
 Array.prototype.sample=function(n){
-	var r=this.length, set=[], res=[], i=t=0
+	var r=this.length, set=[], res=[], i=0, t=0
 	if(!n||n===1) return this[rand(r)]
 	n=Math.min(n,r)
 	while(i<n){if(set.indexOf(t=rand(r))===-1){
