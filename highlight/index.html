@@ -21,7 +21,7 @@ body, button, p, input, div, table, #input, #values, #menu, #dictionary_menu, .p
 	position:fixed;overflow:auto;-webkit-overflow-scrolling:touch;right:-80%;top:0;bottom:0;width:80%;background:#dedede;z-index:2;
 	transition:right .25s;-webkit-transition:right .25s;-moz-transition:right .25s;-o-transition:right .25s
 }
-.opt_display{position:absolute;display:inline;font-size:.8em;text-align:right;right:5.8em;bottom:-1.3em;color:#c7c7c7}
+.opt_display{position:absolute;display:inline;font-size:.8em;text-align:right;right:.5em;bottom:-1.5em;color:#c7c7c7}
 .menu_group_open, .menu_group{overflow:hidden;margin:.5em}
 .menu_group{height:0}
 .menu_group_open div{background:#fff;display:table;width:100%;height:3em;margin:.5em 0}
@@ -53,13 +53,13 @@ button.selected,button:hover,#menu div table tbody tr td button:hover,.reset p:h
 	overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch
 }
 #values table{position:relative;width:100%;height:100%;text-align:center;font-size:.8em}
-#values table td,#values table th{padding:.2em .4em}
+#values table td,#values table th{padding:.2em .4em; white-space:nowrap}
 #values table th:hover{cursor:pointer}
 #frame{
 	position:fixed;width:100%;top:0;bottom:0;right:0;overflow:hidden;
 	transition:left .25s;-webkit-transition:right .25s;-moz-transition:right, .25s;-o-transition:right .25s
 }
-#input{position:absolute;top:0;left:0;right:0;bottom:0;padding:.5em;margin:4em .1em;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#input{position:absolute;top:0;left:0;right:0;bottom:0;padding:.5em;margin:4.3em .1em;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .highlight *{border-radius:3px}
 .highlight p{font-size:1em}
 #inp_control{width:100%;top:0;position:absolute;z-index:3;text-align:center}
@@ -94,7 +94,7 @@ button.selected,button:hover,#menu div table tbody tr td button:hover,.reset p:h
 .upload_group div{width:100%;padding:1em 0;margin:.2em 0;border:#c7c7c7 solid 1px}
 .upload_group button{width:100%;background:#dadada;padding:1em 0;border:none;text-align:center;border-radius:15px}
 .upload_group button:last-of-type{margin:1.5em 0 0 0}
-div.listentry_wide{width:auto;float:right;padding:1em .5em 0 .5em;margin:0;font-size:.9em}
+div.listentry_wide{width:auto;float:right;padding:.25em;margin:0;font-size:.9em;min-width:1em}
 
 .zero{display:none}
 .select{background:#C4B9C5}
@@ -121,7 +121,7 @@ div.listentry_wide{width:auto;float:right;padding:1em .5em 0 .5em;margin:0;font-
 		<div><p title='The similarity metric calculated between the current and comparison text.'>sim_metric</p>
 			<p><button type='button'>canberra</button><button type='button'>cosine</button></p></div>
 		<div><p title='The categories going into the text comparison; categories not found in the current dictionary are ignored.'>sim_cats</p>
-			<div class='listentry_wide' contenteditable='true' type='text' onblur='update_options(this)'></div></div>
+			<div class='listentry_wide' contenteditable='true' onblur='update_options(this)'><p></p></div></div>
 		<div><p title='The code of the character used to fill in spaces; for processing by word, each space is a <span>, but spans with only the regular space character (\u2) are automatically removed, so a different character must be used (\u2008 being the default).'>space_character</p>
 			<p><input type='text' onblur='update_options(this)'></p></div>
 	</div>
@@ -339,11 +339,12 @@ function fill_menu(){
 	while(i--){
 		c=opt_sets.children[i].children
 		k=c[1].childElementCount
-		if(k){
-			if(k===1 && c[1].children[0].tagName==='INPUT'){
-				c[1].children[0].value='\\u'+options[c[0].innerHTML].charCodeAt().toString(16)
-			}else while(k--) c[1].children[k].className=options[c[0].innerHTML]===c[1].children[k].innerHTML ? 'selected' : ''
-		}else if(c[1].tagName==='DIV') c[1].innerText=options[c[0].innerHTML].join(', ')
+		if(k===1){
+			tr=c[1].children[0]
+			if(tr.tagName==='INPUT'){
+				tr.value='\\u'+options[c[0].innerHTML].charCodeAt().toString(16)
+			}else if(c[1].tagName==='DIV') tr.innerText=options[c[0].innerHTML].join(', ')
+		}else while(k--) c[1].children[k].className=options[c[0].innerHTML]===c[1].children[k].innerHTML ? 'selected' : ''
 	}
 	disp_saved.innerText=texts.current
 	disp_saved.style.color=texts.hasOwnProperty(texts.current) && texts[texts.current]===input.innerText ? '#84dc84' : '#ff7b7b'

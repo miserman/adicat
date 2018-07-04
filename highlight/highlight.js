@@ -191,7 +191,7 @@ function update_table(){
 		append(o[0],'th',{innerText:'WC',title:'word count'})
 		append(o[1],'td',{innerText:0,id:'wc_value'})
 	}
-	var o=values.children[0].children[0].children, ol=o.length, w=input.children, i=w.length, k, f, cl, c,
+	var o=values.children[0].children[0].children, ol=o.length, w=input.children, i=w.length, k, f, cl, c, s,
       w=input.getElementsByTagName('span'), i=w.length, cat={wc:0}, trim=/^ | $/g, comps=options.dict[options.use_dict].composites||{}
 	for(k in patterns.dict){if(patterns.dict.hasOwnProperty(k) && options.blacklist.indexOf(k)===-1) cat[k]=0}
 	while(i--){if(patterns.char.test(w[i].innerText)){
@@ -232,7 +232,10 @@ function update_table(){
 			append(o[1],'td',{innerText:cat[k],id:k+'_value',className:cat[k] || options.show_zeros==='true' ? '' : 'zero'})
 		}
 	}}
-  if(texts.comp && texts.comp_values) $('similarity').innerText=new adicat(input.innerText).similarity(texts.comp_values,options.sim_metric,options.sim_cats)
+  if(texts.comp && texts.comp_values){
+    s=$('similarity')
+    if(s) s.innerText=new adicat(input.innerText).similarity(texts.comp_values,options.sim_metric,options.sim_cats)
+  }
   for(f in comps) if(comps.hasOwnProperty(f) && comps[f].show){
     o=$('comp_'+f)
     if(o) o.innerText=solve(comps[f].formula)
