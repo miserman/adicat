@@ -191,6 +191,7 @@ div.listentry_wide{width:auto;float:right;padding:.25em;margin:0;font-size:.9em;
 	<div class='menu_group_open'><p>adicat dictionaries</p><p>
 		<button type='button' onclick="dict_import('function','default')">function</button>
 		<button type='button' onclick="dict_import('lusi')">lusi</button>
+		<button type='button' onclick="dict_import('netspeak')">netspeak</button>
 	</p></div>
 	<div class='upload_group'>
 		<a>URL (if the source allows cross-origin requests):</a>
@@ -718,7 +719,7 @@ function dict_import(f,n){
 	}
 	patterns.dict=null
 	if('string'===typeof f){
-		var ds=['function','lusi'], nn=n||f.match(/[^/]*$/)[0]||f
+		var ds=['function','lusi','netspeak'], nn=n||f.match(/[^/]*$/)[0]||f
 		if(ds.indexOf(f)!==-1) f='https://raw.githubusercontent.com/miserman/adicat/master/dict/'+f+'.json'
 		if(!n) if(options.dict.hasOwnProperty(nn)) nn+='_'+rand(999,100)
 		adicat_loadDict(f)

@@ -121,7 +121,8 @@ function catch_paste(e){if(options.live==='on'){
   e.stopPropagation()
 	e.preventDefault()
   var s=window.getSelection(), r=s.getRangeAt(0)
-	if(input.innerText===''){
+  console.log([input,s,r])
+	if(input.innerText==='' || input.innerText==='\n'){
     display_text(txt)
     r.setStart(input.lastElementChild,1)
   }else{

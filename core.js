@@ -54,10 +54,8 @@ adicat.prototype={
 			.replace(patterns.emojis.frown,' emjsface ')
 			.replace(patterns.symbols.and,' and ')
 			.replace(patterns.symbols.at,' at ')
-			.replace(patterns.punct.initials,'')
 			.replace(patterns.punct.apostrophe,"'s")
 			.replace(patterns.punct.ellipses,'... ')
-			.replace(patterns.filter,' ')
 			.replace(patterns.space,'')
 		this.string.striped=this.string.clean.toLowerCase().replace(patterns.striped,'')
 		this.words={
