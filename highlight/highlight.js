@@ -252,7 +252,7 @@ function update_table(){
           addEvent($('similarity').parentElement.parentElement.children[0].children[1], 'click', sim_refresh)
         }
         for(f in comps){if(comps.hasOwnProperty(f) && comps[f].show){
-          append(o[0],'th',{innerText:f,title:'composite category'})
+          append(o[0],'th',{innerText:f,title:comps[f].formula})
   				append(o[1],'td',{innerText:0,id:'comp_'+f})
         }}
       }

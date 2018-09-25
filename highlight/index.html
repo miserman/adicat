@@ -474,7 +474,7 @@ function dict_display(dict){
 }
 function dict_refresh(ro){
 	var dict={cats:{},colors:{},composites:{}}, rs=dict_words.children[0].tBodies[0].children,
-	    n=rs.length, rm=/[ \r\n\t]/g, i=0, c, cn, od
+	    n=rs.length, rm=/[\s\r\n\t]/g, cm=/^_+|_+$/g, i=0, c, cn, od
 	if(rs && rs.length){
 		for(;i<n;i++){
 			c=rs[i].children
@@ -489,7 +489,7 @@ function dict_refresh(ro){
 		if(n && options.dict[dict_name.innerText].hasOwnProperty('composites')){
 			od=options.dict[dict_name.innerText].composites
 			for(;i<n;i++){
-				cn=rs[i].children[0].innerText.replace(rm,'_')
+				cn=rs[i].children[0].innerText.replace(rm,'_').replace(cm,'')
 				if(cn) dict.composites[cn]={show:!od.hasOwnProperty(cn)||od[cn].show,formula:rs[i].children[1].innerText}
 			}
 		}
@@ -739,17 +739,19 @@ function dict_import(f,n){
 	}
 }
 function solve(eq){
-	var mr=/ |^Math\./g, ch=/[^\.0-9+><*%^()&|\/-]/g, nf=/^\(/, fh=/^[^(]*/, ip=/\([^(]+\)/g, bs=/ +/g, bo=/[^+><*^()&%|\/-]+/g, e={}, sp=[], te='', l=0
+	var mr=/ |^Math\./g, ch=/[^\.0-9+><*%^()&|\/-]/g, nf=/^\(/, fh=/^[^(]*/, ip=/\([^(]+\)/g,
+	  bs=/ +/g, bo=/[^+><*^()&%|\/-]+/g, e={}, sp=[], te='', l=0
 	function dict_ops(s){
 		var s=s+'', t=s.match(bo), n=t ? t.length : 0, c='', i=0
 		for(;i<n;i++){
 			c=t[i].replace(bs,'')
 			c=output.hasOwnProperty(c) ? Number(output[c]) : Number(c)
-			if(isNaN(c)) c=.0000001
+			if(isNaN(c)) c=0
 			s=s.replace(t[i],c)
 		}
 		return s
 	}
+	eq=eq.replace(patterns.returns,' ')
 	sp=eq.match(ip)
 	if(sp){
 		l=sp.length
@@ -767,13 +769,14 @@ function solve(eq){
 				e[sp[l]]=e[sp[l]].replace(fh,'')
 				if(Math.hasOwnProperty(te)){
 					e[sp[l]]=Math[te](Number(Function('"use strict"; return '+e[sp[l]].replace(ch,''))()))
-					if(isNaN(e[sp[l]])) e[sp[l]]=.0000001
+					if(isNaN(e[sp[l]])) e[sp[l]]=0
 				}
 			}
 			eq=eq.replace(sp[l],e[sp[l]])
 		}
 	}
 	eq=dict_ops(eq)
-	return Math.round(Function('"use strict"; return '+eq.replace(ch,''))()*10000)/10000
+	eq=Math.round(Function('"use strict"; return '+eq.replace(ch,''))()*10000)/10000
+	return isFinite(eq) ? eq : 0
 }
 </script></body></html>
