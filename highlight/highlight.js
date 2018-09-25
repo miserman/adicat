@@ -32,7 +32,10 @@ function process_span(k){if(options.live==='on'){
       ae=e.previousElementSibling
       if(ae){
         i=c.length
-        while(i--){ae.insertAdjacentElement('afterEnd',c[i]);if(i) insertSpace(ae)}
+        while(i--){
+          ae.insertAdjacentElement('afterEnd',c[i])
+          if(i) insertSpace(ae)
+        }
         r.setStart(e,0)
         e.parentNode.removeChild(e)
       }
@@ -58,8 +61,9 @@ function process_span(k){if(options.live==='on'){
   					ae=e.nextElementSibling
   					e.parentNode.removeChild(e)
   					for(i=0, n=c.length;i<n;i++){
+              insertSpace(c[i])
   						ae.insertAdjacentElement('beforeBegin',c[i])
-  						if(i!==n-1) insertSpace(c[i])
+              if(i<n-1) insertSpace(c[i])
   					}
   				}else{
   					e.className=c[0].className
@@ -87,7 +91,11 @@ function spanner(k){if(options.live==='on'){
           nr=e[e.length-1]
           e=e.concat(new adicat(p.innerText.substring(r.startOffset)).categorize(patterns.dict,options.blacklist).display())
           i=e.length
-          while(i--){p.insertAdjacentElement('afterEnd',e[i]);insertSpace(p)}
+          if(p.className!=='blankspace') insertSpace(p)
+          while(i--){
+            p.insertAdjacentElement('afterEnd',e[i])
+            if(i) insertSpace(p)
+          }
           r.setStart(nr.nextElementSibling,1)
           p.parentNode.removeChild(p)
           k.preventDefault()
@@ -114,21 +122,20 @@ function spanner(k){if(options.live==='on'){
 }}
 function catch_paste(e){if(options.live==='on'){
 	var txt=(e.clipboardData||window.clipboardData).getData('Text')
-  if(/[\r\n]/.test(txt)){
+  if(patterns.returns.test(txt)){
     setTimeout(input_refresh,0)
     return null
   }
   e.stopPropagation()
 	e.preventDefault()
   var s=window.getSelection(), r=s.getRangeAt(0)
-  console.log([input,s,r])
 	if(input.innerText==='' || input.innerText==='\n'){
     display_text(txt)
     r.setStart(input.lastElementChild,1)
   }else{
     var c=new adicat(txt).categorize(patterns.dict,options.blacklist).display(), n=c.length, t, sp
     r.deleteContents()
-    e=r.startContainer.parentNode
+    e=r.startContainer.id==='input' ? input.firstElementChild : r.startContainer.parentNode
     if(e.id==='input'){
       e=r.startContainer
     }else if(e===input.firstElementChild && !r.startOffset){
@@ -151,15 +158,19 @@ function catch_paste(e){if(options.live==='on'){
   s.addRange(r)
   r.collapse(false)
 }}
-function input_clear(m){backup(true);input.innerHTML=values.innerHTML='';if(m){
-  texts.current=texts.hasOwnProperty(texts.current) ? ++texts.last : texts.last
-  fill_menu()
-}}
+function input_clear(m){
+  backup(true)
+  input.innerHTML=values.innerHTML=''
+  if(m){
+    texts.current=texts.hasOwnProperty(texts.current) ? ++texts.last : texts.last
+    fill_menu()
+  }
+}
 function input_refresh(){
-  var t=input.innerText, br=/\r*\n/, s=window.getSelection(), r=s.getRangeAt(0)
+  var t=input.innerText, s=window.getSelection(), r=s.getRangeAt(0)
   input_clear()
-  if(br.test(t)){
-    t=t.split(br)
+  if(patterns.returns.test(t)){
+    t=t.split(patterns.returns)
     for(var n=t.length,i=0;i<n;i++){
       if(t[i]!=='') display_text(t[i],true)
       if(i!==n-1) input.appendChild(document.createElement('br'))
@@ -168,7 +179,7 @@ function input_refresh(){
   }else{
     display_text(t)
   }
-  r.setStart(input.lastElementChild,1)
+  if(input.lastElementChild) r.setStart(input.lastElementChild,input.lastElementChild.tagName==='SPAN')
   s.removeAllRanges()
   s.addRange(r)
   backup(true)
@@ -177,11 +188,24 @@ function input_refresh(){
 function display_text(text,defer){
 	text=text||input.innerText
 	if('string'===typeof text){
-		var c=new adicat(text).categorize(patterns.dict,options.blacklist).display(), n=c.length, i=0
-		for(;i<n;i++){
-			input.appendChild(c[i])
-			append(input,'span',{innerHTML:options.space_character,className:'blankspace'})
-		}
+    text=text.split(patterns.returns).filter(empty)
+		var i=0, n=text.length, wi, wn, c
+    for(;i<n;i++){
+      c=new adicat(text[i]).categorize(patterns.dict,options.blacklist).display()
+      wn=c.length
+      if(i<n-1){
+        c[wn]=document.createElement('div')
+        c[wn].appendChild(document.createElement('span'))
+        c[wn].firstElementChild.className='blankspace'
+        c[wn].firstElementChild.appendChild(document.createElement('br'))
+        wn++
+      }
+      wi=0
+  		for(;wi<wn;wi++){
+  			input.appendChild(c[wi])
+  			if(c[wi].tagName==='SPAN') append(input,'span',{innerHTML:options.space_character,className:'blankspace'})
+  		}
+    }
     if(!defer) update_table()
 	}
 }
@@ -220,9 +244,10 @@ function update_table(){
       if(o[0].children.length===1){
         if(texts.comp && texts.hasOwnProperty(texts.comp)){
           append(o[0],'th',{innerText:'sim to '+texts.comp,title:
-            (/^co/i.test(options.sim_metric) ? 'Cosine similarity' : 'Inverse Canberra distance')+' to text '+texts.comp+'.'})
+            (/^co/i.test(options.sim_metric) ? 'Cosine similarity' : 'Inverse Canberra distance')+' to text '+texts.comp+'; click to recalculate.'})
           texts.comp_values=new adicat(texts[texts.comp]).categorize().toPercent()
   				append(o[1],'td',{innerText:0,id:'similarity'})
+          addEvent($('similarity').parentElement.parentElement.children[0].children[1], 'click', sim_refresh)
         }
         for(f in comps){if(comps.hasOwnProperty(f) && comps[f].show){
           append(o[0],'th',{innerText:f,title:'composite category'})
@@ -242,6 +267,13 @@ function update_table(){
     if(o) o.innerText=solve(comps[f].formula)
   }
 	$('wc_value').innerText=cat.wc
+}
+function sim_refresh(){
+  var s=$('similarity')
+  if(s){
+    texts.comp_values=new adicat(texts[texts.comp]).categorize().toPercent()
+    s.innerText=new adicat(input.innerText).similarity(texts.comp_values,options.sim_metric,options.sim_cats)
+  }
 }
 function select(e){
 	var sel=/ select /g, ck=sel.test(e.className), c=ck ? sel : new RegExp('( '+e.innerText+' )','g'), r=ck ? '' : '$1 select ',

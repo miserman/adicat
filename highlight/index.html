@@ -162,7 +162,7 @@ div.listentry_wide{width:auto;float:right;padding:.25em;margin:0;font-size:.9em;
 	<div id='inp_control' class='collapse'>
 		<button title='clear input' id='inp_clear' onclick="input_clear(true)" type='button'>&#10005;</button>
 		<button title='refresh input' id='inp_refresh' onclick='input_refresh()' type='button'>&#10227;</button>
-		<p class='opt_display'>saved <a id='disp_saved'>0</a>, live <a id='disp_live'>on</a></p>
+		<p class='opt_display'>text <a id='disp_saved'>0</a>, live <a id='disp_live'>on</a></p>
 		<button title='toggle menu' id='menu_open' onclick='toggle_menu()' type='button'>&#9776;</button>
 	</div>
 	<div id='overlay' onclick='toggle_menu()'></div>
@@ -489,8 +489,8 @@ function dict_refresh(ro){
 		if(n && options.dict[dict_name.innerText].hasOwnProperty('composites')){
 			od=options.dict[dict_name.innerText].composites
 			for(;i<n;i++){
-				cn=rs[i].children[0].innerText.replace(patterns.returns,'').replace(rm,'_')
-				if(cn) dict.composites[cn]={show:!od.hasOwnProperty(cn)||od[cn].show,formula:rs[i].children[1].innerText.replace(patterns.returns,'')}
+				cn=rs[i].children[0].innerText.replace(rm,'_')
+				if(cn) dict.composites[cn]={show:!od.hasOwnProperty(cn)||od[cn].show,formula:rs[i].children[1].innerText}
 			}
 		}
 		options.dict[dict_name.innerText]=dict

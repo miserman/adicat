@@ -3,23 +3,24 @@ var patterns={
 	word_breaks:/\s/g,
 	char:/[A-z0-9?><!@#$%^&*()_+|}{":;}'/.,-=\\\][\]]/,
 	special:/[[\]()\/\\.?$*^]/g,
-	striped:/[^a-z0-9' ]/g,
-	filter:/[$#%^*\r\n\t\-~\\—–→\+=[/({})\]]| "(?!\w)|  /g,
+	striped:/[^a-z0-9'\s]/g,
+	filter:/[$#%^*\r\n\t\-~\\—–→\+=[/({})\]]|\s"(?!\w)|\s\s/g,
 	curly_quote:{s:/[‘’]/g,d:/[“”]/g},
 	emojis:{
-		smile:/\:\)|\: \)|\:\-\)/g,smile_rev:/emjhface/g,
-		frown:/\:\(|\: \(|\:\-\(/g,frown_rev:/emjsface/g
+		smile:/\:\)|\:\s\)|\:\-\)/g,smile_rev:/emjhface/g,
+		frown:/\:\(|\:\s\(|\:\-\(/g,frown_rev:/emjsface/g
 	},
 	symbols:{and:/\&/g,at:/\@/g},
-	punct:{initials:/[,.](?=\w+[.,])/g,apostrophe:/\.\'s/g,ellipses:/…|\.[. ]+\./g},
-	space:/ (?=[ .,?!(){}[\]*&^])|^ | $/g,returns:/[\r\n]/g,
+	punct:{initials:/[,.](?=\w+[.,])/g,apostrophe:/\.\'s/g,ellipses:/…|\.{3,}|\. +\. +[. ]+/g},
+	space:/\s(?=[\s.,?!)}>\]])|^\s|\s$/g,returns:/[\r\n]/g,
+	boundary:{sentence:/[?!.:]+\s*/g, clause:/[.,:;?!(\)<>{}[\]]+\s*/g},
 	cues:{
-		question:/\?| w+h+a+[t ]* | w+h+e+n+ | w+h+o+ | how| a+[sk]{2} | h+u+h/,
-		greeting:/ h+i+[yi]* | h+[ae]+[iy]+ | h+e+l+o+ | y+o+ | w+h+a+t+[']*(?:s| is) (?:shak|up)/,
-		yes:/ y+[ae]+s+ | y+e+a+h+ | s+u+r+[e ]+| u+h+u[hu ]+ | a+f+i+r+m| a+cc+e+p/,
-		no:/ n+o+ | n+o+p+e+ | d+e+c+l+i| r+e+j+e+c/,
-		sad:/ emjsface | b+a+d+ | s+a+d+ | f+r+u+s+t+r| d+e+p+r+e+s| t+e+r+i+b+l| h+o+r+i+b+l/,
-		happy:/ emjhface | h+a+p+y+ | e+x+c+i+t| g+oo+d+ | g+r+e+a+t+ | e+x+c+e+l+e+n+t| s+u+pe+r+ | n+i+c+e+ /
+		question:/\?|\sw+h+a+[t\s]*\s|\sw+h+e+n+\s|\sw+h+o+\s|\show|\sa+[sk]{2}\s|\sh+u+h/,
+		greeting:/\sh+i+[yi]*\s|\sh+[ae]+[iy]+\s|\sh+e+l+o+\s|\sy+o+\s|\sw+h+a+t+[']*(?:s|\sis)\s(?:shak|up)/,
+		yes:/\sy+[ae]+s+\s|\sy+e+a+h+\s|\ss+u+r+[e\s]+|\su+h+u[hu\s]+\s|\sa+f+i+r+m|\sa+cc+e+p/,
+		no:/\sn+o+\s|\sn+o+p+e+\s|\sd+e+c+l+i|\sr+e+j+e+c/,
+		sad:/\semjsface\s|\sb+a+d+\s|\ss+a+d+\s|\sf+r+u+s+t+r|\sd+e+p+r+e+s|\st+e+r+i+b+l|\sh+o+r+i+b+l/,
+		happy:/\semjhface\s|\sh+a+p+y+\s|\se+x+c+i+t|\sg+oo+d+\s|\sg+r+e+a+t+\s|\se+x+c+e+l+e+n+t|\ss+u+pe+r+\s|\sn+i+c+e+\s/
 	},
 	matches:{},
 	dict:null,
@@ -39,7 +40,7 @@ function adicat(str){
 	this.string={raw:str,clean:'',striped:''}
 	this.chars=str.length
 	this._processLevel=0
-	this._processTime={token:-1,cue:-1,cat:-1,display:-1}
+	this._processTime={meta:-1,token:-1,cue:-1,cat:-1,display:-1}
 }
 
 adicat.prototype={
@@ -169,6 +170,29 @@ adicat.prototype={
 		this._processTime.display=new Date().getTime()-st
 		return this.html
 	},
+	meta:function(){
+		var st=new Date().getTime(), i=0, c, pp={period:/\./g,comma:/,/g,qmark:/\?/g,exclam:/\!/g,quotes:/['"]/g,
+		  brackets:/[(\){}<>[\]]/g,organization:/[-—–/:;]/g}
+		if(!this._processLevel) this.tokenize()
+		this.meta={period:0,comma:0,qmark:0,exclam:0,quotes:0,brackets:0,organization:0,
+			sentences:0,WPS:0,clauses:0,WPC:0}
+		this.meta.sentences=this.string.clean.split(patterns.boundary.sentence).filter(empty)
+		i=this.meta.sentences.length
+		while(i--) this.meta.WPS += this.meta.sentences[i].split(patterns.word_breaks).filter(empty).length
+		this.meta.sentences=this.meta.sentences.length
+		this.meta.WPS=this.meta.WPS / this.meta.sentences
+		this.meta.clauses=this.string.clean.split(patterns.boundary.clause).filter(empty)
+		i=this.meta.clauses.length
+		while(i--) this.meta.WPC += this.meta.clauses[i].split(patterns.word_breaks).filter(empty).length
+		this.meta.clauses=this.meta.clauses.length
+		this.meta.WPC=this.meta.WPC / this.meta.clauses
+		for(c in pp){if(pp.hasOwnProperty(c)){
+			this.meta[c]=this.string.clean.match(pp[c])
+			this.meta[c]=this.meta[c] ? this.meta[c].length : 0
+		}}
+		this._processTime.meta=new Date().getTime()-st
+		return this
+	},
 	similarity:function(comp,metric,cats){
 		cats=cats||['ppron','ipron','article','adverb','conj','prep','auxverb','negate','quant']
 		this.sim=0
@@ -270,6 +294,7 @@ function write_dic(d){
 // general untility/compatibility functions
 function rand(u,l){l=l||0;return l+Math.floor(Math.random()*u+l)}
 function which(obj){for(var k in obj){if(obj.hasOwnProperty(k) && obj[k]){return k}}return false}
+function empty(p){return p!==''}
 Array.prototype.sample=function(n){
 	var r=this.length, set=[], res=[], i=0, t=0
 	if(!n||n===1) return this[rand(r)]
