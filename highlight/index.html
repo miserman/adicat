@@ -619,11 +619,12 @@ function addRow(cat){
 function fill_text(t){
 	if(t.target.tagName==='TD'){
 		t=t.target.parentElement
-		var s=t.lastElementChild.innerText==='✕'
+		var s=t.lastElementChild.innerText==='✕', cl=t.children.length, id=t.children[0].innerText
+		t=t.children[s ? 1 : 3].innerText
 		backup(true)
-		if(s && t.children.length) texts.current=t.children[0].innerText
+		if(s && cl) texts.current=id
 		input_clear()
-		display_text(t.children[s ? 1 : 3].innerText)
+		display_text(t)
 		if(!s && texts.hasOwnProperty(texts.current)) new_text()
 		toggle_menu()
 	}else if(t.target.tagName==='BUTTON'){

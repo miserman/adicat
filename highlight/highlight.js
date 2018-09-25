@@ -55,7 +55,9 @@ function process_span(k){if(options.live==='on'){
           pe=e.previousElementSibling
           if(pe && pe.innerText===options.space_character) pe.parentNode.removeChild(pe)
         }else if(!e.history || e.history!==e.innerText){
-  				if(e.style) e.style=''
+  				if(e.style){
+            e.className=e.title=''
+          }
   				c=new adicat(e.innerText).categorize(patterns.dict,options.blacklist).display()
   				if(c.length!==1){
   					ae=e.nextElementSibling
