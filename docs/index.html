@@ -31,7 +31,7 @@ var i, k, d, c, l, de, a, args, sels, ck = /^#A/, docs={}, index={},
 window.onload = function(){
   var f=new XMLHttpRequest()
   f.onreadystatechange=function(){if(f.readyState===4 && f.status===200){
-      Adicat.patterns.dict = JSON.parse(f.responseText)
+      docs = JSON.parse(f.responseText)
       build_index()
       setup()
   }}
