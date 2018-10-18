@@ -63,7 +63,7 @@
         "value":"Canberra or Cosine similarity between the current and specified text.",
         "cats":"Categories that went in to the comparison.",
         "comp":"Comparison values.",
-        "metric":"Metric of value.",
+        "metric":"Metric of value."
       }
     },
     "methods":{
@@ -188,7 +188,7 @@
             "smile":"Simple smiley faces to replace with emjhface.",
             "simle_rev":"Replaces emjhface with a smile.",
             "frown":"Simple frowny faces to replace with emjsface.",
-            "frown_rev":"Replaces emjsface with a frown.",
+            "frown_rev":"Replaces emjsface with a frown."
           },
           "symbols":{
             "and":"Ampersands.",
@@ -215,7 +215,7 @@
             "yes":"Might be answering affirmatively.",
             "no":"Might be answering negatively.",
             "sad":"Might be indicating negative emotion.",
-            "happy":"Might be indicating positive emotion.",
+            "happy":"Might be indicating positive emotion."
           },
           "matches":"Stores words that have been matched to a dictionary category, to avoid searching for the same words repeatedly.",
           "dict":"Houses a default dictionary.",
@@ -413,7 +413,7 @@
           "text":{
             "type":"string",
             "default":"Adicat.hl.input.innerText",
-            "description":"Text to be displayed.",
+            "description":"Text to be displayed."
           },
           "add":{
             "type":"boolean",
@@ -500,7 +500,7 @@
             "type":"object",
             "default":"",
             "description":"Attributes to add to the new element."
-          },
+          }
         },
         "output":"Appends a child element to target.",
         "examples":"Adicat.hl.append(Adicat.hl.input, 'div', {innerText:'appended child'})\nAdicat.hl.input"
@@ -522,7 +522,7 @@
         "frame":"Outer element containing log.",
         "log":"Inner element containing message.",
         "indicator":"Element to be shown and hidden to indicate the bot it typing.",
-        "input":"Input element to pull message from.",
+        "input":"Input element to pull message from."
       },
       "replies":"Object to store bot replies. Should have entries with the same name as those in Adicat.patterns.cues, and a string or array of strings for replies."
     },
