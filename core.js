@@ -1,38 +1,235 @@
 'use strict'
-var patterns={
-	word_breaks:/\s/g,
-	char:/[A-z0-9?><!@#$%^&*()_+|}{":;}'/.,-=\\\][\]]/,
-	special:/[[\]()\/\\.?$*^]/g,
-	striped:/[^a-z0-9'\s]/g,
-	filter:/[$#%^*\r\n\t\-~\\—–→\+=[/({})\]]|\s"(?!\w)|\s\s/g,
-	curly_quote:{s:/[‘’]/g,d:/[“”]/g},
-	emojis:{
-		smile:/\:\)|\:\s\)|\:\-\)/g,smile_rev:/emjhface/g,
-		frown:/\:\(|\:\s\(|\:\-\(/g,frown_rev:/emjsface/g
+var Adicat = {
+	patterns:{
+		word_breaks:/\s/g,
+		char:/[A-z0-9?><!@#$%^&*()_+|}{":;'/.,-=\\\][\]]/,
+		special:/[[\]()\/\\.?$*^]/g,
+		striped:/[^a-z0-9'\s]/g,
+		filter:/[$#%^*\r\n\t\-~\\—–→\+=[/({})\]]|\s"(?!\w)|\s\s/g,
+		curly_quote:{s:/[‘’]/g,d:/[“”]/g},
+		emojis:{
+			smile:/(^|\s)(?:[<([{,]+[\s-.,]*[Xx;:8=]+|[Xx;:8=]+[\s-.,]*[>p3)}D\]]+)(?=\s|$)/g,
+			smile_rev:/emjhface/g,
+			frown:/(^|\s)(?:[>p3)}D\]]+[\s-.,]*[Xx;:8=]+|[Xx;:8=]+[\s-.,]*[<([{q]+)(?=\s|$)/g,
+			frown_rev:/emjsface/g
+		},
+		symbols:{and:/\&/g,at:/\@/g},
+		punct:{
+			emdash:/—/g,endash:/–/g,initials:/(\.[A-z0-9]+\.(?=[\s.]))/g,apostrophe:/\.\'s/g,ellipses:/…|\.{3,}|\. +\. +[. ]+/g,
+			titles:/(?:^|\s)(st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\./ig, initial_trim:/\.$/g
+		},
+		space:/\s(?=[\s.,?!)}>\]])|^\s|\s$|\.—/g,returns:/[\r\n]/g,
+		boundary:{sentence:/[?!.]+(?:[^A-z0-9]|$)/g, clause:/[.,:;?!(\)<>{}[\]]+(?:[^A-z0-9]|$)/g},
+		cues:{
+			question:/\?|\sw+h+a+[t\s]*\s|\sw+h+e+n+\s|\sw+h+o+\s|\show|\sa+[sk]{2}\s|\sh+u+h/,
+			greeting:/\sh+i+[yi]*\s|\sh+[ae]+[iy]+\s|\sh+e+l+o+\s|\sy+o+\s|\sw+h+a+t+[']*(?:s|\sis)\s(?:shak|up)/,
+			yes:/\sy+[ae]+s+\s|\sy+e+a+h+\s|\ss+u+r+[e\s]+|\su+h+u[hu\s]+\s|\sa+f+i+r+m|\sa+cc+e+p/,
+			no:/\sn+o+\s|\sn+o+p+e+\s|\sd+e+c+l+i|\sr+e+j+e+c/,
+			sad:/\semjsface\s|\sb+a+d+\s|\ss+a+d+\s|\sf+r+u+s+t+r|\sd+e+p+r+e+s|\st+e+r+i+b+l|\sh+o+r+i+b+l/,
+			happy:/\semjhface\s|\sh+a+p+y+\s|\se+x+c+i+t|\sg+oo+d+\s|\sg+r+e+a+t+\s|\se+x+c+e+l+e+n+t|\ss+u+pe+r+\s|\sn+i+c+e+\s/
+		},
+		matches:{},
+		dict:null,
+		dict_cats:[],
+		dict_proc:false
 	},
-	symbols:{and:/\&/g,at:/\@/g},
-	punct:{initials:/[,.](?=\w+[.,])/g,apostrophe:/\.\'s/g,ellipses:/…|\.{3,}|\. +\. +[. ]+/g},
-	space:/\s(?=[\s.,?!)}>\]])|^\s|\s$/g,returns:/[\r\n]/g,
-	boundary:{sentence:/[?!.:]+\s*/g, clause:/[.,:;?!(\)<>{}[\]]+\s*/g},
-	cues:{
-		question:/\?|\sw+h+a+[t\s]*\s|\sw+h+e+n+\s|\sw+h+o+\s|\show|\sa+[sk]{2}\s|\sh+u+h/,
-		greeting:/\sh+i+[yi]*\s|\sh+[ae]+[iy]+\s|\sh+e+l+o+\s|\sy+o+\s|\sw+h+a+t+[']*(?:s|\sis)\s(?:shak|up)/,
-		yes:/\sy+[ae]+s+\s|\sy+e+a+h+\s|\ss+u+r+[e\s]+|\su+h+u[hu\s]+\s|\sa+f+i+r+m|\sa+cc+e+p/,
-		no:/\sn+o+\s|\sn+o+p+e+\s|\sd+e+c+l+i|\sr+e+j+e+c/,
-		sad:/\semjsface\s|\sb+a+d+\s|\ss+a+d+\s|\sf+r+u+s+t+r|\sd+e+p+r+e+s|\st+e+r+i+b+l|\sh+o+r+i+b+l/,
-		happy:/\semjhface\s|\sh+a+p+y+\s|\se+x+c+i+t|\sg+oo+d+\s|\sg+r+e+a+t+\s|\se+x+c+e+l+e+n+t|\ss+u+pe+r+\s|\sn+i+c+e+\s/
+	liwc_means:{
+		'overall':{'ppron':9.95,'ipron':5.26,'article':6.51,'auxverb':8.53,'adverb':5.27,'prep':12.93,'conj':5.9,'negate':1.66,'quant':2.02},
+		'blogs':{'ppron':10.66,'ipron':5.53,'article':6,'auxverb':8.75,'adverb':5.88,'prep':12.6,'conj':6.43,'negate':1.81,'quant':2.27},
+		'expressive':{'ppron':12.74,'ipron':5.28,'article':5.7,'auxverb':9.25,'adverb':6.02,'prep':14.27,'conj':7.46,'negate':1.69,'quant':2.35},
+		'novels':{'ppron':10.35,'ipron':4.79,'article':8.35,'auxverb':7.77,'adverb':4.17,'prep':14.27,'conj':6.28,'negate':1.68,'quant':1.8},
+		'natural':{'ppron':13.37,'ipron':7.53,'article':4.34,'auxverb':12.03,'adverb':7.67,'prep':10.29,'conj':6.21,'negate':2.24,'quant':1.93},
+		'nytimes':{'ppron':3.56,'ipron':3.84,'article':9.08,'auxverb':5.11,'adverb':2.76,'prep':14.27,'conj':4.85,'negate':0.62,'quant':1.94},
+		'twitter':{'ppron':9.02,'ipron':4.6,'article':5.58,'auxverb':8.27,'adverb':5.13,'prep':11.88,'conj':4.19,'negate':1.74,'quant':1.85}
 	},
-	matches:{},
-	dict:null,
-	dict_proc:false
-}, liwc_means={
-	'overall':{'ppron':9.95,'ipron':5.26,'article':6.51,'auxverb':8.53,'adverb':5.27,'prep':12.93,'conj':5.9,'negate':1.66,'quant':2.02},
-	'blogs':{'ppron':10.66,'ipron':5.53,'article':6,'auxverb':8.75,'adverb':5.88,'prep':12.6,'conj':6.43,'negate':1.81,'quant':2.27},
-	'expressive':{'ppron':12.74,'ipron':5.28,'article':5.7,'auxverb':9.25,'adverb':6.02,'prep':14.27,'conj':7.46,'negate':1.69,'quant':2.35},
-	'novels':{'ppron':10.35,'ipron':4.79,'article':8.35,'auxverb':7.77,'adverb':4.17,'prep':14.27,'conj':6.28,'negate':1.68,'quant':1.8},
-	'natural':{'ppron':13.37,'ipron':7.53,'article':4.34,'auxverb':12.03,'adverb':7.67,'prep':10.29,'conj':6.21,'negate':2.24,'quant':1.93},
-	'nytimes':{'ppron':3.56,'ipron':3.84,'article':9.08,'auxverb':5.11,'adverb':2.76,'prep':14.27,'conj':4.85,'negate':0.62,'quant':1.94},
-	'twitter':{'ppron':9.02,'ipron':4.6,'article':5.58,'auxverb':8.27,'adverb':5.13,'prep':11.88,'conj':4.19,'negate':1.74,'quant':1.85}
+	toRegex:function(obj,level){
+		var op, s=level ? '\\s' : '^', e=level ? '\\s' : '$', hf=/^\^|\$$/g, wildcards=level ? /(?=\\s|\s)+\*|\*(?=\\s|\s)+/g : /\^\*|\*\$/g,
+				t=level?'g':'', open=/(^|[^\\])[[(]/, close=/(^|[^\\])[)\]]/, sp=/\s/g, wr=level ? '[^\\s]*' : '', isarr, k, i, p
+		if(obj && 'object' === typeof obj) isarr = obj.hasOwnProperty('length')
+		if(isarr) obj={a:obj}
+		for(k in obj) if(obj.hasOwnProperty(k) && !obj[k].test){
+			if(!op) op={}
+			op[k]=[]
+			for(i='string'===typeof obj[k] ? 0 : obj[k].length;i--;){
+				if((open.test(obj[k][i])+close.test(obj[k][i]))===1){
+					obj[k][i]=obj[k][i].replace(Adicat.patterns.special,'\\$&')
+				}
+				op[k][i]=(s+obj[k][i].replace(hf,'')+e).replace(wildcards,wr).replace(sp, '\\s')
+			}
+			op[k]=new RegExp(op[k].join('|'),t)
+		}
+		Adicat.patterns.dict_proc=true
+		return isarr ? op.a : op
+	},
+	loadDict:function(url){
+		var f=new XMLHttpRequest(), k
+	  f.onreadystatechange=function(){if(f.readyState===4 && f.status===200){
+	      Adicat.patterns.dict=/^%/.test(f.resonseTest) ? Adicat.read_dic(f.resonseTest) : JSON.parse(f.responseText)
+				if(Adicat.patterns.dict) for(k in Adicat.patterns.dict) if(Adicat.patterns.dict.hasOwnProperty(k)) Adicat.patterns.dict_cats.push(k)
+	  }}
+	  f.open('GET',url,true)
+	  f.send()
+	},
+	read_dic:function(dic){
+		var h=dic.replace(/[\r\n]+/g,'\n').split(/%[^\n]*\n/), b=h.splice(2)[0], m={c:[],i:[]}, op={},
+		    p={ch:/^[^\d]+|[\t\r\n\s]+$/g,cb:/^[\t\r\n\s]+|[^\d]+$/g,tr:/\t+/,nd:/[^\d]+/g}, i=0, mi, n, l, s
+		h=h[1].match(/\d+[\t\s]+[^\n]+/g)
+		if(!h) throw new TypeError('Unrecognized file type')
+		n=h.length
+		for(;i<n;i++){
+			l=h[i].replace(p.ch,'').split(p.tr)
+			s=l[0].replace(p.nd,'')
+			op[l[1]]=[]
+			m.c.push(l[1])
+			m.i.push(s)
+		}
+		b=b.split('\n')
+		i=b.length
+		while(i--){
+			s=b[i].replace(p.cb,'').split(p.tr)
+			l=s.splice(1)
+			s=s[0]
+			for(h=l.length;h--;) if((mi=m.i.indexOf(l[h]))!==-1) op[m.c[mi]].push(s)
+		}
+		return op
+	},
+	write_dic:function(obj){
+		var k, l, i=1, h=['%'], w={}
+		for(k in obj){if(obj.hasOwnProperty(k)){
+			h.push(i+'\t'+k)
+			l=obj[k].length
+			while(l--) w.hasOwnProperty(obj[k][l]) ? w[obj[k][l]].push(i) : w[obj[k][l]]=[i]
+			i++
+		}}
+		h.push('%')
+		for(k in w) if(w.hasOwnProperty(k)) h.push(k+'\t'+w[k].join('\t'))
+		return h.join('\n')
+	},
+	dict_export:function(obj,dic,download,filename){
+		var e=document.createElement('a')
+		if(dic){
+			obj=Adicat.write_dic(obj)
+		}else{
+			obj=JSON.stringify(obj).replace(/^{/,'{\n  ').replace(/}$/,'\n}').replace(/],/g,'],\n  ')
+		}
+		if(download){
+			if('undefined'!==typeof e.download){
+				e.setAttribute('href', URL.createObjectURL(new Blob([obj], {type: 'text/plain'})))
+				e.setAttribute('download',(filename||'adicat_dictionary').replace(/\.\w+$/,'')+(dic ? '.dic' : '.json'))
+				document.body.appendChild(e)
+				e.click()
+				document.body.removeChild(e)
+			}else if(navigator && navigator.msSaveBlob){
+				navigator.msSaveBlob(new Blob([obj], {type: 'text/plain'}),
+			  	(filename||'adicat_dictionary').replace(/\.\w+$/,'')+(dic ? '.dic' : '.json'))
+			}else throw 'Browser does not seem to support downloading.'
+		}
+		return obj
+	},
+	bulk_process:function(texts,filename,split,sep,args){
+		if(!args) args = {}
+		if(!args.hasOwnProperty('dict')) args.dict = Adicat.patterns.dict
+		if(Adicat.hasOwnProperty('hl')){
+			if(!args.hasOwnProperty('blacklist')) args.blacklist = Adicat.hl.options.blacklist
+			if(!args.hasOwnProperty('percent')) args.percent = Adicat.hl.options.values === 'percent'
+			if(!args.hasOwnProperty('similarity') && Adicat.hl.texts) args.similarity = Adicat.hl.texts.comp
+			if(!args.hasOwnProperty('comps')) args.comps = Adicat.hl.options.dict[Adicat.hl.options.use_dict].composites
+			if(!args.hasOwnProperty('meta')) args.meta = Adicat.hl.options.meta
+		}
+		if(!args.hasOwnProperty('meta')) args.meta = true
+		sep = Adicat.hasOwnProperty('hl') ? Adicat.hl.options.sep : ','
+		var t = texts, pb = document.getElementById('progbar'), pbm = document.getElementById('progbar_message'), n = t.length, i = 0, c = 0,
+		  lim = 1000, h = 'text', b = '\n', k, to, lfun = function(){step()}, sc = /"/g, ck = /[^\s]/, st = new Date().getTime(), ml, f
+		if('string' === typeof t){
+			ml = t.match(/^"[^]*?"$/gm)
+			if(ml) for(var sse = /^"|"$/g, sd = /""/g, i = ml.length; i--;){
+				t = t.replace(ml[i], ml[i].replace(Adicat.patterns.returns, ' ').replace(sse, '').replace(sd, '"'))
+			}
+			t = t.split(split ? new RegExp(split, 'g') : Adicat.patterns.returns)
+			n = t.length
+		}
+		function step(){
+			if('undefined' !== typeof t[i]){
+				if(t[i] && ck.test(t[i])){
+					t[i] = new adicat(t[i]).categorize(args.dict, args.blacklist)
+					b = b + '"' + t[i].string.clean.replace(sc, '""') + '"'
+					if(args.meta){
+						t[i].procmeta()
+						to = {characters:t[i].chars, words:t[i].WC, captured:t[i].captured, unique:t[i].unique}
+						for(k in t[i].meta) if(t[i].meta.hasOwnProperty(k)) to[k] = t[i].meta[k]
+						t[i].meta = to
+					}
+					if(args.percent) t[i].toPercent()
+					if(args.similarity){
+						t[i].similarity(Adicat.hl.texts.comp_values,Adicat.hl.options.sim_metric,Adicat.hl.options.sim_filter === 'true' ? Adicat.hl.options.sim_cats : false)
+						t[i].cats[Adicat.hl.options.sim_metric+'_to_'+args.similarity] = t[i].sim.value
+					}
+					if(args.comps) for(f in args.comps) if(args.comps.hasOwnProperty(f) && args.comps[f].show){
+						Adicat.hl.output = t[i].cats
+					  t[i].cats[f] = Adicat.hl.solve(args.comps[f].formula)
+					}
+					to = t[i].cats
+					if(args.meta) for(k in t[i].meta) if(t[i].meta.hasOwnProperty(k)) to[k] = t[i].meta[k]
+					t[i] = to
+					for(k in t[i]) if(t[i].hasOwnProperty(k)){
+						if(!i || h == 'text') h += sep + k
+						b += sep + t[i][k]
+					}
+				}else b += t[i]
+				b += '\n'
+			}
+			if(n < lim){
+				i++ < n ? step() : output()
+			}else{
+				if(c >= lim || c + lim < n){
+					if(pb) pb.style.width = Math.round(Math.min(10000, (i + 1) / n * 10000) / 100) + '%'
+					if(pbm) pbm.innerText = pb.style.width
+				}
+				if(i++ < n){
+					if(c++ > lim){
+						c = 0
+						setTimeout(lfun)
+					}else step()
+				}else output()
+			}
+		}
+		function output(){
+			var e = document.createElement('a'),
+			  content = new Blob([h + b], {type: 'text/' + (sep == ',' ? 'csv' : 'plain')})
+			if(pbm){
+				st = new Date().getTime() - st
+				pbm.innerText = st > 1000 ? (Math.round(st / 10) / 100) + ' secs' : st + ' ms'
+			}
+			if('undefined'!==typeof e.download){
+				e.setAttribute('href', URL.createObjectURL(content))
+				e.setAttribute('download', (filename||'adicat_' + new Date().getTime()) + (sep == ',' ? '.csv' : '.txt'))
+				document.body.appendChild(e)
+				e.click()
+				document.body.removeChild(e)
+			}else if(navigator && navigator.msSaveBlob){
+				navigator.msSaveBlob(content, (filename||'adicat_' + new Date().getTime()) + (sep == ',' ? '.csv' : '.txt'))
+			}else throw 'Browser does not seem to support downloading.'
+		}
+		step()
+	},
+  rand:function(u,l){
+		l = l || 0
+		return Math.floor(Math.random() * (u - l + 1) + l)
+	},
+	filterOut:function(arr,remove){
+		remove = remove || ''
+		var fun = remove.test ? function(e){return !remove.test(e)} : function(e){return e !== remove}
+		return arr.filter(fun)
+	},
+	which:function(obj){
+		for(var k in obj) if(obj.hasOwnProperty(k) && obj[k]) return k
+		return -1
+	},
+	bench:function(iter,fun){
+		var st=new Date().getTime()
+		while(iter--) fun.call()
+		return new Date().getTime()-st
+	}
 }
 
 function adicat(str){
@@ -46,28 +243,34 @@ function adicat(str){
 adicat.prototype={
 	constructor:adicat,
 	tokenize:function(){
-		var st=new Date().getTime()
+		var st=new Date().getTime(), initials, i
 		this.string.clean=this.string.raw
-			.replace(patterns.word_breaks,' ')
-			.replace(patterns.curly_quote.s,"'")
-			.replace(patterns.curly_quote.d,'"')
-			.replace(patterns.emojis.smile,' emjhface ')
-			.replace(patterns.emojis.frown,' emjsface ')
-			.replace(patterns.symbols.and,' and ')
-			.replace(patterns.symbols.at,' at ')
-			.replace(patterns.punct.apostrophe,"'s")
-			.replace(patterns.punct.ellipses,'... ')
-			.replace(patterns.space,'')
-		this.string.striped=this.string.clean.toLowerCase().replace(patterns.striped,'')
+			.replace(Adicat.patterns.word_breaks,' ')
+			.replace(Adicat.patterns.curly_quote.s,"'")
+			.replace(Adicat.patterns.curly_quote.d,'"')
+			.replace(Adicat.patterns.emojis.smile,' emjhface ')
+			.replace(Adicat.patterns.emojis.frown,' emjsface ')
+			.replace(Adicat.patterns.symbols.and,' and ')
+			.replace(Adicat.patterns.symbols.at,' at ')
+			.replace(Adicat.patterns.punct.apostrophe,"'s")
+			.replace(Adicat.patterns.punct.ellipses,'... ')
+			.replace(Adicat.patterns.punct.endash,' -- ')
+			.replace(Adicat.patterns.punct.emdash,' --- ')
+			.replace(Adicat.patterns.punct.titles,'\$&—')
+			.replace(Adicat.patterns.space,'')
+		if(initials = this.string.clean.match(Adicat.patterns.punct.initials))
+		  for(i = initials.length; i--;) this.string.clean = this.string.clean
+			  .replace(initials[i], initials[i].replace(Adicat.patterns.punct.initial_trim, ''))
+		this.string.striped=this.string.clean.toLowerCase().replace(Adicat.patterns.striped,'')
 		this.words={
-			token:this.string.striped.split(patterns.word_breaks),
+			token:this.string.striped.split(Adicat.patterns.word_breaks),
 			print:this.string.clean
-				.replace(patterns.emojis.smile_rev,':)')
-				.replace(patterns.emojis.frown_rev,':(')
-				.split(patterns.word_breaks)
+				.replace(Adicat.patterns.emojis.smile_rev,':)')
+				.replace(Adicat.patterns.emojis.frown_rev,':(')
+				.split(Adicat.patterns.word_breaks)
 		}
-		this.WC=this.words.token.length
-		if(this.WC!==this.words.print.length){
+		this.WC=Adicat.filterOut(this.words.token).length
+		if(this.words.token.length!==this.words.print.length){
 			if(!this._processLevel){
 				this._processLevel=.5
 				this.string.raw=this.string.raw.replace(/[^A-z0-9?!'",.-;:[({})\]]/g,' ')
@@ -83,42 +286,47 @@ adicat.prototype={
 		blacklist=blacklist||[]
 		if(!this._processLevel) this.tokenize()
 		if(!dict){
-			if(!patterns.dict_proc) patterns.dict=adicat_readDict(patterns.dict)
-			dict=patterns.dict
+			if(!Adicat.patterns.dict_proc) Adicat.patterns.dict=Adicat.toRegex(Adicat.patterns.dict)
+			dict=Adicat.patterns.dict
 		}else for(var k in dict){if(dict.hasOwnProperty(k)){
 				if(dict[k].test){break}else{
-					dict=adicat_readDict(dict)
+					dict=Adicat.toRegex(dict)
 					break
 				}
 		}}
-		var i=0, st=new Date().getTime(), c, cc, cs, t, k, r
+		var i=this.words.print.length, st=new Date().getTime(), c, cc, cs, t, k, r
 		this.words.categories=[]
+		this.vector={}
 		this.cats={}
-		this.cats_type=this.captured=0
-		for(i=this.WC;i--;){
+		this.cats_type=this.unique=this.captured=0
+		while(i--){
 			t=this.words.token[i]
-			if(patterns.matches.hasOwnProperty(t)){
-				cs=patterns.matches[t]
-				for(c=cs.length;c--;){
-					cc=cs[c]
-					if(blacklist.indexOf(cc)===-1){
-						this.cats[cc]=this.cats.hasOwnProperty(cc) ? this.cats[cc]+1 : 1
-					}
-				}
+			if(this.vector.hasOwnProperty(t)){
+				this.vector[t]++
+			}else{
+				this.vector[t]=1
+				this.unique++
+			}
+			if(Adicat.patterns.matches.hasOwnProperty(t)){
+				cs=Adicat.patterns.matches[t]
+				for(k in dict) if(dict.hasOwnProperty(k) && blacklist.indexOf(k)===-1){
+					if(!this.cats.hasOwnProperty(k)) this.cats[k] = 0
+					if(cs.indexOf(k) !== -1) this.cats[k]++
+ 				}
 				this.words.categories[i]=' '+cs.join(' ')+' '
 				this.captured+=1
 			}else{
 				r=false
-				for(k in dict){if(dict.hasOwnProperty(k) && blacklist.indexOf(k)===-1){
+				for(k in dict) if(dict.hasOwnProperty(k) && blacklist.indexOf(k)===-1){
 					if(!this.cats.hasOwnProperty(k)) this.cats[k]=0
 					if(dict[k].test(t)){
-						if(!patterns.matches[t]) patterns.matches[t]=[]
+						if(!Adicat.patterns.matches[t]) Adicat.patterns.matches[t]=[]
 						this.cats[k]+=1
-						patterns.matches[t].push(k)
+						Adicat.patterns.matches[t].push(k)
 						r=true
 					}
-				}}
-				this.words.categories[i]=patterns.matches[t]? ' '+patterns.matches[t].join(' ')+' ' : ' none '
+				}
+				this.words.categories[i]=Adicat.patterns.matches[t]? ' '+Adicat.patterns.matches[t].join(' ')+' ' : ' none '
 				if(r) this.captured+=1
 			}
 		}
@@ -130,30 +338,31 @@ adicat.prototype={
 		if(!this.hasOwnProperty('cats')){this.categorize()}
 		if(!this.cats_type){
 			this.cats_type=1
-			for(var k in this.cats){if(this.cats.hasOwnProperty(k)){
-				this.cats[k]=this.cats[k]/this.WC*100
+			for(var k in this.cats) if(this.cats.hasOwnProperty(k)){
+				this.cats[k]=this.WC ? this.cats[k]/this.WC*100 : 0
 				if(round) this.cats[k]=Math.round(this.cats[k]*100)/100
-			}}
+			}
 		}
-		return this.cats
+		return this
 	},
 	detect:function(cues){
-		cues=cues||patterns.cues
+		cues=cues||Adicat.patterns.cues
 		if(!this._processLevel) this.tokenize()
 		var st=new Date().getTime(), k
 		this.cues={}
-		for(k in cues){if(cues.hasOwnProperty(k)){
+		for(k in cues) if(cues.hasOwnProperty(k)){
+			if(!cues[k].test) cues[k] = Adicat.toRegex(cues[k], true)
 			this.cues[k]=cues[k].test(this.string.striped)||cues[k].test(this.string.raw)
-		}}
+		}
 		this._processTime.cue=new Date().getTime()-st
 		return this
 	},
 	display:function(sort,bycat){
-		var st=new Date().getTime(), i=0, outer=/^ | $/g, inner=/ /g, t='', e, sf
+		var st=new Date().getTime(), i=0, outer=/^\s|\s$/g, inner=/\s/g, t='', e, sf
 		if(this._processLevel<2) this.categorize()
 		this.html=[]
-		for(;i<this.WC;i++){
-			t=this.words.categories[i]===' ' ? ' none ' : this.words.categories[i]
+		for(;i<this.words.print.length;i++){
+			t=this.words.categories[i]==='\s' ? ' none ' : this.words.categories[i]
 			this.html[i]=document.createElement('span')
 			this.html[i].className=t
 			this.html[i].title=t.replace(outer,'').replace(inner,', ')
@@ -170,150 +379,104 @@ adicat.prototype={
 		this._processTime.display=new Date().getTime()-st
 		return this.html
 	},
-	meta:function(){
-		var st=new Date().getTime(), i=0, c, pp={period:/\./g,comma:/,/g,qmark:/\?/g,exclam:/\!/g,quotes:/['"]/g,
-		  brackets:/[(\){}<>[\]]/g,organization:/[-—–/:;]/g}
+	procmeta:function(){
+		var st=new Date().getTime(), i=0, c, pp={periods:/\./g,commas:/,/g,qmarks:/\?/g,exclams:/\!/g,quotes:/(^|\s)['"]+|['"]+(\s|$)/gm,
+		  brackets:/[(\){}<>[\]]/g,orgmarks:/[-—–\\/:;]/g}
 		if(!this._processLevel) this.tokenize()
-		this.meta={period:0,comma:0,qmark:0,exclam:0,quotes:0,brackets:0,organization:0,
+		this.meta={periods:0,commas:0,qmarks:0,exclams:0,quotes:0,brackets:0,orgmarks:0,
 			sentences:0,WPS:0,clauses:0,WPC:0}
-		this.meta.sentences=this.string.clean.split(patterns.boundary.sentence).filter(empty)
+		this.meta.sentences=Adicat.filterOut(this.string.clean.split(Adicat.patterns.boundary.sentence))
 		i=this.meta.sentences.length
-		while(i--) this.meta.WPS += this.meta.sentences[i].split(patterns.word_breaks).filter(empty).length
+		while(i--) this.meta.WPS += Adicat.filterOut(this.meta.sentences[i]
+			.toLowerCase().replace(Adicat.patterns.striped,'').split(Adicat.patterns.word_breaks)).length
 		this.meta.sentences=this.meta.sentences.length
-		this.meta.WPS=this.meta.WPS / this.meta.sentences
-		this.meta.clauses=this.string.clean.split(patterns.boundary.clause).filter(empty)
+		this.meta.WPS=this.meta.sentences ? this.meta.WPS / this.meta.sentences : 0
+		this.meta.clauses=Adicat.filterOut(this.string.clean.split(Adicat.patterns.boundary.clause))
 		i=this.meta.clauses.length
-		while(i--) this.meta.WPC += this.meta.clauses[i].split(patterns.word_breaks).filter(empty).length
+		while(i--) this.meta.WPC += Adicat.filterOut(this.meta.clauses[i]
+			.toLowerCase().replace(Adicat.patterns.striped,'').split(Adicat.patterns.word_breaks)).length
 		this.meta.clauses=this.meta.clauses.length
-		this.meta.WPC=this.meta.WPC / this.meta.clauses
-		for(c in pp){if(pp.hasOwnProperty(c)){
+		this.meta.WPC=this.meta.clauses ? this.meta.WPC / this.meta.clauses : 0
+		for(c in pp) if(pp.hasOwnProperty(c)){
 			this.meta[c]=this.string.clean.match(pp[c])
 			this.meta[c]=this.meta[c] ? this.meta[c].length : 0
-		}}
+		}
 		this._processTime.meta=new Date().getTime()-st
 		return this
 	},
 	similarity:function(comp,metric,cats){
-		cats=cats||['ppron','ipron','article','adverb','conj','prep','auxverb','negate','quant']
-		this.sim=0
-		if(!comp||'string'===typeof comp){
-			comp=comp && !liwc_means.hasOwnProperty(comp) ? new adicat(comp).categorize().toPercent() : liwc_means[comp||'overall']
-		}else if(comp.hasOwnProperty('cats')){
-			if(!comp.cats_type) comp.toPercent()
-			comp=comp.cats
-		}else if(!comp.hasOwnProperty(cats[0])) return this.sim
+		if(!comp) comp = 'overall'
 		if(!this.hasOwnProperty('cats')) this.categorize()
-		if(!this.cats_type) this.toPercent()
-		var i=cats.length, l=0, c='', cos=metric && /^co/i.test(metric)
-		if(cos) this.sim=[0,0,0]
+		if('string' === typeof cats) cats = /^[Mm]/.test(cats) ? 'meta' : 'vector'
+		if('string' === typeof comp){
+			if(Adicat.liwc_means.hasOwnProperty(comp)){
+				comp = Adicat.liwc_means[comp]
+				cats = ['ppron','ipron','article','adverb','conj','prep','auxverb']
+			}else{
+				comp = cats === 'meta' ? new adicat(comp).procmeta() : new adicat(comp).categorize().toPercent()
+			}
+		}
+		if(!cats){
+			cats = 'object' === typeof comp && (comp.hasOwnProperty('WPC') || !(comp.captured || this.captured))
+				? comp.hasOwnProperty('WPC') ? 'meta' : 'vector'
+				: Adicat.patterns.dict_cats.length ? Adicat.patterns.dict_cats : ['ppron','ipron','article','adverb','conj','prep','auxverb']
+		}
+		if(!this.cats_type && 'string' !== typeof cats) this.toPercent()
+		if(cats === 'meta' && !this.hasOwnProperty('meta')) this.procmeta()
+		var v='string'===typeof cats, c='', cos=metric && /^co/i.test(metric), k, i, a = v ? this[cats] : this.cats,
+				b = v ? comp.hasOwnProperty(cats) && 'object' === typeof comp[cats] ? comp[cats] : comp : comp, com
+		this.sim = {
+			value: 0,
+			cats: cats,
+			comp: b,
+			metric: metric
+		}
+		if(v){
+			cats = []
+			for(k in a) if(a.hasOwnProperty(k) && cats.indexOf(k) === -1) cats.push(k)
+			for(k in b) if(b.hasOwnProperty(k) && cats.indexOf(k) === -1) cats.push(k)
+		}
+		i = cats.length
+		if(cos) this.sim.value=[0,0,0]
 		while(i--){
 			c=cats[i]
-			if(this.cats.hasOwnProperty(c) && this.cats[c]+comp[c]){
-				l++
-				if(cos){
-					this.sim[0]+=this.cats[c]*comp[c]
-					this.sim[1]+=this.cats[c]*this.cats[c]
-					this.sim[2]+=comp[c]*comp[c]
-				}else{
-					this.sim+=Math.abs(this.cats[c]-comp[c])/(this.cats[c]+comp[c])
-				}
+			if(!a.hasOwnProperty(c)) a[c]=0
+			if(!b.hasOwnProperty(c)) b[c]=0
+			if(cos){
+				this.sim.value[0]+=a[c]*b[c]
+				this.sim.value[1]+=a[c]*a[c]
+				this.sim.value[2]+=b[c]*b[c]
+			}else{
+				if(a[c]+b[c]) this.sim.value+=Math.abs(a[c]-b[c])/(a[c]+b[c])
 			}
 		}
 		if(cos){
-			this.sim=Math.round((this.sim[0]/Math.sqrt(this.sim[1])/Math.sqrt(this.sim[2]))*1000)/1000
+			this.sim.value=this.sim.value[0]/Math.sqrt(this.sim.value[1])/Math.sqrt(this.sim.value[2])
 		}else{
-			this.sim=Math.round((1-(this.sim/l))*1000)/1000
+			this.sim.value=1-(this.sim.value/cats.length)
 		}
-		if(isNaN(this.sim)) this.sim=0
+		if(isNaN(this.sim.value)) this.sim.value=0
 		return this.sim
 	}
 }
 
-// adicat specific utility functions
-function adicat_readDict(obj,level){
-	var op, s=level?' ':'^', e=level?' ':'$', hf=/^\^|\$$/g, wildcards=level?/ *\* */g:/\^*\*\$*/g,
-			t=level?'g':'', open=/(^|[^\\])[[(]/, close=/(^|[^\\])[)\]]/, k, i, p
-	for(k in obj){if(obj.hasOwnProperty(k) && !obj[k].test){
-		if(!op) op={}
-		op[k]=[]
-		for(i='string'===typeof obj[k] ? 0 : obj[k].length;i--;){
-			if((open.test(obj[k][i])+close.test(obj[k][i]))===1){
-				obj[k][i]=obj[k][i].replace(patterns.special,'\\$&')
-			}
-			op[k][i]=(s+obj[k][i].replace(hf,'')+e).replace(wildcards,'')
-		}
-		op[k]=new RegExp(op[k].join('|'),t)
-	}}
-	patterns.dict_proc=true
-	return op
-}
-function adicat_loadDict(n){
-	var f=new XMLHttpRequest()
-  f.onreadystatechange=function(){if(f.readyState===4 && f.status===200){
-      patterns.dict=/^%/.test(f.resonseTest) ? read_dic(f.resonseTest) : JSON.parse(f.responseText)
-  }}
-  f.open('GET',n,true)
-  f.send()
-}
-function read_dic(f){
-	var h=f.replace(/[\r\n]+/g,'\n').split(/%[^\n]*\n/), b=h.splice(2)[0], m={c:[],i:[]}, op={},
-	    p={ch:/^[^\d]+|[\t\r\n ]+$/g,cb:/^[\t\r\n ]+|[^\d]+$/g,tr:/\t+/,nd:/[^\d]+/g}, i=0, mi, n, l, s
-	h=h[1].match(/\d+[\t ]+[^\n]+/g)
-	n=h.length
-	for(;i<n;i++){
-		l=h[i].replace(p.ch,'').split(p.tr)
-		s=l[0].replace(p.nd,'')
-		op[l[1]]=[]
-		m.c.push(l[1])
-		m.i.push(s)
-	}
-	b=b.split('\n')
-	i=b.length
-	while(i--){
-		s=b[i].replace(p.cb,'').split(p.tr)
-		l=s.splice(1)
-		s=s[0]
-		h=l.length
-		while(h--) if((mi=m.i.indexOf(l[h]))!==-1) op[m.c[mi]].push(s)
-	}
-	return op
-}
-function write_dic(d){
-	var k, l, i=1, h=['%'], w={}
-	for(k in d){if(d.hasOwnProperty(k)){
-		h.push(i+'\t'+k)
-		l=d[k].length
-		while(l--) w.hasOwnProperty(d[k][l]) ? w[d[k][l]].push(i) : w[d[k][l]]=[i]
-		i++
-	}}
-	h.push('%')
-	for(k in w) if(w.hasOwnProperty(k)) h.push(k+'\t'+w[k].join('\t'))
-	return h.join('\n')
-}
-
-// general untility/compatibility functions
-function rand(u,l){l=l||0;return l+Math.floor(Math.random()*u+l)}
-function which(obj){for(var k in obj){if(obj.hasOwnProperty(k) && obj[k]){return k}}return false}
-function empty(p){return p!==''}
 Array.prototype.sample=function(n){
-	var r=this.length, set=[], res=[], i=0, t=0
-	if(!n||n===1) return this[rand(r)]
+	var r=this.length-1, set=[], res=[], i=0, t=0
+	if(!n||n===1) return this[Adicat.rand(r)]
 	n=Math.min(n,r)
-	while(i<n){if(set.indexOf(t=rand(r))===-1){
+	while(i<n) if(set.indexOf(t=Adicat.rand(r))===-1){
 		set[i]=t
 		res[i]=this[t]
 		i++
-	}}
+	}
 	return res
 }
-function addEvent(target,type,fun){
-	target.addEventListener
-		? target.addEventListener(type,function(e){fun(e)},false)
-		: target.attachEvent('on'+type,function(e){fun(e)},false)
-}
 Array.prototype.unique=function(){
-	var n=this.length, l=i=0, op=[]
-	for(;l<n;l++){if(op.indexOf(this[l])===-1){op[i]=this[l];i++}}
+	var n=this.length, l=0, i=0, op=[]
+	for(;l<n;l++) if(op.indexOf(this[l])===-1){
+		op[i]=this[l]
+		i++
+	}
 	return op
 }
 Array.prototype.grepl=function(p){
@@ -337,11 +500,6 @@ Array.prototype.nmatch=function(p){
 		while(i--){s+=this[i].test(p)}
 	}
 	return s
-}
-function bench(iter,fun){
-	st=new Date().getTime()
-	while(iter--){fun.call()}
-	return new Date().getTime()-st
 }
 Array.prototype.sum=function(){var i=this.length, s=0; while(i--){s+=this[i]}return s}
 if(!Array.prototype.indexOf) Array.prototype.indexOf=function(a){var i=this.length;while(i--){if(a==this[i])return i}return -1}

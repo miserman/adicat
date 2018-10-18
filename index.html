@@ -1,56 +1,315 @@
 <!doctype html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<link rel="icon" href="icon.png">
+<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+<link rel='icon' href='icon.png'>
 <title>adicat</title>
-<style type="text/css">
-*{margin:0;padding:0;font-family:"Lucida Sans Unicode","Lucida Grande",Sans-serif;color:#505050}
-iframe{border:none;position:relative;height:100%;width:100%;margin:0 0 -10px 0;top:0}
-a:link,a:visited{text-decoration:none}
-#menu a{display:block;padding:15px 10px;background:#adadad;color:#f3f3f3}
-#menu a:hover{background:#505050}
-#menu{position:fixed;left:0;top:0;bottom:0;width:160px;border-right:1px solid #505050;background:#fff;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
-#wrap{position:fixed;top:0;bottom:0;right:0;left:0;margin:0 0 0 161px;overflow:auto;-webkit-overflow-scrolling:touch}
-#menu a.sel{background:#505050}
-.foot{left:0;bottom:0;width:160px;position:fixed;text-align:center}
-@media only screen and (max-height: 30em){h1,h2{display:none}}
-@media only screen and (max-height: 22em){#menu a{padding:5px 10px}}
+<script type='text/javascript' src='core.js'></script>
+<script type='text/javascript' src='highlight/highlight.js'></script>
+<script type='text/javascript' src='chat/chat.js'></script>
+<link rel='stylesheet' type='text/css' href="docs/style.css">
+<style type='text/css'>
+#topnav{left:0}
+#content_wrap{left:7.5em}
+#nav{width:7.5em;top:3em;background:#fff}
+#nav div{bottom:0}
+@media only screen and (max-device-width: 500px){
+  #topnav{left:0}
+	#content_wrap{left:9.5em}
+	#nav{width:9.5em}
+}
 </style>
 </head>
 <body>
-<div id="menu">
-<h1 style="padding:5px 0 5px 10px">adicat</h1>
-<a href="https://miserman.github.io/adicat/highlight/" target="window" onclick="setup(this)">highlight</a>
-<a href="https://miserman.github.io/adicat/chat/" target="window" onclick="setup(this)">chat</a>
+<div id='content_wrap'><div id='content'>
+<h1 id='adicat'><a>adicat</a></h1>
+<p>
+Adicat is a JavaScript library for dictionary-based text processing.
+Its main role is in the <a href='highlight/' target='_blank'>dictionary highlighter</a>, but it's made to be modular,
+so it could be used in other applications, such as this <a href='chat/' target='_blank'>simple, cue-based chat bot</a>.
+</p><p>
+It's called adicat (<b>a</b>s-needed <b>di</b>ctionary-based <b>cat</b>egorization) because it stores different representations of the
+processed text, and only performs additional processing when called for. See the <a href='docs/' target='_blank'>docs site</a> for structured documentation.
+</p><p>
+For example, <code>text = new adicat('Text to process.')</code> will just set up an object containing the original, unprocessed text. Then,
+<code>text.tokenize()</code> will add cleaned versions of the original text, arrays of words, and a word and character count. Finally,
+<code>text.categorize()</code> will add a vectorized representation, and if a dictionary is loaded, dictionary category scores.
+Adicat is loaded in this page, so you can try these examples out in your browser's console (F12).
+</p><p>
+The data from each processing level are added to the assigned object like this (partially):
+<code class = 'codeblock'>
+{
+  WC: 3,
+  string: {
+    raw: 'Text to process.',
+    clean: 'Text to process.',
+    striped: ' text to process '
+  },
+  words: {
+    print: ['Text', 'to', 'process.'],
+    token: ['test', 'to', 'process'],
+    categories: [' none ', ' none ', ' none ']
+  },
+  vector: {
+    text: 1,
+    to: 1,
+    process: 1
+  },
+  _processLevel: 2
+}
+</code>
+</p>
+<h1 id='similarity'>similarity</h1>
+<p>
+Adicat's similarity function calculates the cosine similarity or inverse Canberra distance between the target text and a comparison.
+</p><p>
+The sample means reported in the <a href='https://liwc.wpengine.com/wp-content/uploads/2015/11/LIWC2015_LanguageManual.pdf'
+target='_blank'>LIWC 2015 manual</a> are stored in <code>Adicat.liwc_means</code>. These include the standard function word
+categories that go into Language Style Matching, so texts have to be processed by a function word dictionary (like
+<a href='dict/function.json' target='_blank'>adicat's default</a>, not loaded here).
+</p><p>
+If a dictionary with these categories was assigned to <code>Adicat.patterns.dict</code>, this would return the inverse
+Canberra distance between the entered text and the expressive standard:
+<code>new adicat("I'm not feeling very expressive.").similarity('expressive')</code>
+</p><p>
+The entered text can also be compared to another text, which can be a preprocessed or entered into the call to
+similarity to be processed. Similarity can be calculated between category scores, meta category scores (such as
+punctuation and number of words), or each vectorized text. For example,
+<code>new adicat('compare this bit of text').similarity('with this bit', 'cosine', 'vector')</code> would return
+the cosine similarity between the vectorized forms of each entered text.
+</p><p>
+To measure similarity, the text has to be processed up to level 2 (categorization), and potentially have meta cateogries added with
+<code>text.procmeta()</code>. It isn't necessary to explicitly perform lower order processing because higher order processes perform
+those if necessary. For instance, the most explicit form of that last example would be this:
+<code class='codeblock'>
+a = new adicat('compare this bit of text').tokenize().categorize();
+b = new adicat('with this bit').tokenize().categorize();
+a.similarity(b, 'cosine', 'vector')
+</code>
+The similarity function triggers categorization if needed, and the categorize function triggers tokenization if needed.
+</p>
+<h1 id='highlight'>highlight</h1>
+<p>
+The <a href="highlight/" target='_blank'>dictionary highlighter</a> was originally made to look at
+<a href="https://liwc.wpengine.com" target='_blank'>Linguistic Inquiry and Word Count</a> categories. It now uses its own dictionaries, and
+allows for new dictionaries to be created, and external dictionaries to be loaded.
+</p><p>
+With the highlighter, you can...
+<ul>
+  <li>See which words are being captured by dictionary categories.</li>
+  <ul>
+    <li>Toggle categories in the dictionary menu.</li>
+    <li>Set to display counts or percentages in the settings menu.</li>
+  </ul>
+  <li>Calculate composite categories for, and similarities between texts.</li>
+  <ul>
+    <li>Composite categories can be added and edited in the dictionary's load/create/edit menu.</li>
+    <li>Set a stored text for comparison in the saved texts menu.</li>
+    <li>Set the comparison categories and metric in the settings menu.</li>
+  </ul>
+  <li>Create or import, edit, and export dictionaries.</li>
+  <ul>
+    <li>Cycle between stored dictionaries in the dictionary's load/create/edit menu.</li>
+  </ul>
+  <li>Download the results of text files scored by the selected dictionary.</li>
+  <ul>
+    <li>Drag and drop a text file anywhere on the page, or navigate to the process file menu.</li>
+    <li>Specify output values, categories, composites, and comparisons in the other menus.</li>
+    <li>Specify formatting and splitting in the process file menu.</li>
+  </ul>
+</ul></p>
+<h3>Implementation</h3><p>
+A dictionary may start out as an object of arrays like this:
+<code class='codeblock' contenteditable='true'>
+{
+  term:['term*', 'word*', 'token*', '[n\\d-]*gram*'],
+  category:['categor*', 'list*', 'dictionar*', 'topic*']
+}
+</code></p><p>
+But it ends up as an object of regular expressions like this, as converted by the <code>Adicat.toRegex()</code> function:
+<code class='codeblock'>
+{
+  term:/^term|^word|^token|^[n\d-]*gram/,
+  category:/^categor|^list|^dictionar|^topic/
+}
+</code>
+</p><p>
+The asterisks at the end of each term represents a greedy wildcard, such that the entry will match any word starting with the entered
+string. Adicat translates initial and terminal asterisks to regular expression equivalents. Asterisks not at the beginning or end of
+an entered string are treated as regular expressions, and other valid regular expression is retained—in this case,
+<code>/[n\d-]*gram/</code> will match "gram", and variants preceded by any number of ns, digits, or dashes, such as "n-gram".
+</p><p>
+This is an example of a complete implementation of the highlighter code—you could copy this code and save it as an html file for a
+functional highlighter:
+<code class='codeblock'>
+&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset = 'utf-8'/&gt;&lt;/head&gt;&lt;body&gt;
+  &nbsp;
+  &lt;!-- (1) set up HTML elements for input, and optionally a reprocess button --&gt;
+  &lt;div id = 'input' contenteditable = 'true'&gt;&lt;/div&gt;
+  &lt;button type = 'button' onclick = 'Adicat.hl.display_text()'&gt;reprocess&lt;/button&gt;
+  &nbsp;
+  &lt;!-- (2) load in the core and highlight scripts --&gt;
+  &lt;script type = 'text/javascript' src = 'https://miserman.github.io/adicat/core.min.js'&gt;&lt;/script&gt;
+  &lt;script type = 'text/javascript' src = 'https://miserman.github.io/adicat/highlight.min.js' async&gt;&lt;/script&gt;
+  &lt;script type = 'text/javascript'&gt;
+  window.onload = function(){
+    // (2.1) assign a dictionary
+    Adicat.patterns.dict = {
+    'term':['term*', 'word*', 'token*', '[n\\d-]*gram*'],
+    'category':['categor*', 'list*', 'dictionar*', 'topic*']
+    }
+    // (2.2) assign an input/output element
+    Adicat.hl.input = document.getElementById('input')
+    // (2.3) add event listeners if you want text to be processed as it's typed
+    Adicat.hl.input.addEventListener('keypress', Adicat.hl.spanner)
+    Adicat.hl.input.addEventListener('keyup', Adicat.hl.process_span)
+  }
+  &lt;/script&gt;
+  &nbsp;
+  &lt;!-- (3) set colors for categories -- a class name for each dictionary category --&gt;
+  &lt;style type = 'text/css'&gt;
+    #input{padding: 1em}
+    .term{color: #b454da}
+    .category{color: #60b346}
+  &lt;/style&gt;
+  &nbsp;
+&lt;/body&gt;&lt;/html&gt;
+</code>
+</p><p>
+The result will be a text box that highlights keywords as they're matched, like this:
+</p>
+<div id='input' class='highlight' contenteditable='true'></div>
+<button id = 'process' type = 'button' onclick = 'Adicat.hl.display_text()'>reprocess</button>
+<h1 id='chat'>chat</h1>
+<p>
+The <a href='chat/' target='_blank'>chat prototype</a> is an example of how
+adicat might be used to process and react to text as it's received.
+</p><p>
+Chat makes use of adicat's cue processor. Unlike the categorizer used by the highlighter, the cue processor
+takes in full text strings (rather than tokens) and says whether any of a set of expressions were found (rather than
+counting up each expression).
+</p><p>
+For example, <code>text = new adicat('Hey there :)').detect()</code> would process the
+input up to level 1 (tokenization), then check the input for each of the default cue categories. The output goes to
+<code>text.cues</code>, which is an object of logical entries indicating whether any matches were found. In this example,
+<code>text.cues.greeting</code> and <code>text.cues.happy</code> would both be true.
+</p><p>
+Cue dictionaries are stored like the other dictionaries. The only difference is in the boundary between cue terms—terms aimed at
+tokens are bounded by the beginning and end of the string (^ and $ respectively), whereas terms aimed at full strings are bounded
+by word boundaries (standardized to single blank spaces). Objects of arrays of terms can be converted to regular expressions with
+<code>Adicat.toRegex(obj, level)</code>, where setting the level argument to true converts to string-targeted patterns.
+</p><p>
+This is an example of a complete implementation of the chat code:
+<code class='codeblock'>
+&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset = 'utf-8'/&gt;&lt;/head&gt;&lt;body&gt;
+  &nbsp;
+  &lt;!-- (1) set up HTML elements for the an input and chat log --&gt;
+  &lt;div id = 'chat_log'&gt;&lt;/div&gt;
+  &lt;input id = 'chat_input' placeholder = 'Message @adicat'/&gt;
+  &nbsp;
+  &lt;!-- (2) load in the core and chat scripts --&gt;
+  &lt;script type = 'text/javascript' src = 'https://miserman.github.io/adicat/core.min.js'&gt;&lt;/script&gt;
+  &lt;script type = 'text/javascript' src = 'https://miserman.github.io/adicat/chat.min.js' async&gt;&lt;/script&gt;
+  &lt;script type = 'text/javascript'&gt;
+  window.onload = function(){
+    // (2.0) maybe add an additional cue
+    Adicat.patterns.cues.followup = Adicat.toRegex(['fine', 'good', 'alright*', 'ok', 'noth*'], true)
+    /*
+    (2.1) set up a set of replies. Arrays in each entry are sampled from:
+    - initial for opening message
+    - general for when no match is found
+    - additional entires named for each cue
+    */
+    Adicat.chat.replies = {
+      initial: ['Hello', 'Hi', 'Hey there!'],
+      general: ['Hmm, what to say', 'You talk now', '&lt;conversation starter&gt;'],
+      greeting: ['How are you?', "What's up?", "What's on your mind?"],
+      followup: ['Cool, cool... ', 'Same here... ', 'Alright then... ']
+    }
+    // (2.2) assign each chat element element
+    Adicat.chat.parts.log = document.getElementById('chat_log'),
+    Adicat.chat.parts.input = document.getElementById('chat_input')
+    // (2.3) add an event listener to send on enter
+    Adicat.chat.parts.input.addEventListener('keypress', function(k){if(k.which === 13) Adicat.chat.send()})
+    // (2.4) send an initial message
+    Adicat.chat.receive('', Adicat.chat.replies.initial.sample())
+  }
+  &lt;/script&gt;
+  &nbsp;
+  &lt;!-- (3) add styling to differentiate incoming and outgoing messages --&gt;
+  &lt;style type = 'text/css'&gt;
+  .outgoing{text-align:right}
+  &lt;/style&gt;
+  &nbsp;
+&lt;/body&gt;&lt;/html&gt;
+</code>
+</p><p>
+The result will be a chat interface like this (in it's simplest form):
+<div id='chat_frame'>
+	<div><div id='chat_log'></div></div>
 </div>
-<div id="wrap">
-<iframe id="window" name="window" src="https://miserman.github.io/adicat/highlight/"></iframe>
+<p style='display:none' id='indicator'>.</p>
+<div class='input_wrap'><input id='chat_input' placeholder='Message @adicat'/></div>
+</p>
+</div></div>
+<div id='topnav'><div>
+  <a class='selected' href='https://miserman.github.io/adicat'>introduction</a>
+  <a href='docs/'>documentation</a>
+</div></div>
+<div id='nav'>
+  <div class='index'><ul id='toc'></ul></div>
 </div>
-<a href="https://github.com/miserman/adicat" class="foot">repository</a>
-<script type="text/javascript">
-var windowFrame=document.getElementById("window")
-var menuItems=document.getElementById("menu").getElementsByTagName("a")
-var menuLength=menuItems.length
-setup()
-function setup(r){
-	for(var i=menuLength;i--;) menuItems[i].className=""
-	if("object"===typeof(r)){
-		r.className="sel"
-		windowFrame.src=r.href
-		window.location.replace
-		  ? window.location.replace("#"+r.innerHTML.toLowerCase().replace(/ /g,'_'))
-		  : window.history.replaceState(void 0,void 0,"#"+r.innerHTML.toLowerCase().replace(/ /g,'_'))
-		return
-	}
-	var tag=window.location.hash
-	if(tag==="") menuItems[0].className="sel"
-	else for(i=menuLength;i--;) if(tag.match(menuItems[i].innerHTML.toLowerCase().replace(/ /g,'_'))){
-	  menuItems[i].className="sel"
-	  windowFrame.src=menuItems[i].href
-	  return
-	}
+<a class='repo' title='repository' href='https://github.com/miserman/adicat'>
+  <img src='https://github.com/fluidicon.png'></a>
+
+<script type='text/javascript' src='colorcode.min.js' defer></script>
+<script type='text/javascript'>
+'use strict';
+var i, k, sid, sp=/^sect_/, headers=$('h1', 'tag'), nheaders=headers.length, table_of_contents=$('toc'), input=$('input'), toc={}
+Adicat.patterns.dict=Adicat.toRegex({
+  'term':['term*', 'word*', 'token*', '[n\\d-]*gram*'],
+  'category':['categor*', 'list*', 'dictionar*', 'topic*']
+})
+Adicat.hl.input=input
+Adicat.hl.display_text('Topics made up of words, categories of terms, lists of n-grams.')
+input.addEventListener('keypress',Adicat.hl.spanner)
+input.addEventListener('keyup',Adicat.hl.process_span)
+
+Adicat.patterns.cues.followup = Adicat.toRegex(['fine', 'good', 'alright*', 'ok', 'noth*'], true)
+Adicat.chat.replies = {
+  initial: ['Hello', 'Hi', 'Hey there!'],
+  general: ['Hmm, what to say', 'You talk now', '<conversation starter>'],
+  greeting: ['How are you?', "What's up?", "What's on your mind?"],
+  followup: ['Cool, cool... ', 'Same here... ', 'Alright then... ']
+}
+Adicat.chat.parts = {
+  frame: document.getElementById('chat_frame'),
+  log: document.getElementById('chat_log'),
+  indicator: document.getElementById('indicator'),
+  input: document.getElementById('chat_input')
+}
+Adicat.chat.parts.input.addEventListener('keypress', function(k){if(k.which === 13) Adicat.chat.send()})
+Adicat.chat.receive('', Adicat.chat.replies.initial.sample())
+function $(e,t){return document[!t ? 'getElementById' : t === 'tag' ? 'getElementsByTagName' : 'getElementsByClassName'](e)}
+for(i = 0; i < nheaders; i++){
+  k = headers[i].id, sid = 'sect_' + k
+  toc[sid] = table_of_contents.appendChild(document.createElement('li'))
+  toc[sid] = toc[sid].appendChild(document.createElement('a'))
+  toc[sid].id = sid
+  toc[sid].href = '#' + k
+  toc[sid].innerText = k
+  toc[sid].className = !i ? 'active' : 'inactive'
+}
+window.onload = function(){
+  window.addEventListener('scroll', function(){
+    for(i = 0; i < nheaders; i++) if(headers[i].getBoundingClientRect().top > -40
+      || (!headers[i + 1] || headers[i + 1].getBoundingClientRect().top > window.innerHeight)){
+      if(toc[sid = 'sect_' + headers[i].id].className !== 'active') for(k in toc)
+        if(toc.hasOwnProperty(k)) toc[k].className = k === sid ? 'active' : 'inactive'
+      break
+    }
+  })
+  colorcode()
 }
 </script>
-</body>
-</html>
+</body></html>

@@ -1,0 +1,80 @@
+body{position:relative;margin:0;font-size:1em;font-family:'Lucida Sans Unicode','Lucida Grande',Sans-serif;color:#505050}
+a:link, a:visited{text-decoration:none;color:inherit}
+ul{margin:0;padding:0 0 0 1.5em}
+table{width:100%}
+th, td{padding: 0 .5em .5em 0; text-align:left;vertical-align:top}
+td{font:1.2em monospace; min-width:4.4em}
+td:last-of-type{font:1em sans-serif}
+button{width:100%;background:#cccccc;border:none;border-radius:10px;padding:.5em 0}
+button:hover,.topnav a:hover{background:#717171;color:#f3f3f3;cursor:pointer}
+#content{position:relative;margin:auto;max-width:55em;padding:0 .5em 3.5em .5em}
+#content_wrap{position:absolute;right:0;left:11em;overflow-x:hidden}
+#content_wrap a:link,.content a:visited{font-style:italic;color:#868686}
+#content_wrap a:link:hover,.content a:visited:hover{text-decoration:underline}
+#content_wrap h1{display:table-cell;padding:1em 0 .8em 0}
+#topnav{position:fixed;top:0;left:11em;right:0;overflow:hidden;text-indent:1em;background:#e1e1e1}
+#topnav div{display:table;width:100%}
+#topnav a{display:table-cell;font-size:.9em;border-radius:10px 10px 0 0;padding:.3em 0}
+#topnav a.selected{background:#fff;cursor:default}
+#topnav a.selected:hover{color:#505050;background:#fff}
+#topnav a:hover{color:#fff;background:#505050}
+#nav, h1, .index, #topnav{-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+#nav{position:fixed;bottom:0;top:0;width:11em;background:#e1e1e1;overflow:hidden}
+#nav div{bottom:2em;top:0;width:100%}
+#nav img{width:1em;margin:auto}
+#menu_tab{position:absolute;bottom:0;left:0;right:0;text-align:right;padding:.2em .5em .2em 0;cursor:pointer;font-weight:bolder}
+.repo{position:fixed;bottom:0;right:0;width:2em}
+.repo img{width:100%}
+.active{font-weight:bold;margin:0 0 0 .7em}
+.toc{position:fixed;top:2.5em;bottom:11em;left:0;width:1em}
+.toc a:hover,.index a:hover{font-weight:bold}
+.index{position:absolute;top:2.5em;bottom:3em;left:0;overflow-y:auto;transition:left .2s; -webkit-transition:left .2s}
+.innerlist{list-style:none;padding:0 0 0 .3em}
+.tablewrap{overflow-x:auto}
+.properties{background:#dedede; margin:.2em 0 0 0}
+code{font:1.2em monospace;color:#e2e1e1;background:#383838;padding:.15em .6em;cursor:text;white-space:nowrap}
+.codeblock{display:block;padding:1em;white-space:normal}
+.codeblock span.body{display:block;margin:0 0 0 1em}
+.body span.break, .codeblock span.break{display:block}
+.string span.body{display:inline;margin:0}
+.statement{color:#ed8aff}
+.number, .color{color:#fffc8a}
+.string, .url{color:#a4da5d}
+.function, .operator{color:#aaf3fb}
+.arg{color:#a1d1fb}
+.logical{color:#fff0b7}
+.window{color:#ffd77c}
+.regex{color:#d5c2f3}
+.comment{color:#a2a2a2;font-style:italic}
+.tag{color:#e69a9a}
+.category{color:#60b346}
+.term{color:#b454da}
+.selector{color:#f7ddb6}
+span.string > span.number, span.comment > span.number, span.color > span.number{color:inherit}
+#chat_frame{position: relative; height:15em; overflow:auto}
+#chat_frame div p{display:inline-block; padding:1em; margin:0}
+.outgoing{text-align:right}
+.incoming p{background:#c0dcba; border-radius: 25px 25px 25px 10px}
+.outgoing p{background:#d1bfde; border-radius: 25px 25px 10px 25px}
+.input_wrap input{bottom: 0; width:100%; margin: 0; padding: .5em 0}
+@-webkit-keyframes ddd{0%{left:0em}100%{left:1em}}
+@-moz-keyframes ddd{0%{left:0em}100%{left:1em}}
+@-o-keyframes ddd{0%{left:0em}100%{left:1em}}
+@keyframes ddd{0%{left:0em}100%{left:1em}}
+#indicator{
+	position:absolute;bottom:.6em;left:0;font-size:3.5em;
+  -webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;
+	-webkit-animation:ddd .5s infinite;-moz-animation:ddd .5s infinite;-o-animation:ddd .5s infinite;animation:ddd 1s infinite
+}
+@media only screen and (max-width: 55em){
+	code, h1{word-break:break-word;white-space:normal}
+}
+@media only screen and (max-width: 30em){
+	td{word-break:break-word;white-space:normal}
+}
+@media only screen and (max-device-width: 500px){
+	#content_wrap, #topnav{left:14em}
+	#nav{width:14em}
+	#content, p, li, button, body{font-size:1.45em}
+	code, td, h1, h2{word-break:break-word;white-space:normal}
+}

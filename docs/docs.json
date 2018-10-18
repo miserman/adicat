@@ -1,0 +1,602 @@
+{
+  "adicat":{
+    "source":"core.js",
+    "description":"Constructor that stores information about the entered text, which is added to by each prototype function.",
+    "examples":"new adicat('Text to process.')",
+    "properties":{
+      "string":{
+        "raw":"The original text.",
+        "clean":"Text filtered of special characters. Filled in by tokenize.",
+        "striped":"Additionally filtered text with normalized word boundaries, padded by blank spaces. Filled in by tokenize."
+      },
+      "chars":"Number of characters in the original text.",
+      "words":{
+        "source":"tokenize",
+        "token":"Standardized tokens; string.striped split by patterns.word_breaks.",
+        "print":"More faithful word forms for display; string.clean split by patterns.word_breaks.",
+        "categories":"A string of comma-delimited categories matching the token or print of the same index. Added by categorize."
+      },
+      "_processLevel":"Tracks the level of processing, starting at 0, increasing to 1 when tokenized, and 2 when categorized.",
+      "_processTime":"An object with process time associated with each function. Each starts at -1, so any positive values indicate that function has been run.",
+      "WC":{
+        "source":"tokenize",
+        "description":"Number of words."
+      },
+      "vector":{
+        "source":"categorize",
+        "description":"Object with unique tokens as keys and their counts as values."
+      },
+      "cats":{
+        "source":"categorize",
+        "description":"Object with categories as keys and their scores (sum of term counts) as values."
+      },
+      "cats_type":{
+        "source":"categorize",
+        "description":"Tracks the type of category score: 0 = count, 1 = percent."
+      },
+      "captured":{
+        "source":"categorize",
+        "description":"The number of matched terms for the given dictionary."
+      },
+      "html":{
+        "source":"display",
+        "description":"An array of &lt;span&gt;s displaying each word, with categories as class names."
+      },
+      "meta":{
+        "source":"procmeta",
+        "description":"Punctuation and structural categories.",
+        "period":"Number of periods.",
+        "comma":"Number of commas.",
+        "qmark":"Number of question marks.",
+        "exclam":"Number of exclamation points.",
+        "quotes":"Number of quotation marks.",
+        "brackets":"Number of brackets (square, curly, or angle brackets, or parens).",
+        "organization":"Number of organization-related marks (dashes, slashes, colons, and semicolons).",
+        "sentences":"Number of sentences.",
+        "WPS":"Mean words per sentence.",
+        "clauses":"Number of clauses, including sentences.",
+        "WPC":"Mean words per clause."
+      },
+      "sim":{
+        "source":"similarity",
+        "description":"Information about the performed similarity calculation.",
+        "value":"Canberra or Cosine similarity between the current and specified text.",
+        "cats":"Categories that went in to the comparison.",
+        "comp":"Comparison values.",
+        "metric":"Metric of value.",
+      }
+    },
+    "methods":{
+      "tokenize":{
+        "source":"core.js",
+        "description":"Initial level of processing. Cleans the text and splits it into tokens.",
+        "arguments":{},
+        "output":"Adds cleaned and striped strings, words arrays, and word count. Returns the full, updated adicat object.",
+        "examples":"new adicat('some text to process').tokenize()"
+      },
+      "categorize":{
+        "source":"core.js",
+        "description":"Final level of processing. Adds category scores and the vectorized text.",
+        "arguments":{
+          "dict":{
+            "type":"object",
+            "default":"Adicat.patterns.dict",
+            "description":"Dictionary object containing categories. Category terms entered as arrays will be converted to regular expressions."
+          },
+          "blacklist":{
+            "type":"array",
+            "default":"Adicat.hl.options.blacklist",
+            "description":"Names of categories to ignore."
+          }
+        },
+        "output":"The full, updated adicat object.",
+        "examples":"new adicat('some text to process').categorize()"
+      },
+      "toPercent":{
+        "source":"core.js",
+        "description":"Converts category counts to percentages.",
+        "arguments":{
+          "round":{
+            "type":"boolean",
+            "default":"false",
+            "description":"If true, the output will be rounded to 2 digits."
+          }
+        },
+        "output":"The full, updated adicat object.",
+        "examples":"new adicat('some text to process').toPercent()"
+      },
+      "detect":{
+        "source":"core.js",
+        "description":"Checks the raw and striped strings for each entry cues.",
+        "arguments":{
+          "cues":{
+            "type":"object",
+            "default":"Adicat.patterns.cues",
+            "description":"Object of regular expressions or arrays (to be converted)."
+          }
+        },
+        "output":"Adds .cues -- an object with true or false for each cues entry. Returns the full, updated adicat object.",
+        "examples":"new adicat('hey there :)').detect()"
+      },
+      "display":{
+        "source":"core.js",
+        "description":"Creates a span for each word, with categories as classes.",
+        "arguments":{
+          "sort":{
+            "type":"boolean",
+            "default":"false",
+            "description":"If true, the output will be sorted alphabetically."
+          },
+          "bycat":{
+            "type":"boolean",
+            "default":"false",
+            "description":"Applies when sort is true. If true, sorts by word categories rather than words."
+          }
+        },
+        "output":"Adds .html -- an array of span elements. Returns that array.",
+        "examples":"new adicat('a b').display()"
+      },
+      "procmeta":{
+        "source":"core.js",
+        "description":"Counts types of punctuation and structural information like number of sentences and clauses.",
+        "arguments":{},
+        "output":"Adds .meta -- an object with scores for each meta category. Returns the full, updated adicat object.",
+        "examples":"new adicat(\"Hey! What's that? Another sentence?!\").procmeta()"
+      },
+      "similarity":{
+        "source":"core.js",
+        "description":"Calculates similarity between two texts.",
+        "arguments":{
+          "comp":{
+            "type":"string or object",
+            "default":"'overall'",
+            "description":"Specifies the comparison to be made. If a string matching one of the entries of Adicat.liwc_means, that entry will be used. Otherwise, strings are treated as text and processes. If an object and comp.cats, comp.meta, or comp.vector exist, one of those will be used. Otherwise, an object will be used as the comparison."
+          },
+          "metric":{
+            "type":"string",
+            "default":"'canberra'",
+            "description":"Specifies the metric to calculate -- 'cosine' for cosine similarity, and 'canberra' for inverse Canberra distance."
+          },
+          "cats":{
+            "type":"array or string",
+            "default":"['ppron', 'ipron', 'article', 'adverb', 'conj', 'prep', 'auxverb']",
+            "description":"Categories to calculate similarity between, or selects all meta ('meta') or vector ('vector') categories to be compared."
+          }
+        },
+        "output":"Similarity score.",
+        "examples":"new adicat('compare this text').similarity('to this text')"
+      }
+    }
+  },
+  "Adicat":{
+    "type":"object",
+    "source":"core.js",
+    "description":"Object containing data and functions used by adicat and associated functions.",
+    "properties":{
+      "patterns":{
+        "description":"Precompiled Regex patterns.",
+        "properties":{
+          "word_breaks":"Simple word boundaries during tokenization",
+          "char":"All acceptable (whitelisted) characters.",
+          "special":"Regular expression characters to be escaped in exact-match strings.",
+          "filter":"Characters to remove for striped text.",
+          "curly_quote":{
+            "s":"Single curly quotes.",
+            "d":"Double curly quotes."
+          },
+          "emojis":{
+            "smile":"Simple smiley faces to replace with emjhface.",
+            "simle_rev":"Replaces emjhface with a smile.",
+            "frown":"Simple frowny faces to replace with emjsface.",
+            "frown_rev":"Replaces emjsface with a frown.",
+          },
+          "symbols":{
+            "and":"Ampersands.",
+            "at":"At symbols."
+          },
+          "punct":{
+            "endash":"en dash to conver to two hyphens.",
+            "emdash":"em dash to conver to three hyphens.",
+            "initials":"Initials to trim terminal periods from.",
+            "initial_trim":"Finds the terminal period in initials matches.",
+            "apostrophe":"Apostrophes to avoid treating them as quotes.",
+            "ellipses":"ellipses to avoid treating them as sentence boundaries.",
+            "titles":"A few standard titles to remove periods from."
+          },
+          "space":"spaces to eat up before breaking out words, such as those before periods.",
+          "returns":"Line breaks.",
+          "boundary":{
+            "sentence":"Sentence boundaries.",
+            "clause":"Clause boundaries, including sentence boundaries."
+          },
+          "cues":{
+            "question":"Might be asking a question.",
+            "greeting":"Might be offering greeting.",
+            "yes":"Might be answering affirmatively.",
+            "no":"Might be answering negatively.",
+            "sad":"Might be indicating negative emotion.",
+            "happy":"Might be indicating positive emotion.",
+          },
+          "matches":"Stores words that have been matched to a dictionary category, to avoid searching for the same words repeatedly.",
+          "dict":"Houses a default dictionary.",
+          "dict_proc":"indicates whether the default dictionary has been checked and potentially converted to regular expression."
+        }
+      },
+      "liwc_means":"Category means from the <a href='https://liwc.wpengine.com/wp-content/uploads/2015/11/LIWC2015_LanguageManual.pdf' target='_blankl'>LIWC 2015 language manual</a>."
+    },
+    "methods":{
+      "toRegex":{
+        "source":"core.js",
+        "description":"Converts array dictionaries to regular expression",
+        "output":"Object with the same entries as obj",
+        "arguments":{
+          "obj":{
+            "type":"object",
+            "default":"",
+            "description":"An object of arrays of strings."
+          },
+          "source":{
+            "type":"boolean",
+            "default":"false",
+            "description":"Specifies the intended application; true applied to striped strings where words are separated by single spaces (for cue processing, where word boundaries can be crossed), and false applies to tokenized words were each is in a string of its own."
+          }
+        },
+        "examples":"Adicat.toRegex({'category': ['term*', 'word']}, true)"
+      },
+      "loadDict":{
+        "source":"core.js",
+        "description":"Load dictionaries into the Adicat patterns dict position.",
+        "output":"The object parsed from the input file is assigned to Adicat.patterns.dict.",
+        "arguments":{
+          "url":{
+            "type":"string",
+            "default":"",
+            "description":"Path to a JSON or .dic file."
+          }
+        },
+        "examples":"Adicat.loadDict('https://miserman.github.io/adicat/dict/function.json')"
+      },
+      "read_dic":{
+        "source":"core.js",
+        "description":"Converts .dic formated strings to objects, with categories as arrays of terms. .dic format is tab delimited, with a category index marked by %, and terms marked by category IDs.",
+        "output":"Object of arrays of strings.",
+        "arguments":{
+          "dic":{
+            "type":"string",
+            "default":"",
+            "description":"A dic formated dictionary."
+          }
+        },
+        "examples":"Adicat.read_dic('%\\n1\\tcategory\\n%\\nword*\\t1\\nterm*\\t1')"
+      },
+      "write_dic":{
+        "source":"core.js",
+        "description":"Converts objects to .dic formated strings. .dic format is tab delimited, with a category index marked by %, and terms marked by category IDs:\n\n%\n1\tcategory\n%\nword*\t1\nterm*\t1",
+        "output":"A .dic formated string",
+        "arguments":{
+          "obj":{
+            "type":"object",
+            "default":"",
+            "description":"An object with categories as entires."
+          }
+        },
+        "examples":"Adicat.write_dic({'category':['word*','term*']})"
+      },
+      "dict_export":{
+        "source":"core.js",
+        "description":"Converts an object dictionary to a string, and optionally downloads it.",
+        "output":"An object or .dic file as a string.",
+        "arguments":{
+          "obj":{
+            "type":"object",
+            "default":"",
+            "description":"Dictionary to be converted and downloaded."
+          },
+          "dic":{
+            "type":"boolean",
+            "default":"false",
+            "description":"Indicates the desired format of the resulting dictionary; true for .dic, and false for .json."
+          },
+          "download":{
+            "type":"boolean",
+            "default":"false",
+            "description":"If true, the converted dictionary will be downloaded."
+          },
+          "filename":{
+            "type":"string",
+            "default":"'adicat_dictionary'",
+            "description":"Name of the file to be downloaded, appended with .dic or .json."
+          }
+        },
+        "examples":"Adicat.dict_export({'category':['word*','term*']}, true, true, 'example')"
+      },
+      "rand":{
+        "source":"core.js",
+        "description":"Generate an integer within a positive or negative range, used to sample from an array.",
+        "output":"Random integer.",
+        "arguments":{
+          "u":{
+            "type":"number",
+            "default":"",
+            "description":"Upper bound; resulting number is a randomized percent of u."
+          },
+          "l":{
+            "type":"number",
+            "default":"0",
+            "description":"Lower bound; added to the randomized percent of u."
+          }
+        },
+        "examples":"Adicat.rand(10,5)"
+      },
+      "filterOut":{
+        "source":"core.js",
+        "description":"Removes array entries matching a particular value.",
+        "output":"Filtered array.",
+        "arguments":{
+          "arr":{
+            "type":"array",
+            "default":"",
+            "description":"The full array from which to remove entries."
+          },
+          "remove":{
+            "type":"string or number",
+            "default":"''",
+            "description":"Value to filter out. By default, filters out empty strings."
+          }
+        },
+        "examples":"Adicat.filterOut(['a','','b']) // ['a','b']"
+      }
+    }
+  },
+  "Adicat.hl":{
+    "source":"highlight/highlight.js",
+    "description":"Additional properties and methods for category highlighting.",
+    "properties":{
+      "input":"DIV element with contenteditable set to 'true', where text is to be entered and displayed.",
+      "values":"DIV element in which a table is build to display category scores if Adicat.hl.options.tabulate is true.",
+      "kbl":"An array storing blacklist key code, which are blocked when tying into input.",
+      "input_history":"Records the code of the last key pressed to detect repeated spaces.",
+      "texts":{
+        "description":"Keeps track of entered texts for comparisons and saving. Entries named for each text ID are created as texts are saved.",
+        "current":"ID of the text currently being edited.",
+        "last":"ID of the last text that was being edited.",
+        "comp":"ID of the comparison text.",
+        "comp_values":"An object of category scores for the comp text."
+      },
+      "options":{
+        "description":"Stores settings, mostly used by the highlighter.",
+        "value":"A string specifying the displayed output values, either 'count' (default) or 'percent'.",
+        "blacklist":"An array of dictionary categories to skip.",
+        "live":"A string indicating whether text should be processed as it's typed ('on'; default) or only when requested ('off').",
+        "tabulate":"Indicates whether the elements in input should be counted up with each span process. Only necessary when displaying values.",
+        "nback":"Specifies the number of previous spans that should be checked after the current span has been processed. ",
+        "show_zeros":"A string indicating whether unmatched categories should be shown in the output table; 'true' or 'false' (default)",
+        "space_character":"Code of the character used to fill spaces; '\\u2008' by default.",
+        "use_dict":"Name of the dictionary to use, among those in Adicat.hl.dict. 'default' by default.",
+        "sim_filter":"Boolean specifying whether to apply sim_cats. If false, all available categories are used.",
+        "sim_cats":"An array of category names to be included in similarity calculations.",
+        "sim_metric":"Similarity metric to calculate; 'canberra' (default) or 'cosine'.",
+        "split":"A string to be used as the regular expression on which to split file inputs; '\\\\n+' by default.",
+        "sep":"Character to delineate columns in file outputs; ',' by default.",
+        "meta":"Indicates whether meta categories should be included in file outputs; true (default) or false.",
+        "input_encoding":"ID string of the encoding used to read in uploaded files; 'ascii' by default. See <a href='https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsText#Parameters' target='_blank'>supported encodings</a>.",
+        "dict":"Object storing loaded and created dictionaries.",
+        "output":"Category scores from the most recently processed text.",
+        "colors":"Color codes, sampled from to assign colors to new dictionary categories."
+      }
+    },
+    "methods":{
+      "process_span":{
+        "description":"Processes the innerText of the selected span (by current caret position), and checks and potentially reprocesses previous spans up to Adicat.hl.options.nback.",
+        "source":"highlight/highlight.js",
+        "arguments":{},
+        "output":"Updates the current and Adicat.hl.nback previous spans.",
+        "examples":"&lt;div contenteditable='true' onkeypress='Adicat.hl.process_span()'&gt;&lt;/div&gt;"
+      },
+      "spanner":{
+        "description":"",
+        "source":"highlight/highlight.js",
+        "arguments":{
+          "k":{
+            "type":"Object with a 'which' entry and 'preventDefault' method",
+            "default":"",
+            "description":"The event passed by an event listener (a 'keydown' as implemented). If k.which equals 32 (space), a space span may be interted, if other conditions are met."
+          }
+        },
+        "output":"Inserts a space span before the current caret selection, or updates the span surrounding the current caret selection.",
+        "examples":"&lt;div contenteditable='true' onkeydown='Adicat.hl.spanner()'&gt;&lt;/div&gt;"
+      },
+      "display_text":{
+        "description":"Processes and displays text in Adicat.hl.input",
+        "source":"highlight/highlight.js",
+        "arguments":{
+          "text":{
+            "type":"string",
+            "default":"Adicat.hl.input.innerText",
+            "description":"Text to be displayed.",
+          },
+          "add":{
+            "type":"boolean",
+            "default":"false",
+            "description":"If true, adds to rather than replacing the contents of Adicat.hl.input, and defers tabulation."
+          }
+        },
+        "output":"Updates Adicat.hl.input.",
+        "examples":"Adicat.hl.display_text('display this text')\nAdicat.hl.input"
+      },
+      "update_table":{
+        "description":"Loops through all spans in Adicat.hl.input to count up their categories, then updates a table in Adicat.hl.values.",
+        "source":"highlight/highlight.js",
+        "arguments":{},
+        "output":"Updates Adicat.hl.values.",
+        "examples":"Adicat.hl.update_table()\nAdicat.hl.values"
+      },
+      "solve":{
+        "description":"Calculates composite variables, based on values in Adicat.hl.output.",
+        "source":"highlight/highlight.js",
+        "arguments":{
+          "eq":{
+            "type":"string",
+            "default":"",
+            "description":"An equation to calculate using named categories."
+          }
+        },
+        "output":"Results of the evaluated eq.",
+        "examples":"Adicat.hl.output = {// these would normally be filled in by update_table\na:1, b:2}\nAdicat.hl.solve('a + b') // 3"
+      },
+      "sim_refresh":{
+        "description":"Reprocesses Adicat.hl.texts[Adicat.hl.texts.comp] for Adiact.hl.texts.comp_value, and Adicat.hl.input.innerText for the comparison.",
+        "source":"highlight/highlight.js",
+        "arguments":{},
+        "output":"Updates an element with a 'similarity' id.",
+        "examples":"Adicat.hl.texts = {0: 'text to be compared with', comp: 0}\nsim = document.body.appendChild(document.createElement('a'))\nsim.id = 'similarity'\nAdicat.hl.sim_refresh()"
+      },
+      "select":{
+        "description":"Highlights (adds 'select' to the class list of) processed spans in Adicat.hl.input of the given category.",
+        "source":"highlight/highlight.js",
+        "arguments":{
+          "e":{
+            "type":"object with an 'innerText' entry",
+            "default":"",
+            "description":"Usually a clicked on element giving a category to be highlighted."
+          }
+        },
+        "output":"Updates spans in Adicat.hl.input.",
+        "examples":"Adicat.hl.display_text('show this text')\nAdicat.hl.select({innerText:'none'}) // adds 'select' to the class list of uncategorized spans in Adicat.hl.input\nAdicat.hl.input"
+      },
+      "insertSpace":{
+        "description":"Inserts a span around a space character (Adicat.hl.options.space_character).",
+        "source":"highlight/highlight.js",
+        "arguments":{
+          "e":{
+            "type":"object with an 'insertAdjacentElement' method",
+            "default":"",
+            "description":"The element to insert the space element relative to."
+          },
+          "p":{
+            "type":"string",
+            "default":"'afterEnd'",
+            "description":"Desired relative location of the space element, e.g., 'afterEnd' or 'beforeBegin'."
+          }
+        },
+        "output":"Adds a span element to the parent element of e.",
+        "examples":"e = Adicat.hl.input.appendChild(document.createElement('span'))\nAdicat.hl.insertSpace(e)\nAdicat.hl.input"
+      },
+      "append":{
+        "description":"Appends children to an element after assigning the child attributes.",
+        "source":"highlight/highlight.js",
+        "arguments":{
+          "taret":{
+            "type":"object with an 'apppendChild' method",
+            "default":"",
+            "description":"To-be parent of the new element."
+          },
+          "type":{
+            "type":"string",
+            "default":"",
+            "description":"tagName of the new element."
+          },
+          "attributes":{
+            "type":"object",
+            "default":"",
+            "description":"Attributes to add to the new element."
+          },
+        },
+        "output":"Appends a child element to target.",
+        "examples":"Adicat.hl.append(Adicat.hl.input, 'div', {innerText:'appended child'})\nAdicat.hl.input"
+      }
+    }
+  },
+  "Adicat.chat":{
+    "source":"chat/chat.js",
+    "description":"Additional properties and methods for the chat interface.",
+    "properties":{
+      "indStat":"a boolean indicating whether the bot is typing.",
+      "log":{
+        "description":"log of last messages.",
+        "s":"Last message sent by the bot.",
+        "r":"Last message received by the bot."
+      },
+      "parts":{
+        "description":"HTML elements to pull messages from and send messages to.",
+        "frame":"Outer element containing log.",
+        "log":"Inner element containing message.",
+        "indicator":"Element to be shown and hidden to indicate the bot it typing.",
+        "input":"Input element to pull message from.",
+      },
+      "replies":"Object to store bot replies. Should have entries with the same name as those in Adicat.patterns.cues, and a string or array of strings for replies."
+    },
+    "methods":{
+      "parse":{
+        "description":"Parses text to an object appropriate for replies.",
+        "source":"chat/chat.js",
+        "arguments":{
+          "t":{
+            "type":"string",
+            "default":"",
+            "description":"Text to be read in as an object."
+          }
+        },
+        "output":"Returns parsed object.",
+        "examples":"Adicat.chat.parse(\"(initial){['Hey', 'Hi']}\")"
+      },
+      "send":{
+        "description":"Sends a message to the bot.",
+        "source":"chat/chat.js",
+        "arguments":{
+          "t":{
+            "type":"string",
+            "default":"parts.input.value",
+            "description":"Text to be sent to the bot."
+          }
+        },
+        "output":"Appends the message to parts.log, and calls receive(t).",
+        "examples":"Adicat.chat.send('hey')\nAdicat.chat.parts.log"
+      },
+      "receive":{
+        "description":"Parses sent text, and samples a reply.",
+        "source":"chat/chat.js",
+        "arguments":{
+          "t":{
+            "type":"string",
+            "default":"",
+            "description":"Sent text."
+          },
+          "r":{
+            "type":"string",
+            "default":"sampled message",
+            "description":"Text for the bot to send, overriding sampled messages."
+          }
+        },
+        "output":"Calls typing with the element containing the reply.",
+        "examples":"// make the bot say something\nAdicat.chat.receive('', \"I'm a bot!\")\nAdicat.chat.parts.log\n// make the bot reply to an unsent message\nAdicat.chat.receive('hey')"
+      },
+      "typing":{
+        "description":"Handles bot's behavior -- shows and hides typing indicator, and meters massage receipt and replies.",
+        "source":"chat/chat.js",
+        "arguments":{
+          "e":{
+            "type":"object",
+            "default":"",
+            "description":"HTML element to be appended to parts.log."
+          }
+        },
+        "output":"Calls append(e)",
+        "examples":"// insert a message into the chat frame\ne = document.createElement('p')\ne.innerText = 'message'\nAdicat.chat.typing(e)\nAdicat.chat.parts.log"
+      },
+      "append":{
+        "description":"Appends a message to parts.log",
+        "source":"chat/chat.js",
+        "arguments":{
+          "e":{
+            "type":"object",
+            "default":"",
+            "description":"HTML element containing the message."
+          }
+        },
+        "output":"Appends an element to parts.log.",
+        "examples":"// insert a message by the bot or user, bypassing all processing\ne = document.createElement('div')\ne.className = 'incoming'\ne.appendChild(document.createElement('p'))\ne.firstElementChild.innerText = 'message text'\nAdicat.chat.append(e)\nAdicat.chat.parts.log"
+      }
+    }
+  }
+}

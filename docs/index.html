@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+<link rel='icon' href='../icon.png'>
+<title>adicat documentation</title>
+<link rel='stylesheet' type='text/css' href="style.css">
+</head>
+<body>
+
+<div id='content_wrap'><div id='content'></div></div>
+<div id='topnav'><div>
+  <a href='https://miserman.github.io/adicat'>introduction</a>
+  <a class='selected'>documentation</a>
+</div></div>
+<div id='nav'>
+  <div class='index' id='menu'><ul id='toc'></ul></div>
+  <a id='menu_tab' onclick='toggle_menu()'>‹</a>
+</div>
+<a class='repo' title='repository' href='https://github.com/miserman/adicat'>
+  <img src='https://github.com/fluidicon.png'></a>
+
+<script type='text/javascript' src='../colorcode.min.js' async></script>
+<script type='text/javascript' src='../core.js' defer></script>
+<script type='text/javascript' src='../highlight/highlight.js' defer></script>
+<script type='text/javascript' src='../chat/chat.js' defer></script>
+<script type='text/javascript'>
+'use strict';
+var i, k, d, c, l, de, a, args, sels, ck = /^#A/, docs={}, index={},
+  toc=$('toc'), content=$('content'), content_wrap=$('content_wrap'), nav=$('nav'), topnav=$('topnav'), menu_tab=$('menu_tab')
+window.onload = function(){
+  var f=new XMLHttpRequest()
+  f.onreadystatechange=function(){if(f.readyState===4 && f.status===200){
+      Adicat.patterns.dict = JSON.parse(f.responseText)
+      build_index()
+      setup()
+  }}
+  f.open('GET', 'docs.json', true)
+  f.send()
+}
+function $(e,t){return document[!t ? 'getElementById' : t === 'tag' ? 'getElementsByTagName' : 'getElementsByClassName'](e)}
+function build_index(){
+  var k, e, h, li, a
+  for(k in docs) if(docs.hasOwnProperty(k)){
+    h = toc.appendChild(document.createElement('li'))
+    a = h.appendChild(document.createElement('a'))
+    a.innerText = k
+    a.href = '#' + k
+    a.id = 'sel_' + k
+    index[k] = docs[k]
+    h = h.insertAdjacentElement('afterEnd', document.createElement('ul'))
+    h.className = 'innerlist'
+    if(docs[k].hasOwnProperty('methods')){
+      for(e in docs[k].methods) if(docs[k].methods.hasOwnProperty(e)){
+        li = h.appendChild(document.createElement('li'))
+        a = li.appendChild(document.createElement('a'))
+        a.innerText = '.' + e
+        a.href = '#' + k + '.' + e
+        a.id = 'sel_' + k+'.' + e
+        a.className = 'inactive'
+        index[k + '.' + e] = docs[k].methods[e]
+      }
+    }
+  }
+}
+function toggle_menu(){
+  if(nav.style.left === ''){
+    nav.style.left = screen.width > 500 ? '-9.6em' : '-12em'
+    content_wrap.style.left = topnav.style.left = screen.width > 500 ? '1.4em' : '1.9em'
+    menu_tab.innerText = '›'
+  }else{
+    nav.style.left = ''
+    content_wrap.style.left = topnav.style.left = screen.width > 500 ? '11em' : '14em'
+    menu_tab.innerText = '‹'
+  }
+}
+function setup(){
+  toc.addEventListener('click', function(e){
+    if(e.target && e.target.tagName === 'A' && index.hasOwnProperty(e.target.hash.replace('#', ''))){
+      show(e.target)
+    }
+  })
+  window.onhashchange = function(){show(window.location.hash)}
+  show(window.location.hash ? window.location.hash : '#adicat')
+}
+function show(e){
+  if('string' === typeof e) e = document.getElementById('sel_' + e.replace(/#/, ''))
+  if(e){
+    sels = document.getElementsByClassName('active')
+    if(sels.length) for(i = sels.length; i--;) sels[i].className = 'inactive'
+    e.className = 'active'
+    d = index[e.hash.replace('#', '')]
+    if(d.arguments){
+      c = ''
+      args = '<div class="tablewrap"><table><thead><tr><th>argument</th><th>type</th><th>default</th><th>description</th></tr></thead><tbody>'
+      for(k in d.arguments) if(d.arguments.hasOwnProperty(k)){
+        c += c ? ', ' + k : k
+        args += '<tr><td>' + k + '</td><td>' + d.arguments[k].type + '</td><td>' + d.arguments[k].default
+          + '</td><td>' + d.arguments[k].description + '</td></tr>'
+      }
+      args = '<h2>Usage</h2><code>' + (ck.test(e.hash)
+        ? (d.source === 'core.js' ? 'Adicat' : d.source === 'chat/chat.js' ? 'Adicat.chat' : 'Adicat.hl')
+        : 'new adicat("")') + e.innerText + '(' + c + ')</code>'
+        + (c ? args + '</tbody></table></div>' : '')
+    }else if(d.properties){
+      args = '<h2>Properties</h2><div class="tablewrap"><table><thead><tr><th>name</th><th>contents</th></tr></thead><tbody>'
+      for(k in d.properties) if(d.properties.hasOwnProperty(k)){
+        l = de = a = ''
+        toTable(d.properties[k])
+        args += '<tr><td>' + k + '</td><td>' + de + ' ' + l + (a ? a + '</tbody></table></div>' : '') + '</td></tr>'
+      }
+      args += '</tbody></table></div>'
+    }
+    content.innerHTML = '<h1>' + e.hash.replace('#', '') + '</h1>'
+      + (d.description ? '<p class="description">' + d.description + '</p>' : '')
+      + (d.source ? '<p>source: <a class="source" target="_blank" href="https://miserman.github.io/adicat/'
+        + d.source + '">' + d.source + '</a></p>' : '')
+      + (d.arguments || d.properties ? args : '')
+      + (d.output ? '<h2>Output</h2><p>' + d.output + '</p>' : '')
+      + (d.examples ? '<h2>Examples</h2><code class="codeblock">' + d.examples + '</code>' : '')
+    colorcode()
+  }
+}
+function toTable(obj){
+  if('string' === typeof obj){
+    de = obj
+  }else{
+    for(i in obj) if(obj.hasOwnProperty(i)){
+      if(!l && i === 'source'){
+        l = 'Added by ' + obj.source + '.'
+      }else if(!de && i === 'description'){
+        de = obj.description
+      }else{
+        if(!a) a = '<div class="properties"><table><tbody>'
+        if('string' === typeof obj[i]){
+          a += '<tr><td>' + i + '</td><td>' + obj[i] + '</td></tr>'
+        }else if(i === 'properties'){
+          toTable(obj[i])
+        }else{
+          a += '<tr><td>' + i + '</td><td><table><tbody>'
+          toTable(obj[i])
+          a += '</tbody></table></td></tr>'
+        }
+      }
+    }
+  }
+}
+</script>
+</body></html>

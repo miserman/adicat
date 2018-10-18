@@ -6,21 +6,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"/>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<script type='text/javascript' src="../core.js" async></script>
+<script type='text/javascript' src="../core.js"></script>
 <script type='text/javascript' src="../highlight/highlight.js" async></script>
 <style type="text/css">
-body, button, p, input, div, table, #input, #values, #menu, #dictionary_menu, .port_menu{
+body, button, p, input, div, table, #input, #values, #menu, .full_menu, .port_menu{
 	margin:0;padding:0;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
 	outline-color:#8a8b9e;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:greyscale
 }
-#input, #values, #menu, #dictionary_menu, .port_menu, button, p{font-size:1.1em}
-.noint, #inp_control, #menu, #dictionay_menu, .port_menu{
+#input, #values, #menu, .full_menu, .port_menu, button, p{font-size:1.1em}
+.noint, #inp_control, #menu, .full_menu, .port_menu{
 	-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none
 }
 #menu{
 	position:fixed;overflow:auto;-webkit-overflow-scrolling:touch;right:-80%;top:0;bottom:0;width:80%;background:#dedede;z-index:2;
 	transition:right .25s;-webkit-transition:right .25s;-moz-transition:right .25s;-o-transition:right .25s
 }
+.menu_title{display:table;padding: 1em 0;width:100%;text-align:center}
+.menu_title a{display:table-cell;color:#777;text-decoration:none;font-size:.85em}
+.menu_title a:hover{color:#000}
 .opt_display{position:absolute;display:inline;font-size:.8em;text-align:right;right:.5em;bottom:-1.5em;color:#c7c7c7}
 .menu_group_open, .menu_group{overflow:hidden;margin:.5em}
 .menu_group{height:0}
@@ -31,19 +34,21 @@ body, button, p, input, div, table, #input, #values, #menu, #dictionary_menu, .p
 .menu_group_open table{background:#fff;width:100%;text-align:left;font-size:.9em}
 .menu_group_open table tr td{padding:0 .2em;white-space:nowrap;overflow:hidden;cursor:pointer;max-width:100px;text-overflow:ellipsis}
 .menu_group_open table tr td button{padding:0;width:100%;height:1.5em}
-.menu_group_open input{padding:1em;margin:.78em;border:none;width:3.5em}
-.menu_group_open button.menu_inner_full{width:100%;background:#c1e2b3;font-weight:bolder}
+.menu_group_open input{padding:1em;margin:.78em;border:none;width:6.5em}
+.menu_group_open button.menu_inner_full{background:#b0d6a1}
 .dict_parts{max-height:15em}
 .dict_parts span{display:inline-block;padding:.3em .4em;margin:0;cursor:pointer}
 .dict_parts span:hover, .dict_parts span.off{text-decoration:line-through;color:#d4d4d4}
-.menu_header,.menu_header_open,.reset, #menu div table tbody tr td button{
+.menu_header,.menu_header_open,.menu_inner_full, #menu div table tbody tr td button{
 	text-align:left;border:none;width:100%;padding:1em;margin:0;background:#8f8f8f;color:#efefef;cursor:pointer;border-radius:15px
 }
+.menu_inner_full{margin: 0 0 1em;font-weight:bolder;text-align:center;color:#000;background:#b0d6a1}
+.note{font-size:.7em;color:#777}
 #menu div table tbody tr td button{text-align:center;padding:0}
-.reset, #menu div table tbody tr td:last-child button{background:#9f4444;text-align:center;color:#e9e9e9}
+.reset, #menu div table tbody tr td:last-child button, #fileproc_menu button.menu_inner_full{background:#9f4444;text-align:center;color:#e9e9e9}
 .menu_header::after{content:'∨';float:right}
 .menu_header_open::after{content:'∧';float:right}
-button.selected,button:hover,#menu div table tbody tr td button:hover,.reset p:hover,.menu_header:hover,.menu_header_open{
+button.selected,button:hover,#menu div table tbody tr td button:hover,.reset p:hover,.menu_header:hover,.menu_header_open, #fileproc_menu button:hover{
 	color:#efefef;background:#202020;cursor:pointer;border-radius:20px
 }
 #menu div table tbody tr:hover{color:#fff;background:#888;border-radius:20px}
@@ -57,24 +62,24 @@ button.selected,button:hover,#menu div table tbody tr td button:hover,.reset p:h
 #values table th:hover{cursor:pointer}
 #frame{
 	position:fixed;width:100%;top:0;bottom:0;right:0;overflow:hidden;
-	transition:left .25s;-webkit-transition:right .25s;-moz-transition:right, .25s;-o-transition:right .25s
+	transition:right .25s;-webkit-transition:right .25s;-moz-transition:right, .25s;-o-transition:right .25s
 }
 #input{position:absolute;top:0;left:0;right:0;bottom:0;padding:.5em;margin:4.3em .1em;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .highlight *{border-radius:3px}
 .highlight p{font-size:1em}
 #inp_control{width:100%;top:0;position:absolute;z-index:3;text-align:center}
 #inp_control button{position:absolute;cursor:pointer;border:none;padding:.5em;font-size:1.5em;color:#2c2c2c;background:#e5e5e5}
-#inp_control button:hover, .upload_group button:hover{color:#efefef;background:#202020}
+#inp_control button:hover, .full_button button:hover, .menu_group_full button:hover{color:#efefef;background:#202020}
 #inp_control button#inp_clear{left:0;top:0;border-radius:0 0 30px;padding:.5em 1em}
 #inp_control button#inp_refresh{position:relative;top:.15em;border-radius:25px;padding:.5em 2.5em}
 #inp_control button#menu_open{right:0;padding:.5em 1em;border-radius:0 0 0 30px}
-#dictionary_edit{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9;cursor:not-allowed;background:#000}
-#dictionary_menu, .port_menu{
+.excape_plate{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9;cursor:not-allowed;background:#000}
+.full_menu, .port_menu{
 	position:relative;top:5em;margin:0 auto 5em auto;width:80%;background:#fff;z-index:10;border-radius:10px;padding:.01em .5em 2em .5em
 }
-#dictionary_menu>p, .port_menu>p{margin:1em 0;font-weight:bolder}
+.full_menu>p{margin:1em 0;font-weight:bolder}
 #dict_name{font-weight:bold}
-#dictionary_menu button>a{position:absolute;bottom:1em;left:1em;font-size:.7em;color:#b5b5b5}
+.full_menu button>a{position:absolute;bottom:1em;left:1em;font-size:.7em;color:#b5b5b5}
 #dictionary_menu_previous,#dictionary_menu_next{position:absolute;top:1em;height:8em;border-radius:25px}
 #dictionary_menu_previous{left:-3em}
 #dictionary_menu_next{right:-3em}
@@ -85,16 +90,23 @@ button.selected,button:hover,#menu div table tbody tr td button:hover,.reset p:h
 .dict_table button{width:100%;border:none;color:#2c2c2c;background:#e5e5e5}
 .dict_table button:hover{background:#999}
 .dict_indicator{font-size:.5em}
-#export_output{width:100%;height:20em;resize:vertical;white-space:pre;overflow:auto}
+.full_menu textarea, .port_menu textarea{width:100%;height:20em;resize:vertical;white-space:pre;overflow:auto}
 .parts_header{position:relative;display:inline;width:100%;font-size:.7em;top:.5em;color:#777}
 .parts_header a{display:block;padding:.5em 0}
 .parts_header button{float:right;background:inherit;color:#777;padding:1em 1em .5em 1em}
 .parts_header button:hover{background:#fff;border-radius:25px 25px 0 0}
-.upload_group{padding:1.5em}
-.upload_group div{width:100%;padding:1em 0;margin:.2em 0;border:#c7c7c7 solid 1px}
-.upload_group button{width:100%;background:#dadada;padding:1em 0;border:none;text-align:center;border-radius:15px}
-.upload_group button:last-of-type{margin:1.5em 0 0 0}
+.submenu_section{padding:1em}
+.submenu_section h1{font-size:1.1em}
+.menu_group_full{padding:0 1.5em}
+.menu_group_full div{padding:.5em;margin:.2em 0;border:#c7c7c7 solid 1px}
+.menu_group_full button{background:#dadada;padding:.5em 0;border:none;border-radius:15px}
+.menu_group_full a, .menu_group_full input, .menu_group_full button{width:100%}
 div.listentry_wide{width:auto;float:right;padding:.25em;margin:0;font-size:.9em;min-width:1em}
+.progbar_container{position:absolute;bottom:0;left:0;right:0;height:2.5em;border-radius:0 0 10px 10px;
+	z-index:-1;color:#565656;text-align:center;overflow:hidden}
+.progbar_container div{position:absolute}
+#progbar{background:#c7e8c3;height:100%;z-index:-1}
+#progbar_message{height:75%;width:100%;bottom:0;font-size:.8em}
 
 .zero{display:none}
 .select{background:#C4B9C5}
@@ -110,9 +122,15 @@ div.listentry_wide{width:auto;float:right;padding:.25em;margin:0;font-size:.9em;
 </style>
 </head><body>
 <div id='menu' class='closed'>
+	<div class = 'menu_title'>
+		<a href='../#highlight' target='_blank'>Introduction</a>
+		<a href='https://github.com/miserman/adicat' target='_blank'>Repository</a>
+		<a href='../docs/#Adicat.hl' target='_blank'>Documentation</a>
+	</div>
 	<button class='menu_header' type='button'>Settings</button>
 	<div id='opt_sets' class='menu_group'>
-		<div><p title='Which metric should be displayed for each category; percent is percent of total words.'>values</p>
+		<a class='note'>hover over each setting name for details</a>
+		<div><p title='Ehich metric should be displayed for each category; percent is percent of total words.'>values</p>
 			<p><button type='button'>count</button><button type='button'>percent</button></p></div>
 		<div><p title="When live processing is on, input text is processed locally as it's entered; otherwise, input text is only processed globally, when triggered (as by the refresh button)">live</p>
 			<p><button type='button'>on</button><button type='button'>off</button></p></div>
@@ -120,12 +138,15 @@ div.listentry_wide{width:auto;float:right;padding:.25em;margin:0;font-size:.9em;
 			<p><button type='button'>true</button><button type='button'>false</button></p></div>
 		<div><p title='The similarity metric calculated between the current and comparison text.'>sim_metric</p>
 			<p><button type='button'>canberra</button><button type='button'>cosine</button></p></div>
-		<div><p title='The categories going into the text comparison; categories not found in the current dictionary are ignored.'>sim_cats</p>
-			<div class='listentry_wide' contenteditable='true' onblur='update_options(this)'><p></p></div></div>
 		<div><p title='The code of the character used to fill in spaces; for processing by word, each space is a <span>, but spans with only the regular space character (\u2) are automatically removed, so a different character must be used (\u2008 being the default).'>space_character</p>
 			<p><input type='text' onblur='update_options(this)'></p></div>
+		<p class='parts_header'><button type='button'>default</button><button type='button'>displaying</button><button type='button'>all</button></p>
+		<div><p title='Only applies if sim_filter is true. The categories going into the text comparison; categories not found in the current dictionary are ignored.'>sim_cats</p>
+			<div class='listentry_wide' contenteditable='true' onblur='update_options(this)'><p></p></div></div>
+		<div><p title='If true, similarity comparisons are only between sim_cats categories. Otherwise, all categories are used (unless no categories are matched, in which case comparisons are between words).'>sim_filter</p>
+			<p><button type='button'>true</button><button type='button'>false</button></p></div>
 	</div>
-	<button class='menu_header' type='button'>Dictionary</button>
+	<button class='menu_header' id='dict_menu_header' type='button'>Dictionary</button>
 	<div class='menu_group'>
 		<button class='menu_inner_full' onclick='toggle_edit()'>load/create/edit</button>
 		<p class='parts_header' id='toggle_cats'>Word Categories<button type='button'>none</button><button type='button'>all</button></p>
@@ -135,6 +156,7 @@ div.listentry_wide{width:auto;float:right;padding:.25em;margin:0;font-size:.9em;
   </div>
 	<button class='menu_header' type='button'>Saved Texts</button>
 	<div class='menu_group'>
+		<a class='note'>set a comparison to see similarity between the set and current text in the output</a>
 		<table><thead><tr><th width='25px'>ID</th><th>Text</th><th width='25px'>Comparison</th><th width='25px'>Delete</th></tr></thead><tbody id='menu_saved'></tbody></table>
   </div>
 	<button class='menu_header' type='button'>Example Texts</button>
@@ -154,7 +176,8 @@ div.listentry_wide{width:auto;float:right;padding:.25em;margin:0;font-size:.9em;
 			<tr><td>4</td><td>Life Course</td><td>Masculine</td><td>The last couple of years were 'bear down to stabilize' years, with some loans to pay off, some unfortunately necessary large purchases, and a new baby on top of all that. With a lot of that behind us, I feel a bit of room to breathe. In this mind set, some old dreams of living in Sweden are coming up to the surface. Of course, everyone was thrilled at the idea. Part of me wants to go all in; this was always the plan from the start. Another part looks at what we have in place at the moment: stability, roots, prospects, etc.. I almost want to slap myself for continuing to hold on to these silly fantasies. Support from the spouse and kids is firmly in place; they love a good adventure, particularly into the unknown. I'm the deciding factor in all of this, which is scary. With nothing else to consider, I'd be on the road in a heartbeat, but with a family and the partial foundation we put down, the decision seems impossible. In the best case, it's between something rewarding in the long term, and something pragmatically reasonable. In a sense, each side seems like the right choice, depending on which one I'm focusing on at the time.</td></tr>
 		</tbody></table>
   </div>
-	<button onclick='backup(null,null,true)' class='reset' title='clear local storage' type='button'>Reset</button>
+	<button onclick='toggle_fileproc()' title='process and download a text file' class='menu_inner_full' type='button'>Process File</button>
+	<button onclick='backup(null,null,true)' class='reset menu_inner_full' title='clear local storage' type='button'>Reset</button>
 </div>
 <div id='frame'>
 	<div id='input' class='highlight' contenteditable="true"></div>
@@ -167,8 +190,8 @@ div.listentry_wide{width:auto;float:right;padding:.25em;margin:0;font-size:.9em;
 	</div>
 	<div id='overlay' onclick='toggle_menu()'></div>
 </div>
-<div id='dictionary_edit' class='transparent' style='display:none' onclick='toggle_edit()'></div>
-<div id='dictionary_menu' style='display:none'>
+<div id='dictionary_edit' class='excape_plate transparent' style='display:none' onclick='toggle_edit()'></div>
+<div id='dictionary_menu' class='full_menu' style='display:none'>
 	<div class='menu_group_open'>
 		<p id='dict_name' contenteditable="true">Default</p>
 		<button type='button' id='dictionary_menu_previous' title='previous dictionary' onclick='dict_cycle(true)'>&lang;</button>
@@ -188,23 +211,32 @@ div.listentry_wide{width:auto;float:right;padding:.25em;margin:0;font-size:.9em;
 		<p><strong>Import dictionary</strong></p>
 		<p><button onclick='toggle_port(import_menu)' type='button'>close</button></p>
 	</div>
-	<div class='menu_group_open'><p>adicat dictionaries</p><p>
-		<button type='button' onclick="dict_import('function','default')">function</button>
-		<button type='button' onclick="dict_import('lusi')">lusi</button>
-		<button type='button' onclick="dict_import('netspeak')">netspeak</button>
-	</p></div>
-	<div class='upload_group'>
-		<a>URL (if the source allows cross-origin requests):</a>
-		<div contenteditable="true" onkeydown='import_url(event)'></div>
-		<button onclick='import_url(event)' type='button'>Submit URL</button>
-		<button onclick='upload.click()' type='button'>Upload File</button>
+	<div class='submenu_section'>
+		<h1>From a URL:</h1>
+		<div class='menu_group_open'><p>adicat dictionaries:</p><p>
+			<button type='button' onclick="dict_import('function','default')">function</button>
+			<button type='button' onclick="dict_import('lusi')">lusi</button>
+			<button type='button' onclick="dict_import('netspeak')">netspeak</button>
+		</p></div>
+		<div class='menu_group_full'>
+			<a>URL (if the source allows cross-origin requests):</a>
+			<div contenteditable='true' onkeydown='import_url(event)'></div>
+			<button onclick='import_url(event)' type='button'>Submit URL</button>
+		</div>
+	</div><div class='submenu_section'>
+		<h1>From a file or direct input:</h1>
+		<textarea id='dictionary_input'></textarea>
 		<input type='file' style='display:none' onchange='dict_import(this)' id='upload'>
-		<p id='load_error' style='display:none;color:red;font-size:1.2em;padding:2em'>Failed to load file.<p>
+		<div class='menu_group_open'><p contenteditable='true' id='dictionary_filename'>import_dict</p><p>
+			<button onclick='upload.click()' type='button'>Upload File</button>
+			<button onclick='handle_dict_import()' type='button'>Import</button>
+		</p></div>
 	</div>
+	<p id='load_error' style='font-size:.7em;text-align:center;padding:2em 0 0 0'>drag and drop or select a .dic or .json dictionary<p>
 </div>
 <div class='port_menu' id='export_menu' style='display:none'>
 	<div class='menu_group_open'>
-		<p><strong>name:</strong> <a id='file_name' contenteditable="true">Default</a></p>
+		<p id='file_name' contenteditable="true">Default</p>
 		<p><button onclick='toggle_port(export_menu)' type='button'>close</button></p>
 	</div>
 	<textarea id='export_output'></textarea>
@@ -213,56 +245,118 @@ div.listentry_wide{width:auto;float:right;padding:.25em;margin:0;font-size:.9em;
 			<button onclick='export_refresh(this)' title='Formated for Linguistic Inquery and Word Count' type='button'>DIC</button>
 		</p><p>
 			<button onclick='export_output.focus();export_output.select();document.execCommand("copy")' type='button'>copy</button>
-			<button onclick='dict_export(filename.innerText,options.use_dict,export_format.className==="selected",true)' type='button'>download</button>
+			<button onclick='Adicat.dict_export(Adicat.hl.options.dict[Adicat.hl.options.use_dict].cats,export_format.className==="selected",true,filename.innerText)' type='button'>download</button>
 	</p></div>
+</div>
+<div id='fileproc_background' class='excape_plate transparent' style='display:none' onclick='toggle_fileproc()'></div>
+<div id='fileproc_menu' class='full_menu' style='display:none'>
+	<div class='menu_group_open'>
+		<p id='output_name' contenteditable="true">adicat_output</p>
+		<p>
+			<button onclick='upload.click()' type='button'>Upload File</button>
+			<button onclick='file_input.value=""' type='button'>Clear</button>
+		</p>
+	</div>
+	<textarea id='file_input'></textarea>
+	<a class='note'>settings from the other menus (such as selected categories and comparison text) also apply here</a>
+	<div class='menu_group_open'>
+		<p>input_encoding</p>
+		<p><input type='text' id='input_encoding' onblur='update_options(this)' value='ascii'></p>
+	</div>
+	<div class='menu_group_open'>
+		<p>split</p>
+		<p><input type='text' id='output_split' onblur='update_options(this)' value='\n+'></p>
+	</div>
+	<div class='menu_group_open'>
+		<p>Output Format</p>
+		<p>
+			<button onclick='fileproc_options(this)' class='selected' type='button'>.csv</button>
+			<button onclick='fileproc_options(this)' id='output_sep_txt' type='button'>.txt</button>
+		</p>
+	</div>
+	<div class='menu_group_open'>
+		<p>Meta Categories</p>
+		<p>
+			<button onclick='fileproc_options(this)' class='selected' type='button'>on</button>
+			<button onclick='fileproc_options(this)' id='output_meta_off' type='button'>off</button>
+		</p>
+	</div>
+	<div class='progbar_container'><div id='progbar_message'>paste in text or drag and drop a text file</div><div id='progbar'></div></div>
+	<button onclick='process_file()' class='menu_inner_full' type='button'>Process and Download</button>
 </div>
 <script type="text/javascript">
 'use strict'
 function $(e){return document.getElementById(e)}
 var frame=$('frame'), menu=$('menu'), menu_open=$('menu_open'), menu_cats=$('menu_cats'), menu_saved=$('menu_saved'), overlay=$('overlay'),
-		upload=$('upload'), file=$('file'), input=$('input'), contr=$('inp_control'), contr_items=contr.children, eopt={},
-		store=window.localStorage||{},values=$('values'), toggle_cats=$('toggle_cats'), menu_comps=$('menu_comps'), input_history=0,
-		texts={current:0, comp:null, last:0}, limit={proc:false, save:0}, que_proc=false, example_texts=$('example_texts'), dictionary_edit=$('dictionary_edit'),
-		dictionary_menu=$('dictionary_menu'), dict_prev=$('dictionary_menu_previous'), dict_next=$('dictionary_menu_next'), dict_name=$('dict_name'),
-		dict_words=$('dict_words'), dict_comps=$('dict_comps'), disp_live=$('disp_live'), disp_saved=$('disp_saved'), export_menu=$('export_menu'),
-		export_output=$('export_output'), export_format=$('export_menu').lastElementChild.children[0].children[1], filename=$('file_name'),
-		upload=$('upload'), opt_sets=$('opt_sets'), opt_style=$('opt_style'), import_menu=$('import_menu'), load_error=$('load_error')
+		upload=$('upload'), file=$('file'), contr=$('inp_control'), contr_items=contr.children, eopt={}, store=window.localStorage||{},
+		toggle_cats=$('toggle_cats'), menu_comps=$('menu_comps'), limit={proc:false, save:0}, que_proc=false, example_texts=$('example_texts'),
+		dictionary_edit=$('dictionary_edit'), dictionary_menu=$('dictionary_menu'), dict_prev=$('dictionary_menu_previous'),
+		dict_next=$('dictionary_menu_next'), dict_name=$('dict_name'), dict_words=$('dict_words'), dict_comps=$('dict_comps'),
+		disp_live=$('disp_live'), disp_saved=$('disp_saved'), export_menu=$('export_menu'), export_output=$('export_output'),
+		export_format=$('export_menu').lastElementChild.children[0].children[1], filename=$('file_name'), upload=$('upload'),
+		opt_sets=$('opt_sets'), opt_style=$('opt_style'), import_menu=$('import_menu'), load_error=$('load_error'), fileproc_menu=$('fileproc_menu'),
+		file_input=$('file_input'), fileproc_background=$('fileproc_background'), output_name=$('output_name'), output_split=$('output_split'),
+		dictionary_input=$('dictionary_input'), dictionary_filename=$('dictionary_filename'), dict_menu_header=$('dict_menu_header')
 window.onload=function(){
+	var k
 	if(store.hasOwnProperty('options')){
 		eopt=JSON.parse(store.options)
-		for(var k in options) if(eopt.hasOwnProperty(k)) options[k]=eopt[k]
+		for(k in Adicat.hl.options) if(eopt.hasOwnProperty(k)) Adicat.hl.options[k]=eopt[k]
 	}
-	if(store.hasOwnProperty('texts')) texts=JSON.parse(store.texts)
-	texts.current=texts.hasOwnProperty(texts.last) ? ++texts.last : texts.last
-	if(!options.dict.hasOwnProperty(options.use_dict)) options.use_dict='default'
-	if(!options.dict[options.use_dict].hasOwnProperty('cats')){
+	if(store.hasOwnProperty('texts')) Adicat.hl.texts=JSON.parse(store.texts)
+	Adicat.hl.texts.current=Adicat.hl.texts.hasOwnProperty(Adicat.hl.texts.last) ? ++Adicat.hl.texts.last : Adicat.hl.texts.last
+	Adicat.hl.options.tabulate=true
+	Adicat.hl.input=$('input')
+	Adicat.hl.values=$('values')
+	if(!Adicat.hl.options.dict.hasOwnProperty(Adicat.hl.options.use_dict)) Adicat.hl.options.use_dict='default'
+	if(!Adicat.hl.options.dict[Adicat.hl.options.use_dict].hasOwnProperty('cats')){
 		dict_import('function','default')
 	}
-	if(!patterns.dict_proc) patterns.dict=adicat_readDict(options.dict[options.use_dict].cats)
+	if(!Adicat.patterns.dict_proc){
+		Adicat.patterns.dict=Adicat.toRegex(Adicat.hl.options.dict[Adicat.hl.options.use_dict].cats)
+		Adicat.patterns.dict_cats = []
+		if(Adicat.patterns.dict) for(k in Adicat.patterns.dict) if(Adicat.patterns.dict.hasOwnProperty(k)) Adicat.patterns.dict_cats.push(k)
+	}
 	fill_menu()
 	apply_colors()
-	addEvent(input,'keypress',function(k){disp_saved.style.color='#ff7b7b';spanner(k)})
-	addEvent(input,'keyup',process_span)
-	addEvent(input,'paste',catch_paste)
-	addEvent(input,'keydown',function(k){if(k.which===9){k.preventDefault()}})
-	addEvent(values,'click',function(t){if(t.target.tagName==='TH' && t.target.className!=='') select(t.target)})
-	addEvent(menu,'click',toggle_menu_group)
-	addEvent(opt_sets,'click',update_options)
-	addEvent(menu_cats,'click',function(t){if(t.target.tagName==='SPAN') toggle_cat(t.target)})
-	addEvent(menu_comps,'click',function(t){if(t.target.tagName==='SPAN') toggle_comp(t.target)})
-	addEvent(toggle_cats,'click',function(e){e.target.innerText==='all' ? multitog(true,true) : multitog()})
-	addEvent(menu_saved,'click',fill_text)
-	addEvent(example_texts,'click',fill_text)
-	addEvent(dictionary_menu,'keydown',enter_sub)
-	addEvent(opt_sets,'keydown',enter_sub)
-	addEvent(dict_name,'blur',dict_rename)
-	addEvent(dict_words,'blur',function(e){if(e.value){
+	input.addEventListener('keypress',function(k){
+		disp_saved.style.color='#ff7b7b'
+		Adicat.hl.spanner(k)
+		if(Adicat.hl.options.live==='on') backup(false,true)
+	})
+	document.addEventListener('drop',handle_drop)
+	document.addEventListener('dragover',function(e){e.preventDefault()})
+	input.addEventListener('keyup',Adicat.hl.process_span)
+	input.addEventListener('paste',catch_paste)
+	input.addEventListener('keydown',function(k){if(k.which===9){k.preventDefault()}})
+	values.addEventListener('click',function(t){if(t.target.tagName==='TH' && t.target.className!=='') Adicat.hl.select(t.target)})
+	menu.addEventListener('click',toggle_menu_group)
+	opt_sets.addEventListener('click',update_options)
+	menu_cats.addEventListener('click',function(t){if(t.target.tagName==='SPAN') toggle_cat(t.target)})
+	menu_comps.addEventListener('click',function(t){if(t.target.tagName==='SPAN') toggle_comp(t.target)})
+	toggle_cats.addEventListener('click',function(e){e.target.innerText==='all' ? multitog(true,true) : multitog()})
+	menu_saved.addEventListener('click',fill_text)
+	example_texts.addEventListener('click',fill_text)
+	dictionary_menu.addEventListener('keydown',enter_sub)
+	opt_sets.addEventListener('keydown',enter_sub)
+	dict_name.addEventListener('blur',dict_rename)
+	dictionary_input.addEventListener('keydown',function(k){if(k.which===9){
+		k.preventDefault()
+		if(document.selection){
+			document.selection.createRange().text = '\t'
+		}else{
+			var p = dictionary_input.selectionStart, b = dictionary_input.value, a = b.substring(dictionary_input.selectionEnd, b.length)
+			dictionary_input.value = b.substring(0, p) + '\t' + a
+			dictionary_input.selectionStart = dictionary_input.selectionEnd = p + 1
+		}
+	}})
+	dict_words.addEventListener('blur',function(e){if(e.value){
 		var o=e.value, n=e.innerText, d=dict_name.innerText
-		options.dict[d][n]=options.dict[d][o]
-		delete options.dict[d][n]
+		Adicat.hl.options.dict[d][n]=Adicat.hl.options.dict[d][o]
+		delete Adicat.hl.options.dict[d][n]
 		set_dict(d)
 	}})
-	addEvent(document,'keydown',function(k){
+	document.addEventListener('keydown',function(k){
 		if(k.ctrlKey){
 			if(k.which===83){
 				backup(true)
@@ -282,9 +376,9 @@ function backup(force,wait,clear){
 			window.location.reload()
 		}
 	}else if(force || limit.save<1 || limit.calls>15){
-		if(patterns.char.test(input.innerText)) texts[texts.current]=input.innerText
-		store.options=JSON.stringify(options)
-		store.texts=JSON.stringify(texts)
+		if(Adicat.patterns.char.test(input.innerText)) Adicat.hl.texts[Adicat.hl.texts.current]=input.innerText
+		store.options=JSON.stringify(Adicat.hl.options)
+		store.texts=JSON.stringify(Adicat.hl.texts)
 		fill_menu()
 		limit.save=2
 		limit.calls=0
@@ -303,54 +397,60 @@ function backup(force,wait,clear){
 	}
 }
 function update_options(e){
-	if(e.target && e.target.tagName==='BUTTON'){
-		var v=e.target, a=v.parentElement.children, i=a.length, k=v.parentElement.previousElementSibling.innerText
-		if(options.hasOwnProperty(k)) options[k]=v.innerText
-		while(i--){a[i].className=''}
-		v.className='selected'
+	if(!e.target || e.target.parentElement.className === 'parts_header'){
+		if(e.target && e.target.parentElement.className === 'parts_header'){
+		  sim_cat_fill(e.target)
+			e = e.target.parentElement.nextElementSibling.lastElementChild
+		}
+		var a=e.value ? e.parentElement.parentElement.firstElementChild.innerHTML : e.parentElement.firstElementChild.innerHTML, uc = /^\\u/
+		if(Adicat.hl.options.hasOwnProperty(a)) Adicat.hl.options[a]=e.value ?
+		  uc.test(e.value) ? String.fromCharCode(parseInt(e.value.replace(uc,''),16)) : e.value : e.innerText.split(/ *, */)
 		backup(true)
 		que_proc=true
-	}else if(!e.target){
-		var a=e.value ? e.parentElement.parentElement.firstElementChild.innerHTML : e.parentElement.firstElementChild.innerHTML
-		if(options.hasOwnProperty(a)) options[a]=e.value ? String.fromCharCode(parseInt(e.value.replace(/^\\u/,''),16)) : e.innerText.split(/ *, */)
+	}else if(e.target && e.target.tagName==='BUTTON'){
+		var v=e.target, a=v.parentElement.children, i=a.length, k=v.parentElement.previousElementSibling.innerText
+		if(Adicat.hl.options.hasOwnProperty(k)) Adicat.hl.options[k]=v.innerText
+		while(i--){a[i].className=''}
+		v.className='selected'
 		backup(true)
 		que_proc=true
 	}
 }
 function enter_sub(k){if(k.which===13 && k.target.tagName!=='BUTTON'){k.target.blur();k.preventDefault()}}
 function fill_menu(){
-	var k, i, c, tr, n=/\d/, dict=options.dict[options.use_dict].cats, comps=options.dict[options.use_dict].composites
+	var k, i, c, tr, n=/\d/, dict=Adicat.hl.options.dict[Adicat.hl.options.use_dict].cats, comps=Adicat.hl.options.dict[Adicat.hl.options.use_dict].composites
 	menu_cats.innerHTML=menu_comps.innerHTML=menu_saved.innerHTML=''
-	for(k in dict){if(dict.hasOwnProperty(k)){
-		append(menu_cats,'span',{className:options.blacklist.indexOf(k)===-1 ? ' '+k+' ' : '|'+k+'| off',innerText:k})
-	}}
-	for(k in comps){if(comps.hasOwnProperty(k)){
-		append(menu_comps,'span',{className:comps[k].show ? '' : 'off',innerText:k})
-	}}
-	for(k in texts){if(n.test(k)){
+	for(k in dict) if(dict.hasOwnProperty(k)){
+		Adicat.hl.append(menu_cats,'span',{className:Adicat.hl.options.blacklist.indexOf(k)===-1 ? ' '+k+' ' : '|'+k+'| off',innerText:k})
+	}
+	for(k in comps) if(comps.hasOwnProperty(k)){
+		Adicat.hl.append(menu_comps,'span',{className:comps[k].show ? '' : 'off',innerText:k})
+	}
+	for(k in Adicat.hl.texts) if(n.test(k)){
 		tr=document.createElement('tr')
-		append(tr,'td',{innerText:k})
-		append(tr,'td',{innerText:texts[k]})
-		append(tr,'td',{innerHTML:"<button type='button'>"+(texts.comp===k ? 'comparing' : 'set')+"</button>"})
-		append(tr,'td',{innerHTML:"<button type='button'>&#10005;</button>"})
+		Adicat.hl.append(tr,'td',{innerText:k})
+		Adicat.hl.append(tr,'td',{innerText:Adicat.hl.texts[k]})
+		Adicat.hl.append(tr,'td',{innerHTML:"<button type='button'>"+(Adicat.hl.texts.comp===k ? 'comparing' : 'set')+"</button>"})
+		Adicat.hl.append(tr,'td',{innerHTML:"<button type='button'>&#10005;</button>"})
 		menu_saved.appendChild(tr)
-	}}
-	menu.children[2].innerText='Dictionary: '+options.use_dict
+	}
+	dict_menu_header.innerText='Dictionary: '+Adicat.hl.options.use_dict
 	i=opt_sets.childElementCount
 	while(i--){
-		c=opt_sets.children[i].children
-		k=c[1].childElementCount
-		if(k===1){
-			tr=c[1].children[0]
-			if(tr.tagName==='INPUT'){
-				tr.value='\\u'+options[c[0].innerHTML].charCodeAt().toString(16)
-			}else if(c[1].tagName==='DIV') tr.innerText=options[c[0].innerHTML].join(', ')
-		}else while(k--) c[1].children[k].className=options[c[0].innerHTML]===c[1].children[k].innerHTML ? 'selected' : ''
+		if((c=opt_sets.children[i].children).length){
+			k=c[1].childElementCount
+			if(k===1 && Adicat.hl.options.hasOwnProperty(c[0].innerHTML)){
+				tr=c[1].children[0]
+				if(tr.tagName==='INPUT'){
+					tr.value='\\u'+Adicat.hl.options[c[0].innerHTML].charCodeAt().toString(16)
+				}else if(c[1].tagName==='DIV') tr.innerText=Adicat.hl.options[c[0].innerHTML].join(', ')
+			}else while(k--) c[1].children[k].className=Adicat.hl.options[c[0].innerHTML]===c[1].children[k].innerHTML ? 'selected' : ''
+		}
 	}
-	disp_saved.innerText=texts.current
-	disp_saved.style.color=texts.hasOwnProperty(texts.current) && texts[texts.current]===input.innerText ? '#84dc84' : '#ff7b7b'
-	disp_live.innerText=options.live
-	disp_live.style.color=options.live==='on' ? '#84dc84' : '#ff7b7b'
+	disp_saved.innerText=Adicat.hl.texts.current
+	disp_saved.style.color=Adicat.hl.texts.hasOwnProperty(Adicat.hl.texts.current) && Adicat.hl.texts[Adicat.hl.texts.current]===input.innerText ? '#84dc84' : '#ff7b7b'
+	disp_live.innerText=Adicat.hl.options.live
+	disp_live.style.color=Adicat.hl.options.live==='on' ? '#84dc84' : '#ff7b7b'
 }
 function toggle_menu(e){
 	if(menu.className==='closed'){
@@ -361,6 +461,7 @@ function toggle_menu(e){
 		overlay.style.display='block'
 	}else{
 		if(input.lastElementChild && input.lastElementChild.tagName==='SPAN'){
+			input.focus()
 			var s=window.getSelection(), r=s.getRangeAt(0)
 			r.setStart(input.lastElementChild,0)
 			r.setEnd(input.lastElementChild,1)
@@ -382,23 +483,23 @@ function toggle_menu(e){
 	backup(true)
 }
 function toggle_cat(e){
-	var off=/ off$/, i=options.blacklist.indexOf(e.innerText)
+	var off=/ off$/, i=Adicat.hl.options.blacklist.indexOf(e.innerText)
 	if(off.test(e.className)){
 		e.className=e.className.replace(/\|/g,' ').replace(off,'')
-		if(i!==-1) options.blacklist.splice(i,1)
+		if(i!==-1) Adicat.hl.options.blacklist.splice(i,1)
 	}else{
 		e.className=e.className.replace(/ /g,'|')+' off'
-		if(i===-1) options.blacklist.push(e.innerText)
+		if(i===-1) Adicat.hl.options.blacklist.push(e.innerText)
 	}
-	patterns.matches={}
+	Adicat.patterns.matches={}
 	que_proc=true
 }
 function toggle_comp(e){
-	var i, k, co=options.dict[options.use_dict].composites[e.innerText], ca=[]
+	var i, k, co=Adicat.hl.options.dict[Adicat.hl.options.use_dict].composites[e.innerText], ca=[]
 	if(e.className==='off'){
 		e.className=''
 		co.show=true
-		for(k in options.dict[options.use_dict].cats){if(options.dict[options.use_dict].cats.hasOwnProperty(k) && co.formula.search(k)!==-1) ca.push(k)}
+		for(k in Adicat.hl.options.dict[Adicat.hl.options.use_dict].cats){if(Adicat.hl.options.dict[Adicat.hl.options.use_dict].cats.hasOwnProperty(k) && co.formula.search(k)!==-1) ca.push(k)}
 		if(ca.length) multitog(true,false,ca)
 	}else{
 		e.className='off'
@@ -410,13 +511,13 @@ function multitog(on,all,cats){
 	var cats=cats||[], i=cats.length, p
 	if(on){
 		if(all){
-			options.blacklist=[]
+			Adicat.hl.options.blacklist=[]
 		}else{
-			while(i--){if((p=options.blacklist.indexOf(cats[i]))!==-1) options.blacklist.splice(p,1)}
+			while(i--){if((p=Adicat.hl.options.blacklist.indexOf(cats[i]))!==-1) Adicat.hl.options.blacklist.splice(p,1)}
 		}
 	}else{
-		for(i in options.dict[options.use_dict].cats){if(options.dict[options.use_dict].cats.hasOwnProperty(i)){
-			if(options.blacklist.indexOf(i)===-1) options.blacklist.push(i)
+		for(i in Adicat.hl.options.dict[Adicat.hl.options.use_dict].cats){if(Adicat.hl.options.dict[Adicat.hl.options.use_dict].cats.hasOwnProperty(i)){
+			if(Adicat.hl.options.blacklist.indexOf(i)===-1) Adicat.hl.options.blacklist.push(i)
 		}}
 	}
 	if(menu_cats.innerHTML===''){
@@ -425,50 +526,52 @@ function multitog(on,all,cats){
 		i=menu_cats.children.length
 		while(i--){
 			p=menu_cats.children[i].innerText
-			menu_cats.children[i].className=options.blacklist.indexOf(p)===-1 ? ' '+p+' ' : '|'+p+'| off'
+			menu_cats.children[i].className=Adicat.hl.options.blacklist.indexOf(p)===-1 ? ' '+p+' ' : '|'+p+'| off'
 		}
 	}
-	patterns.matches={}
+	Adicat.patterns.matches={}
   input_refresh()
 }
-function set_dict(d){if(options.dict.hasOwnProperty(d)){
-	patterns.dict=adicat_readDict(options.dict[d].cats)
-	patterns.dict_proc=true
-	patterns.matches={}
-	options.use_dict=d
+function set_dict(d){if(Adicat.hl.options.dict.hasOwnProperty(d)){
+	Adicat.patterns.dict=Adicat.toRegex(Adicat.hl.options.dict[d].cats)
+	Adicat.patterns.dict_cats = []
+	for(var k in Adicat.patterns.dict) if(Adicat.patterns.dict.hasOwnProperty(k)) Adicat.patterns.dict_cats.push(k)
+	Adicat.patterns.dict_proc=true
+	Adicat.patterns.matches={}
+	Adicat.hl.options.use_dict=d
 	apply_colors()
 	que_proc=true
 }}
 function dict_display(dict){
-	if('string'===typeof dict) dict=options.dict[dict]
+	if('string'===typeof dict) dict=Adicat.hl.options.dict[dict]
 	dict_words.innerHTML=dict_comps.innerHTML=''
-	append(dict_words,'table',{className:'dict_table',innerHTML:'<thead><td style="width:25px">category</td><td style="width:25px">color</td><td>terms</td>'
+	Adicat.hl.append(dict_words,'table',{className:'dict_table',innerHTML:'<thead><td style="width:25px">category</td><td style="width:25px">color</td><td>terms</td>'
 		+'<tr><td colspan="3"><button onclick="addRow(true)" type="button">+</button></td></tr></thead><tbody></tbody>'
 	})
 	var cats=dict_words.children[0].tBodies[0], comps, seeds=[], bs=/^\/|\/$/g, i=0, k, l, tr
-	for(k in colors){if(colors.hasOwnProperty(k)) seeds.push(k)}
+	for(k in Adicat.hl.colors){if(Adicat.hl.colors.hasOwnProperty(k)) seeds.push(k)}
 	l=seeds.length
 	for(k in dict.cats){if(dict.cats.hasOwnProperty(k)){
 		if(!dict.colors.hasOwnProperty(k)){
 			if(i>=l) i=0
-			dict.colors[k]=colors[seeds[i]].sample()
+			dict.colors[k]=Adicat.hl.colors[seeds[i]].sample()
 			i++
 		}
 		if(dict.cats[k].test) dict.cats[k]=(dict.cats[k]+'').replace(bs,'').split('|')
 		tr=document.createElement('tr')
-		append(tr,'td',{innerHTML:'<div contenteditable="true" value="'+k+'">'+k+'</div>',style:'color:'+dict.colors[k]})
-		append(tr,'td',{innerHTML:'<div contenteditable="true" onkeyup="color_preview(this)">'+dict.colors[k]+'</div>'})
-		append(tr,'td',{innerHTML:'<div contenteditable="true">'+dict.cats[k].join(', ')+'</div>'})
+		Adicat.hl.append(tr,'td',{innerHTML:'<div contenteditable="true" value="'+k+'">'+k+'</div>',style:'color:'+dict.colors[k]})
+		Adicat.hl.append(tr,'td',{innerHTML:'<div contenteditable="true" onkeyup="color_preview(this)">'+dict.colors[k]+'</div>'})
+		Adicat.hl.append(tr,'td',{innerHTML:'<div contenteditable="true">'+dict.cats[k].join(', ')+'</div>'})
 		cats.appendChild(tr)
 	}}
-	append(dict_comps,'table',{className:'dict_table',innerHTML:'<thead><td style="width:25px">name</td><td>formula</td>'
+	Adicat.hl.append(dict_comps,'table',{className:'dict_table',innerHTML:'<thead><td style="width:25px">name</td><td>formula</td>'
 		+'<tr><td colspan="2"><button onclick="addRow()" type="button">+</button></td></tr></thead><tbody></tbody>'
 	})
 	comps=dict_comps.children[0].tBodies[0]
 	for(k in dict.composites){if(dict.composites.hasOwnProperty(k)){
 		tr=document.createElement('tr')
-		append(tr,'td',{innerHTML:'<div contenteditable="true" value="'+k+'">'+k+'</div>'})
-		append(tr,'td',{innerHTML:'<div contenteditable="true">'+dict.composites[k].formula+'</div>'})
+		Adicat.hl.append(tr,'td',{innerHTML:'<div contenteditable="true" value="'+k+'">'+k+'</div>'})
+		Adicat.hl.append(tr,'td',{innerHTML:'<div contenteditable="true">'+dict.composites[k].formula+'</div>'})
 		comps.appendChild(tr)
 	}}
 }
@@ -486,28 +589,28 @@ function dict_refresh(ro){
 			}
 		}
 		rs=dict_comps.children[0].tBodies[0].children, n=rs.length, i=0
-		if(n && options.dict[dict_name.innerText].hasOwnProperty('composites')){
-			od=options.dict[dict_name.innerText].composites
+		if(n && Adicat.hl.options.dict[dict_name.innerText].hasOwnProperty('composites')){
+			od=Adicat.hl.options.dict[dict_name.innerText].composites
 			for(;i<n;i++){
 				cn=rs[i].children[0].innerText.replace(rm,'_').replace(cm,'')
 				if(cn) dict.composites[cn]={show:!od.hasOwnProperty(cn)||od[cn].show,formula:rs[i].children[1].innerText}
 			}
 		}
-		options.dict[dict_name.innerText]=dict
+		Adicat.hl.options.dict[dict_name.innerText]=dict
 		if(!ro) set_dict(dict_name.innerText)
 	}else{
 		if(!ro) dict_cycle(true)
 	}
 }
 function dict_rename(){
-	var o=options.use_dict, n=dict_name.innerText
+	var o=Adicat.hl.options.use_dict, n=dict_name.innerText
 	if(o!==n){
 		if(o==='default'){
-			options.dict[n]=JSON.parse(JSON.stringify(options.dict[o]))
-			options.use_dict=n
+			Adicat.hl.options.dict[n]=JSON.parse(JSON.stringify(Adicat.hl.options.dict[o]))
+			Adicat.hl.options.use_dict=n
 		}else{
-			if(o) options.dict[n]=options.dict[o]
-			delete options.dict[o]
+			if(o) Adicat.hl.options.dict[n]=Adicat.hl.options.dict[o]
+			delete Adicat.hl.options.dict[o]
 			if(o) dict_cycle(true)
 		}
 	}
@@ -515,9 +618,9 @@ function dict_rename(){
 function dict_cycle(ch,f){
 	var ns=[], i=0, t=0, k, n
 	if(dict_words.childElementCount) dict_refresh(true)
-	for(k in options.dict){if(options.dict.hasOwnProperty(k)){
+	for(k in Adicat.hl.options.dict){if(Adicat.hl.options.dict.hasOwnProperty(k)){
 		ns[i]=k
-		if(k===options.use_dict) t=i
+		if(k===Adicat.hl.options.use_dict) t=i
 		i++
 	}}
 	n=ns.length-1
@@ -525,8 +628,8 @@ function dict_cycle(ch,f){
 		f ? t++ : t--
 		if(t>n){t=0}else if(t<0){t=n}
 	}
-	if(ns[t]!==options.use_dict) set_dict(ns[t])
-	dict_name.innerText=options.use_dict
+	if(ns[t]!==Adicat.hl.options.use_dict) set_dict(ns[t])
+	dict_name.innerText=Adicat.hl.options.use_dict
 	i=t-1
 	k=t+1
 	if(i<0) i=n
@@ -540,21 +643,42 @@ function dict_cycle(ch,f){
 }
 function toggle_edit(){
 	if('none'===dictionary_edit.style.display){
-		if(!options.hasOwnProperty('dict')) options.dict={default:{cats:options.dict[options.use_dict].cats}}
-		if(!options.dict[options.use_dict].hasOwnProperty('colors')) assign_colors(options.use_dict)
-		if(!options.dict[options.use_dict].hasOwnProperty('composites')) options.dict[options.use_dict].composites={}
+		if(!Adicat.hl.options.hasOwnProperty('dict')) Adicat.hl.options.dict={default:{cats:Adicat.hl.options.dict[Adicat.hl.options.use_dict].cats}}
+		if(!Adicat.hl.options.dict[Adicat.hl.options.use_dict].hasOwnProperty('colors')) assign_colors(Adicat.hl.options.use_dict)
+		if(!Adicat.hl.options.dict[Adicat.hl.options.use_dict].hasOwnProperty('composites')) Adicat.hl.options.dict[Adicat.hl.options.use_dict].composites={}
 		dict_cycle()
 		dictionary_menu.style.display=dictionary_edit.style.display=''
 	}else{
 		var wr=dict_words.getElementsByTagName('tr')
 		if(dict_name.innerText==='' || (wr.length===2 || (wr.length===3 && !wr[2].innerText))){
-			if(dict_name.innerText!=='default') delete options.dict[dict_name.innerText]
+			if(dict_name.innerText!=='default') delete Adicat.hl.options.dict[dict_name.innerText]
 			dict_cycle(true)
 		}else{
 			dict_refresh()
 		}
 		dictionary_menu.style.display=dictionary_edit.style.display=export_menu.style.display=import_menu.style.display='none'
 		fill_menu()
+	}
+}
+function toggle_fileproc(){
+	if('none'===fileproc_menu.style.display){
+		fileproc_menu.style.display=fileproc_background.style.display=''
+		output_split.value = Adicat.hl.options.split || '\\n+'
+	  if(Adicat.hl.options.sep === '\t') fileproc_options($('output_sep_txt'))
+	  if(!Adicat.hl.options.meta) fileproc_options($('output_meta_off'))
+	}else{
+		fileproc_menu.style.display=fileproc_background.style.display='none'
+	}
+}
+function sim_cat_fill(e){
+	var i = e.parentElement.nextElementSibling.children[1].children[0], ck = e.innerText === 'all'
+	if(e.innerText === 'default'){
+		i.innerText = 'article, prep, adverb, conj, auxverb, ipron, ppron'
+	}else{
+		var cats = '', k
+		for(k in Adicat.patterns.dict) if(Adicat.patterns.dict.hasOwnProperty(k)
+		  && (ck || Adicat.hl.options.blacklist.indexOf(k) === -1)) cats += cats ? ', ' + k : k
+		i.innerText = cats
 	}
 }
 function color_preview(cc){cc.parentElement.previousElementSibling.style.color=cc.innerText}
@@ -568,20 +692,20 @@ function toggle_menu_group(t){if(/^menu_header/.test(t.target.className)){
 	}
 }}
 function assign_colors(dict,reset){
-  if(reset || !options.dict[dict].hasOwnProperty('colors')) options.dict[dict].colors={}
+  if(reset || !Adicat.hl.options.dict[dict].hasOwnProperty('colors')) Adicat.hl.options.dict[dict].colors={}
   var seeds=[], i=0, l, k
-  for(k in colors){if(colors.hasOwnProperty(k)) seeds.push(k)}
+  for(k in Adicat.hl.colors) if(Adicat.hl.colors.hasOwnProperty(k)) seeds.push(k)
   l=seeds.length
-  for(k in options.dict[dict].cats){if(options.dict[dict].cats.hasOwnProperty(k) && !options.dict[dict].colors.hasOwnProperty(k)){
+  for(k in Adicat.hl.options.dict[dict].cats) if(Adicat.hl.options.dict[dict].cats.hasOwnProperty(k) && !Adicat.hl.options.dict[dict].colors.hasOwnProperty(k)){
     if(i>=l) i=0
-    options.dict[dict].colors[k]=colors[seeds[i]].sample()
+    Adicat.hl.options.dict[dict].colors[k]=Adicat.hl.colors[seeds[i]].sample()
     i++
-  }}
+  }
 }
 function apply_colors(){
   var h=document.head || document.getElementsByTagName('head')[0], ss=document.getElementsByTagName('style'),
-			l=ss.length, cols=options.dict[options.use_dict].colors, c='.highlight span{color:#d4d4d4}', s=$('cat_colors'), k
-  for(k in cols) if(cols.hasOwnProperty(k)) c=c+".highlight *[class*=' "+k+" ']{color:"+cols[k]+"}"
+			l=ss.length, cols=Adicat.hl.options.dict[Adicat.hl.options.use_dict].colors, c='.highlight span{color:#d4d4d4}', s=$('cat_colors'), k
+  for(k in cols) if(cols.hasOwnProperty(k)) c=c+".highlight *."+k+"{color:"+cols[k]+"}"
   if(s) s.parentElement.removeChild(s)
   s=document.createElement('style')
   s.id='cat_colors'
@@ -592,9 +716,38 @@ function apply_colors(){
   }
   h.appendChild(s)
 }
+function input_clear(m){
+	backup(true)
+	Adicat.hl.input.innerHTML=Adicat.hl.values.innerHTML=''
+	if(m){
+		Adicat.hl.texts.current=Adicat.hl.texts.hasOwnProperty(Adicat.hl.texts.current) ? ++Adicat.hl.texts.last : Adicat.hl.texts.last
+		fill_menu()
+	}
+}
+function input_refresh(){
+	var t=Adicat.hl.input.innerText, s=window.getSelection(), r=s.getRangeAt(0)
+	input_clear()
+	if(Adicat.patterns.returns.test(t)){
+		for(var t=t.split(Adicat.patterns.returns), n=t.length, i=0; i<n; i++){
+			if(t[i]!=='') Adicat.hl.display_text(t[i],true)
+			if(i!==n-1 && Adicat.hl.input.lastElementChild.tagName === 'SPAN') Adicat.hl.input.appendChild(document.createElement('br'))
+		}
+		Adicat.hl.update_table()
+	}else{
+		Adicat.hl.display_text(t)
+	}
+	if(Adicat.hl.input.lastElementChild) r.setStart(Adicat.hl.input.lastElementChild,Adicat.hl.input.lastElementChild.tagName==='SPAN')
+	s.removeAllRanges()
+	s.addRange(r)
+	backup(true)
+	Adicat.hl.input.focus()
+}
+function catch_paste(e){if(Adicat.hl.options.live==='on'){
+	setTimeout(function(){input_refresh()},0)
+}}
 function new_text(){
-	texts.current=++texts.last
-	texts[texts.current]=input.innerText
+	Adicat.hl.texts.current=++Adicat.hl.texts.last
+	Adicat.hl.texts[Adicat.hl.texts.current]=input.innerText
 	backup(true)
 }
 function new_dict(){
@@ -602,9 +755,9 @@ function new_dict(){
 	dict_refresh(true)
 	backup(true)
 	if(dict_name.innerText!=='' && (wr.length>2 && wr[2].innerText)){
-		options.use_dict='custom'
-		if(options.dict.hasOwnProperty('custom')) options.use_dict+='_'+rand(999,100)
-		options.dict[options.use_dict]={cats:{},colors:{},composites:{}}
+		Adicat.hl.options.use_dict='custom'
+		if(Adicat.hl.options.dict.hasOwnProperty('custom')) Adicat.hl.options.use_dict+='_'+Adicat.rand(999,100)
+		Adicat.hl.options.dict[Adicat.hl.options.use_dict]={cats:{},colors:{},composites:{}}
 		dict_cycle()
 		addRow(true)
 	}
@@ -622,45 +775,26 @@ function fill_text(t){
 		var s=t.lastElementChild.innerText==='✕', cl=t.children.length, id=t.children[0].innerText
 		t=t.children[s ? 1 : 3].innerText
 		backup(true)
-		if(s && cl) texts.current=id
+		if(s && cl) Adicat.hl.texts.current=id
 		input_clear()
-		display_text(t)
-		if(!s && texts.hasOwnProperty(texts.current)) new_text()
+		Adicat.hl.display_text(t)
+		if(!s && Adicat.hl.texts.hasOwnProperty(Adicat.hl.texts.current)) new_text()
 		toggle_menu()
 	}else if(t.target.tagName==='BUTTON'){
 		var r=t.target.parentElement.parentElement, id=r.children[0].innerText, i, cr
 		if(t.target.innerText!=='✕'){
 			r=r.parentElement.children
 			i=r.length
-			texts.comp=t.target.innerText==='comparing' ? null : id
-			while(i--){cr=r[i].children;if(cr[2].children) cr[2].children[0].innerText=cr[0].innerText==texts.comp ? 'comparing' : 'set'}
+			Adicat.hl.texts.comp=t.target.innerText==='comparing' ? null : id
+			while(i--){cr=r[i].children;if(cr[2].children) cr[2].children[0].innerText=cr[0].innerText==Adicat.hl.texts.comp ? 'comparing' : 'set'}
 			que_proc=true
 		}else if(confirm('are you sure you want to delete text '+id+'?')){
-			if(input.innerText===texts[id]) input_clear()
-			if(texts.comp===id) texts.comp=null
-			delete texts[id]
+			if(input.innerText===Adicat.hl.texts[id]) input_clear()
+			if(Adicat.hl.texts.comp===id) Adicat.hl.texts.comp=null
+			delete Adicat.hl.texts[id]
 			fill_menu()
 		}
 	}
-}
-function dict_export(n,d,dic,download){
-	var e=document.createElement('a')
-	if('string'===typeof d) d=options.dict[d].cats
-	if(dic){
-		d=write_dic(d)
-	}else{
-		d=JSON.stringify(d)
-		d=d.replace(/^{/,'{\n  ').replace(/}$/,'\n}').replace(/],/g,'],\n  ')
-	}
-	if(download && 'undefined'!==typeof e.download){
-		e.setAttribute('href','data:text/plain;charset=utf-8,'+encodeURIComponent(d))
-		n=n.replace(/\.\w+$/,'')+(dic ? '.dic' : '.json')
-		e.setAttribute('download',n)
-		document.body.appendChild(e)
-		e.click()
-		document.body.removeChild(e)
-	}
-	return d
 }
 function toggle_port(e){
 	if(e.style.display==='none'){
@@ -668,8 +802,8 @@ function toggle_port(e){
 		e.style.display=''
 		if(e.id==='export_menu'){
 			dict_refresh()
-			filename.innerText=options.use_dict
-			export_output.value=dict_export(filename.innerText,options.use_dict,export_format.className==="selected")
+			filename.innerText=Adicat.hl.options.use_dict
+			export_output.value=Adicat.dict_export(Adicat.hl.options.dict[Adicat.hl.options.use_dict].cats,export_format.className==="selected")
 		}else{
 			load_error.display='none'
 		}
@@ -689,94 +823,107 @@ function import_url(k){
 	}
 }
 function export_refresh(e){
-	export_output.value=dict_export('',options.use_dict,e.innerText==='DIC')
+	export_output.value=Adicat.dict_export(Adicat.hl.options.dict[Adicat.hl.options.use_dict].cats,e.innerText==='DIC')
 	e.className='selected'
 	e.innerText==='DIC' ? e.previousElementSibling.className='' : e.nextElementSibling.className=''
 }
+function fileproc_options(e){
+	var ck = /format/i
+	e.className='selected'
+	ck.test(e.parentElement.previousElementSibling.innerText)
+	  ? Adicat.hl.options.sep=e.innerText === '.csv' ? ',' : '\t'
+		: Adicat.hl.options.meta=e.innerText === 'on'
+	e.nextElementSibling ? e.nextElementSibling.className='' : e.previousElementSibling.className=''
+	backup(true)
+}
 function handle_dict_import(n){
 	var waits=0
-	if(patterns.dict || waits>10){
-		if(patterns.dict){
-			if(options.dict.hasOwnProperty(n)){
-				options.dict[n].cats=patterns.dict
-			}else options.dict[n]={cats:patterns.dict}
+	if(!n){
+		n = dictionary_filename.innerText
+		Adicat.patterns.dict = dictionary_input.value ? parse_dict(dictionary_input.value) : null
+	}
+	if(Adicat.patterns.dict || waits>10){
+		if(Adicat.patterns.dict){
+			if(Adicat.hl.options.dict.hasOwnProperty(n)){
+				Adicat.hl.options.dict[n].cats=Adicat.patterns.dict
+			}else Adicat.hl.options.dict[n]={cats:Adicat.patterns.dict}
 			if(import_menu.style.display==='') toggle_port(import_menu)
 			assign_colors(n)
 			set_dict(n)
+			dict_words.innerHTML=''
 			dict_cycle()
 			backup(true)
 		}else{
-			load_error.display=''
+			load_error.innerText='processing failed'
 		}
 	}else{
 		waits++
 		setTimeout(function(){handle_dict_import(n)},20)
 	}
 }
-function dict_import(f,n){
-	if(patterns.dict){
-		dict_refresh()
-		backup(true)
-	}
-	patterns.dict=null
-	if('string'===typeof f){
-		var ds=['function','lusi','netspeak'], nn=n||f.match(/[^/]*$/)[0]||f
-		if(ds.indexOf(f)!==-1) f='https://raw.githubusercontent.com/miserman/adicat/master/dict/'+f+'.json'
-		if(!n) if(options.dict.hasOwnProperty(nn)) nn+='_'+rand(999,100)
-		adicat_loadDict(f)
-		handle_dict_import(nn)
-	}if(f.files && f.files[0]){
-		var f=f.files[0], r=new FileReader(), c, nn
-		r.onload=function(e){
-			c=e.target.result
-			upload.value=''
-			nn=n||options.dict.hasOwnProperty(f.name) ? f.name+'_'+rand(999,100) : f.name
-			patterns.dict=/^%/.test(c) ? read_dic(c) : JSON.parse(c)
-			handle_dict_import(nn)
-		}
-		r.readAsText(f)
-		dict_cycle()
+function handle_drop(e,format){
+	e.preventDefault()
+	format = format || Adicat.hl.options.input_encoding
+	if(e.dataTransfer.files && e.dataTransfer.files[0]){
+		var f=e.dataTransfer.files[0], r=new FileReader(), c, n, ml
+		r.onload = import_menu.style.display!=='none'
+			? function(e){
+				dictionary_filename.innerText = Adicat.hl.options.dict.hasOwnProperty(f.name) ? f.name+'_'+Adicat.rand(999,100) : f.name
+				dictionary_input.value = e.target.result
+			}
+			: function(e){
+				if(dictionary_edit.style.display!=='none') toggle_edit()
+				if(fileproc_menu.style.display==='none') toggle_fileproc()
+				output_name.innerText = f.name.replace(/\.[^\.]*$/,'') + '_' + Adicat.hl.options.use_dict
+				f = e.target.result
+				ml = f.match(/^"[^]*?"$/gm)
+				if(ml) for(var sse = /^"|"$/g, sd = /""/g, i = ml.length; i--;) f = f.replace(ml[i],
+					ml[i].replace(Adicat.patterns.returns, ' ').replace(sse, '').replace(sd, '"'))
+				file_input.value = f
+			}
+		r.readAsText(f,format)
 	}
 }
-function solve(eq){
-	var mr=/ |^Math\./g, ch=/[^\.0-9+><*%^()&|\/-]/g, nf=/^\(/, fh=/^[^(]*/, ip=/\([^(]+\)/g,
-	  bs=/ +/g, bo=/[^+><*^()&%|\/-]+/g, e={}, sp=[], te='', l=0
-	function dict_ops(s){
-		var s=s+'', t=s.match(bo), n=t ? t.length : 0, c='', i=0
-		for(;i<n;i++){
-			c=t[i].replace(bs,'')
-			c=output.hasOwnProperty(c) ? Number(output[c]) : Number(c)
-			if(isNaN(c)) c=0
-			s=s.replace(t[i],c)
-		}
-		return s
+function process_file(){
+	if(file_input.value) try{
+		Adicat.bulk_process(file_input.value,output_name.innerText,output_split.value)
+	}catch(e){
+		$('progbar_message').innerText = e
 	}
-	eq=eq.replace(patterns.returns,' ')
-	sp=eq.match(ip)
-	if(sp){
-		l=sp.length
-		while(l--){
-			e[sp[l]]=sp[l].replace(' ','')
-			te=e[sp[l]].replace(e[sp[l]],dict_ops(e[sp[l]]))
-			eq=eq.replace(sp[l],te)
+}
+function parse_dict(s){
+	try{
+		return Adicat.patterns.dict=/^%/.test(s) ? Adicat.read_dic(s) : JSON.parse(s)
+	}catch(e){
+		load_error.innerText = e
+		load_error.style.color = 'red'
+		return null
+	}
+}
+function dict_import(f,n,format){
+	format = format || Adicat.hl.options.input_encoding
+	if('string'===typeof f || import_menu.style.display !== 'none'){
+		if(Adicat.patterns.dict && dict_words.childElementCount){
+			dict_refresh()
+			backup(true)
 		}
-		sp=eq.match(/(^|[^(+><*^&|\/-]*)\([^()]*\)/g)
-		l=sp.length
-		while(l--){
-			e[sp[l]]=sp[l].replace(mr,'')
-			if(!nf.test(e[sp[l]])){
-				te=e[sp[l]].match(fh)
-				e[sp[l]]=e[sp[l]].replace(fh,'')
-				if(Math.hasOwnProperty(te)){
-					e[sp[l]]=Math[te](Number(Function('"use strict"; return '+e[sp[l]].replace(ch,''))()))
-					if(isNaN(e[sp[l]])) e[sp[l]]=0
-				}
+		Adicat.patterns.dict=null
+		if('string'===typeof f){
+			var ds=['function','lusi','netspeak'], nn=n||f.match(/[^/]*$/)[0]||f
+			if(ds.indexOf(f)!==-1) f='https://miserman.github.io/adicat/dict/'+f+'.json'
+			if(!n) if(Adicat.hl.options.dict.hasOwnProperty(nn)) nn+='_'+Adicat.rand(999,100)
+			Adicat.loadDict(f)
+			handle_dict_import(nn)
+		}else if(f.files && f.files[0]){
+			var f=f.files[0], r=new FileReader(), c, nn
+			r.onload=function(e){
+				dictionary_filename.innerText = Adicat.hl.options.dict.hasOwnProperty(f.name) ? f.name+'_'+Adicat.rand(999,100) : f.name
+				dictionary_input.value = e.target.result
 			}
-			eq=eq.replace(sp[l],e[sp[l]])
+			r.readAsText(f,format)
 		}
+	}else{
+		handle_drop({dataTransfer:f, preventDefault:function(){}})
 	}
-	eq=dict_ops(eq)
-	eq=Math.round(Function('"use strict"; return '+eq.replace(ch,''))()*10000)/10000
-	return isFinite(eq) ? eq : 0
 }
 </script></body></html>
