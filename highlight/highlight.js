@@ -288,11 +288,15 @@ Adicat.hl = {
     }
   },
   select:function(e){
-  	var sel=/ select /g, ck=sel.test(e.className), c=ck ? sel : new RegExp('( '+e.innerText+' )','g'), r=ck ? '' : '$1 select ',
-  			oe=Adicat.hl.values.children[0].children[0].children[0].children, v=oe.length, d=Adicat.hl.input.children.length
-  	while(d--) if(Adicat.hl.input.children[d].innerText!=='') Adicat.hl.input.children[d].className=Adicat.hl.input.children[d].className.replace(sel,'').replace(c,r)
-  	while(v--) if(oe[v].className!=='zero') oe[v].className=oe[v].className.replace(sel,' ')
-  	if(!ck) e.className+='select '
+  	var ck=e.classList.contains('select'), es=Adicat.hl.input.getElementsByClassName('select'), i
+  	for(i=es.length;i--;) es[i].classList.remove('select')
+    es=Adicat.hl.values.getElementsByClassName('select')
+  	for(i=es.length;i--;) if(es[i].className!=='zero') es[i].classList.remove('select')
+  	if(!ck){
+      e.classList.add('select')
+      es=Adicat.hl.input.getElementsByClassName(e.innerText)
+      for(i=es.length;i--;) if(es[i].innerText!=='') es[i].classList.add('select')
+    }
   },
   insertSpace:function(e,p){
     var s=document.createElement('span')
