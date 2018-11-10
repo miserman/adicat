@@ -430,7 +430,7 @@ function fill_menu(){
 		tr=document.createElement('tr')
 		Adicat.hl.append(tr,'td',{innerText:k})
 		Adicat.hl.append(tr,'td',{innerText:Adicat.hl.texts[k]})
-		Adicat.hl.append(tr,'td',{innerHTML:"<button type='button'>"+(Adicat.hl.texts.comp===k ? 'comparing' : 'set')+"</button>"})
+		Adicat.hl.append(tr,'td',{innerHTML:"<button type='button'>"+(Adicat.hl.texts.comp==k ? 'comparing' : 'set')+"</button>"})
 		Adicat.hl.append(tr,'td',{innerHTML:"<button type='button'>&#10005;</button>"})
 		menu_saved.appendChild(tr)
 	}
@@ -772,21 +772,24 @@ function addRow(cat){
 function fill_text(t){
 	if(t.target.tagName==='TD'){
 		t=t.target.parentElement
-		var s=t.lastElementChild.innerText==='✕', cl=t.children.length, id=t.children[0].innerText
+		var s=t.lastElementChild.innerText==='✕', cl=t.children.length, id=parseInt(t.children[0].innerText)
 		t=t.children[s ? 1 : 3].innerText
 		backup(true)
-		if(s && cl) Adicat.hl.texts.current=parseInt(id)
+		if(s && cl) Adicat.hl.texts.current=id
 		input_clear()
 		Adicat.hl.display_text(t)
 		if(!s && Adicat.hl.texts.hasOwnProperty(Adicat.hl.texts.current)) new_text()
 		toggle_menu()
 	}else if(t.target.tagName==='BUTTON'){
-		var r=t.target.parentElement.parentElement, id=r.children[0].innerText, i, cr
+		var r=t.target.parentElement.parentElement, id=parseInt(r.children[0].innerText), i, cr
 		if(t.target.innerText!=='✕'){
 			r=r.parentElement.children
 			i=r.length
 			Adicat.hl.texts.comp=t.target.innerText==='comparing' ? null : id
-			while(i--){cr=r[i].children;if(cr[2].children) cr[2].children[0].innerText=cr[0].innerText==Adicat.hl.texts.comp ? 'comparing' : 'set'}
+			while(i--){
+				cr=r[i].children
+				if(cr[2].children) cr[2].children[0].innerText=cr[0].innerText==Adicat.hl.texts.comp ? 'comparing' : 'set'
+			}
 			que_proc=true
 		}else if(confirm('are you sure you want to delete text '+id+'?')){
 			if(input.innerText===Adicat.hl.texts[id]) input_clear()
