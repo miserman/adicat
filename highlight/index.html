@@ -793,7 +793,7 @@ function fill_text(t){
 			que_proc=true
 		}else if(confirm('are you sure you want to delete text '+id+'?')){
 			if(input.innerText===Adicat.hl.texts[id]) input_clear()
-			if(Adicat.hl.texts.comp===id) Adicat.hl.texts.comp=null
+			if(Adicat.hl.texts.comp==id) Adicat.hl.texts.comp=null
 			delete Adicat.hl.texts[id]
 			fill_menu()
 		}

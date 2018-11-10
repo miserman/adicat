@@ -212,7 +212,7 @@ Adicat.hl = {
   				Adicat.hl.append(o[1],'td',{innerText:0,id:'wc_value'})
   			}
         if(o[0].children.length===1){
-          if(Adicat.hl.texts.comp && Adicat.hl.texts.hasOwnProperty(Adicat.hl.texts.comp)){
+          if(Adicat.hl.texts.comp > -1 && Adicat.hl.texts.hasOwnProperty(Adicat.hl.texts.comp)){
             Adicat.hl.append(o[0],'th',{innerText:'sim to '+Adicat.hl.texts.comp,title:
               (/^co/i.test(Adicat.hl.options.sim_metric) ? 'Cosine similarity' : 'Inverse Canberra distance')+' to text '+Adicat.hl.texts.comp+'; click to recalculate.'})
             Adicat.hl.texts.comp_values=new adicat(Adicat.hl.texts[Adicat.hl.texts.comp]).categorize().toPercent().cats
@@ -228,7 +228,7 @@ Adicat.hl = {
   			Adicat.hl.append(o[1],'td',{innerText:cat[k],id:k+'_value',className:cat[k] || Adicat.hl.options.show_zeros==='true' ? '' : 'zero'})
   		}
   	}
-    if(Adicat.hl.texts.comp && Adicat.hl.texts.comp_values){
+    if(Adicat.hl.texts.comp > -1 && Adicat.hl.texts.comp_values){
       s=document.getElementById('similarity')
       if(s) s.innerText=Math.round(
         new adicat(Adicat.hl.input.innerText)
