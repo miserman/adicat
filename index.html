@@ -78,7 +78,7 @@ punctuation and number of words), or each vectorized text. For example,
 <code>new adicat('compare this bit of text').similarity('with this bit', 'cosine', 'vector')</code> would return
 the cosine similarity between the vectorized forms of each entered text.
 </p><p>
-To measure similarity, the text has to be processed up to level 2 (categorization), and potentially have meta cateogries added with
+To measure similarity, the text has to be processed up to level 2 (categorization), and potentially have meta categories added with
 <code>text.procmeta()</code>. It isn't necessary to explicitly perform lower order processing because higher order processes perform
 those if necessary. For instance, the most explicit form of that last example would be this:
 <code class='codeblock'>
@@ -145,6 +145,7 @@ functional highlighter:
 &lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset = 'utf-8'/&gt;&lt;/head&gt;&lt;body&gt;
   &nbsp;
   &lt;!-- (1) set up HTML elements for input, and optionally a reprocess button --&gt;
+  Type into the input element -- words matching those in the dictionary will be colored by category.
   &lt;div id = 'input' contenteditable = 'true'&gt;&lt;/div&gt;
   &lt;button type = 'button' onclick = 'Adicat.hl.display_text()'&gt;reprocess&lt;/button&gt;
   &nbsp;
@@ -168,7 +169,7 @@ functional highlighter:
   &nbsp;
   &lt;!-- (3) set colors for categories -- a class name for each dictionary category --&gt;
   &lt;style type = 'text/css'&gt;
-    #input{padding: 1em}
+    #input{padding: 1em; margin: 1em 0; outline: 1px solid}
     .term{color: #b454da}
     .category{color: #60b346}
   &lt;/style&gt;
@@ -244,7 +245,7 @@ This is an example of a complete implementation of the chat code:
 &lt;/body&gt;&lt;/html&gt;
 </code>
 </p><p>
-The result will be a chat interface like this (in it's simplest form):
+The result will be a chat interface like this (in its simplest form):
 <div id='chat_frame'>
 	<div><div id='chat_log'></div></div>
 </div>
