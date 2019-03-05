@@ -358,14 +358,20 @@ adicat.prototype={
 		return this
 	},
 	display:function(sort,bycat){
-		var st=new Date().getTime(), i=0, outer=/^\s|\s$/g, inner=/\s/g, t='', e, sf
+		var st=new Date().getTime(), i=0, inner=/\s/g, t='', e, sf
 		if(this._processLevel<2) this.categorize()
 		this.html=[]
 		for(;i<this.words.print.length;i++){
-			t=this.words.categories[i]==='\s' ? ' none ' : this.words.categories[i]
+			if(this.words.categories[i]==='\s'){
+				t = ' none '
+			}else{
+				t = this.words.categories[i].trim().split(' ')
+				for(e = t.length; e--;) if(!this.cats.hasOwnProperty(t[e])) t.pop(e)
+				t = t.length ? ' ' + t.join(' ') + ' ' : ' none '
+			}
 			this.html[i]=document.createElement('span')
 			this.html[i].className=t
-			this.html[i].title=t.replace(outer,'').replace(inner,', ')
+			this.html[i].title=t.trim().replace(inner,', ')
 			this.html[i].innerText=this.words.print[i]
 		}
 		if(sort){

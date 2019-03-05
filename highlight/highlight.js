@@ -180,7 +180,7 @@ Adicat.hl = {
   		Adicat.hl.append(o[1],'td',{innerText:0,id:'wc_value'})
   	}
   	var o=Adicat.hl.values.children[0].children[0].children, ol=o.length, w=Adicat.hl.input.children, i=w.length, k, f, cl, c, s,
-        w=Adicat.hl.input.getElementsByTagName('span'), i=w.length, cat={wc:0}, trim=/^ | $/g,
+        w=Adicat.hl.input.getElementsByTagName('span'), i=w.length, cat={wc:0},
         comps=Adicat.hl.options.dict[Adicat.hl.options.use_dict].composites||{},
         wc=document.getElementById('wc_value')
     if(!wc){
@@ -190,7 +190,7 @@ Adicat.hl = {
     }
   	for(k in Adicat.patterns.dict) if(Adicat.patterns.dict.hasOwnProperty(k) && Adicat.hl.options.blacklist.indexOf(k)===-1) cat[k]=0
   	while(i--) if(Adicat.patterns.char.test(w[i].innerText)){
-      cl=w[i].className.replace(trim,'').split(' ')
+      cl=w[i].className.trim().split(' ')
   		k=cl.length
       cat.wc++
   		while(k--){
@@ -215,7 +215,7 @@ Adicat.hl = {
           if(Adicat.hl.texts.comp > -1 && Adicat.hl.texts.hasOwnProperty(Adicat.hl.texts.comp)){
             Adicat.hl.append(o[0],'th',{innerText:'sim to '+Adicat.hl.texts.comp,title:
               (/^co/i.test(Adicat.hl.options.sim_metric) ? 'Cosine similarity' : 'Inverse Canberra distance')+' to text '+Adicat.hl.texts.comp+'; click to recalculate.'})
-            Adicat.hl.texts.comp_values=new adicat(Adicat.hl.texts[Adicat.hl.texts.comp]).categorize().toPercent().cats
+            Adicat.hl.texts.comp_values=new adicat(Adicat.hl.texts[Adicat.hl.texts.comp]).categorize(Adicat.patterns.dict,Adicat.hl.options.blacklist).toPercent().cats
     				Adicat.hl.append(o[1],'td',{innerText:0,id:'similarity'})
             document.getElementById('similarity').parentElement.parentElement.children[0].children[1].addEventListener('click', Adicat.hl.sim_refresh)
           }
@@ -247,7 +247,7 @@ Adicat.hl = {
   	function dict_ops(s){
   		for(var s=s+'', t=s.match(bo), n=t ? t.length : 0, c='', i=0;i<n;i++){
   			c=t[i].replace(bs,'')
-  			c=Adicat.hl.output.hasOwnProperty(c) ? Number(Adicat.hl.output[c]) : Number(c)
+        if(c) c=Adicat.hl.output.hasOwnProperty(c) ? Number(Adicat.hl.output[c]) : Number(c)
   			if(isNaN(c)) c=0
   			s=s.replace(t[i],c)
   		}
@@ -282,7 +282,7 @@ Adicat.hl = {
   sim_refresh:function(){
     var s=document.getElementById('similarity')
     if(s){
-      Adicat.hl.texts.comp_values=new adicat(Adicat.hl.texts[Adicat.hl.texts.comp]).categorize().toPercent().cats
+      Adicat.hl.texts.comp_values=new adicat(Adicat.hl.texts[Adicat.hl.texts.comp]).categorize(Adicat.patterns.dict,Adicat.hl.options.blacklist).toPercent().cats
       s.innerText=Math.round(new adicat(Adicat.hl.input.innerText)
         .similarity(Adicat.hl.texts.comp_values,Adicat.hl.options.sim_metric,Adicat.hl.options.sim_filter === 'true' ? Adicat.hl.options.sim_cats : false).value*1000)/1000
     }
