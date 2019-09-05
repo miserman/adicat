@@ -43,7 +43,7 @@ The data from each processing level are added to the assigned object like this (
   string: {
     raw: 'Text to process.',
     clean: 'Text to process.',
-    striped: ' text to process '
+    stripped: ' text to process '
   },
   words: {
     print: ['Text', 'to', 'process.'],
@@ -204,7 +204,7 @@ This is an example of a complete implementation of the chat code:
 <code class='codeblock'>
 &lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset = 'utf-8'/&gt;&lt;/head&gt;&lt;body&gt;
   &nbsp;
-  &lt;!-- (1) set up HTML elements for the an input and chat log --&gt;
+  &lt;!-- (1) set up HTML elements for an input and chat log --&gt;
   &lt;div id = 'chat_log'&gt;&lt;/div&gt;
   &lt;input id = 'chat_input' placeholder = 'Message @adicat'/&gt;
   &nbsp;
@@ -227,7 +227,7 @@ This is an example of a complete implementation of the chat code:
       greeting: ['How are you?', "What's up?", "What's on your mind?"],
       followup: ['Cool, cool... ', 'Same here... ', 'Alright then... ']
     }
-    // (2.2) assign each chat element element
+    // (2.2) assign each chat element
     Adicat.chat.parts.log = document.getElementById('chat_log'),
     Adicat.chat.parts.input = document.getElementById('chat_input')
     // (2.3) add an event listener to send on enter

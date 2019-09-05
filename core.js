@@ -4,7 +4,7 @@ var Adicat = {
 		word_breaks:/\s/g,
 		char:/[A-z0-9?><!@#$%^&*()_+|}{":;'/.,-=\\\][\]]/,
 		special:/[[\]()\/\\.?$*^]/g,
-		striped:/[^a-z0-9'\s]/g,
+		stripped:/[^a-z0-9'\s]/g,
 		filter:/[$#%^*\r\n\t\-~\\—–→\+=[/({})\]]|\s"(?!\w)|\s\s/g,
 		curly_quote:{s:/[‘’]/g,d:/[“”]/g},
 		emojis:{
@@ -234,7 +234,7 @@ var Adicat = {
 
 function adicat(str){
 	if('string'!==typeof str) throw new TypeError('argument must be a string')
-	this.string={raw:str,clean:'',striped:''}
+	this.string={raw:str,clean:'',stripped:''}
 	this.chars=str.length
 	this._processLevel=0
 	this._processTime={meta:-1,token:-1,cue:-1,cat:-1,display:-1}
@@ -261,9 +261,9 @@ adicat.prototype={
 		if(initials = this.string.clean.match(Adicat.patterns.punct.initials))
 		  for(i = initials.length; i--;) this.string.clean = this.string.clean
 			  .replace(initials[i], initials[i].replace(Adicat.patterns.punct.initial_trim, ''))
-		this.string.striped=this.string.clean.toLowerCase().replace(Adicat.patterns.striped,'')
+		this.string.stripped=this.string.clean.toLowerCase().replace(Adicat.patterns.stripped,'')
 		this.words={
-			token:this.string.striped.split(Adicat.patterns.word_breaks),
+			token:this.string.stripped.split(Adicat.patterns.word_breaks),
 			print:this.string.clean
 				.replace(Adicat.patterns.emojis.smile_rev,':)')
 				.replace(Adicat.patterns.emojis.frown_rev,':(')
@@ -277,7 +277,7 @@ adicat.prototype={
 				return this.tokenize()
 			}else throw 'InputError: the input text is not parsing properly; check for special characters'
 		}
-		this.string.striped=' '+this.string.striped+' '
+		this.string.stripped=' '+this.string.stripped+' '
 		this._processLevel=1
 		this._processTime.token=new Date().getTime()-st
 		return this
@@ -352,7 +352,7 @@ adicat.prototype={
 		this.cues={}
 		for(k in cues) if(cues.hasOwnProperty(k)){
 			if(!cues[k].test) cues[k] = Adicat.toRegex(cues[k], true)
-			this.cues[k]=cues[k].test(this.string.striped)||cues[k].test(this.string.raw)
+			this.cues[k]=cues[k].test(this.string.stripped)||cues[k].test(this.string.raw)
 		}
 		this._processTime.cue=new Date().getTime()-st
 		return this
@@ -386,23 +386,45 @@ adicat.prototype={
 		return this.html
 	},
 	procmeta:function(){
-		var st=new Date().getTime(), i=0, c, pp={periods:/\./g,commas:/,/g,qmarks:/\?/g,exclams:/\!/g,quotes:/(^|\s)['"]+|['"]+(\s|$)/gm,
-		  brackets:/[(\){}<>[\]]/g,orgmarks:/[-—–\\/:;]/g}
-		if(!this._processLevel) this.tokenize()
-		this.meta={periods:0,commas:0,qmarks:0,exclams:0,quotes:0,brackets:0,orgmarks:0,
-			sentences:0,WPS:0,clauses:0,WPC:0}
+		var st=new Date().getTime(), i=0, t=0, ct=[], terms={}, c, syllables=/a+[eu]*|e+a*|i+|o+[ui]*|u+|y+[aeiou]*/g,
+			apostrophes=/[\u02bc]+|[A-z][\u0027\u0060\u2019]+[A-z]/g, pp={puncts:/(^|\s)[^A-z0-9]|[^A-z0-9](\s|$)/g,numbers:/(^|\s)[0-9]/g,
+			periods:/\./g,commas:/,/g,qmarks:/\?/g,exclams:/\!/g,quotes:/(^|\s)['"]+|['"]+(\s|$)/gm,brackets:/[(\){}<>[\]]/g,orgmarks:/[-—–\\/:;]/g}
+		if(this._processLevel < 2) this.categorize()
+		this.meta={characters:0,syllables:0,sentences:0,WPS:0,clauses:0,WPC:0,sixltr:0,characters_per_word:0,syllables_per_word:0,
+			type_token_ratio:0,reading_grade:0,numbers:0,puncts:0,periods:0,commas:0,qmarks:0,exclams:0,quotes:0,apostrophes:0,
+			brackets:0,orgmarks:0}
 		this.meta.sentences=Adicat.filterOut(this.string.clean.split(Adicat.patterns.boundary.sentence))
 		i=this.meta.sentences.length
-		while(i--) this.meta.WPS += Adicat.filterOut(this.meta.sentences[i]
-			.toLowerCase().replace(Adicat.patterns.striped,'').split(Adicat.patterns.word_breaks)).length
+		while(i--){
+			ct=Adicat.filterOut(this.meta.sentences[i]
+				.toLowerCase().replace(Adicat.patterns.stripped,'').split(Adicat.patterns.word_breaks))
+			t = ct.length
+			this.meta.WPS += t
+			while(t--){
+				if(!terms.hasOwnProperty(ct[t])){
+					terms[ct[t]] = ct[t].split(syllables).length - 1
+					if(!terms[ct[t]]) terms[ct[t]] = 1
+				}
+				this.meta.characters += ct[t].length
+				if(ct[t].length > 5) this.meta.sixltr += 1
+				this.meta.syllables += terms[ct[t]]
+			}
+		}
 		this.meta.sentences=this.meta.sentences.length
 		this.meta.WPS=this.meta.sentences ? this.meta.WPS / this.meta.sentences : 0
+		if(this.WC){
+			this.meta.characters_per_word=this.meta.characters / this.WC
+			this.meta.syllables_per_word=this.meta.syllables / this.WC
+			this.meta.type_token_ratio=this.unique / this.WC
+			if(this.meta.sentences) this.meta.reading_grade=.39*this.WC/this.meta.sentences+11.8*this.meta.syllables/this.WC-15.59
+		}
 		this.meta.clauses=Adicat.filterOut(this.string.clean.split(Adicat.patterns.boundary.clause))
 		i=this.meta.clauses.length
 		while(i--) this.meta.WPC += Adicat.filterOut(this.meta.clauses[i]
-			.toLowerCase().replace(Adicat.patterns.striped,'').split(Adicat.patterns.word_breaks)).length
+			.toLowerCase().replace(Adicat.patterns.stripped,'').split(Adicat.patterns.word_breaks)).length
 		this.meta.clauses=this.meta.clauses.length
 		this.meta.WPC=this.meta.clauses ? this.meta.WPC / this.meta.clauses : 0
+		this.meta.apostrophes=Adicat.filterOut(this.string.clean.split(apostrophes)).length
 		for(c in pp) if(pp.hasOwnProperty(c)){
 			this.meta[c]=this.string.clean.match(pp[c])
 			this.meta[c]=this.meta[c] ? this.meta[c].length : 0

@@ -7,12 +7,12 @@
       "string":{
         "raw":"The original text.",
         "clean":"Text filtered of special characters. Filled in by tokenize.",
-        "striped":"Additionally filtered text with normalized word boundaries, padded by blank spaces. Filled in by tokenize."
+        "stripped":"Additionally filtered text with normalized word boundaries, padded by blank spaces. Filled in by tokenize."
       },
       "chars":"Number of characters in the original text.",
       "words":{
         "source":"tokenize",
-        "token":"Standardized tokens; string.striped split by patterns.word_breaks.",
+        "token":"Standardized tokens; string.stripped split by patterns.word_breaks.",
         "print":"More faithful word forms for display; string.clean split by patterns.word_breaks.",
         "categories":"A string of comma-delimited categories matching the token or print of the same index. Added by categorize."
       },
@@ -45,17 +45,27 @@
       "meta":{
         "source":"procmeta",
         "description":"Punctuation and structural categories.",
-        "period":"Number of periods.",
-        "comma":"Number of commas.",
-        "qmark":"Number of question marks.",
-        "exclam":"Number of exclamation points.",
-        "quotes":"Number of quotation marks.",
-        "brackets":"Number of brackets (square, curly, or angle brackets, or parens).",
-        "organization":"Number of organization-related marks (dashes, slashes, colons, and semicolons).",
-        "sentences":"Number of sentences.",
+        "WPC":"Mean words per clause.",
         "WPS":"Mean words per sentence.",
+        "apostrophes":"Number of apostrophes, defined as any modified letter apostrophe, or backtick or single straight or curly quote surrounded by letters",
+        "brackets":"Number of brackets (square, curly, or angle brackets, or parens).",
+        "characters":"Number of characters, excluding spaces.",
+        "characters_per_word":"Mean number of characters per word.",
         "clauses":"Number of clauses, including sentences.",
-        "WPC":"Mean words per clause."
+        "commas":"Number of commas.",
+        "exclams":"Number of exclamation points.",
+        "numbers":"Number of numbers (strings starting with numerals).",
+        "orgmarks":"Number of organization-related marks (dashes, slashes, colons, and semicolons).",
+        "periods":"Number of periods.",
+        "puncts":"Number of punctuation characters (anything not a letter or number).",
+        "qmarks":"Number of question marks.",
+        "quotes":"Number of quotation marks.",
+        "reading_grade":"Flesch-Kincaid grade level: .39 * this.WC / this.meta.sentences + 11.8 * this.meta.syllables / this.WC - 15.59.",
+        "sentences":"Number of sentences.",
+        "sixltr":"Number of words with 6 or more characters.",
+        "syllables":"Number of syllables, based on vowel splits.",
+        "syllables_per_word":"Mean number of syllables per word.",
+        "type_token_ratio":"this.unique / this.WC."
       },
       "sim":{
         "source":"similarity",
@@ -71,7 +81,7 @@
         "source":"core.js",
         "description":"Initial level of processing. Cleans the text and splits it into tokens.",
         "arguments":{},
-        "output":"Adds cleaned and striped strings, words arrays, and word count. Returns the full, updated adicat object.",
+        "output":"Adds cleaned and stripped strings, words arrays, and word count. Returns the full, updated adicat object.",
         "examples":"new adicat('some text to process').tokenize()"
       },
       "categorize":{
@@ -107,7 +117,7 @@
       },
       "detect":{
         "source":"core.js",
-        "description":"Checks the raw and striped strings for each entry cues.",
+        "description":"Checks the raw and stripped strings for each entry cues.",
         "arguments":{
           "cues":{
             "type":"object",
@@ -179,7 +189,7 @@
           "word_breaks":"Simple word boundaries during tokenization",
           "char":"All acceptable (whitelisted) characters.",
           "special":"Regular expression characters to be escaped in exact-match strings.",
-          "filter":"Characters to remove for striped text.",
+          "filter":"Characters to remove for stripped text.",
           "curly_quote":{
             "s":"Single curly quotes.",
             "d":"Double curly quotes."
@@ -195,8 +205,8 @@
             "at":"At symbols."
           },
           "punct":{
-            "endash":"en dash to conver to two hyphens.",
-            "emdash":"em dash to conver to three hyphens.",
+            "endash":"en dash to convert to two hyphens.",
+            "emdash":"em dash to convert to three hyphens.",
             "initials":"Initials to trim terminal periods from.",
             "initial_trim":"Finds the terminal period in initials matches.",
             "apostrophe":"Apostrophes to avoid treating them as quotes.",
@@ -222,7 +232,7 @@
           "dict_proc":"indicates whether the default dictionary has been checked and potentially converted to regular expression."
         }
       },
-      "liwc_means":"Category means from the <a href='https://liwc.wpengine.com/wp-content/uploads/2015/11/LIWC2015_LanguageManual.pdf' target='_blankl'>LIWC 2015 language manual</a>."
+      "liwc_means":"Category means from the <a href='https://liwc.wpengine.com/wp-content/uploads/2015/11/LIWC2015_LanguageManual.pdf' target='_blank'>LIWC 2015 language manual</a>."
     },
     "methods":{
       "toRegex":{
@@ -238,7 +248,7 @@
           "source":{
             "type":"boolean",
             "default":"false",
-            "description":"Specifies the intended application; true applied to striped strings where words are separated by single spaces (for cue processing, where word boundaries can be crossed), and false applies to tokenized words were each is in a string of its own."
+            "description":"Specifies the intended application; true applied to stripped strings where words are separated by single spaces (for cue processing, where word boundaries can be crossed), and false applies to tokenized words were each is in a string of its own."
           }
         },
         "examples":"Adicat.toRegex({'category': ['term*', 'word']}, true)"
@@ -258,26 +268,26 @@
       },
       "read_dic":{
         "source":"core.js",
-        "description":"Converts .dic formated strings to objects, with categories as arrays of terms. .dic format is tab delimited, with a category index marked by %, and terms marked by category IDs.",
+        "description":"Converts .dic formatted strings to objects, with categories as arrays of terms. .dic format is tab delimited, with a category index marked by %, and terms marked by category IDs.",
         "output":"Object of arrays of strings.",
         "arguments":{
           "dic":{
             "type":"string",
             "default":"",
-            "description":"A dic formated dictionary."
+            "description":"A dic formatted dictionary."
           }
         },
         "examples":"Adicat.read_dic('%\\n1\\tcategory\\n%\\nword*\\t1\\nterm*\\t1')"
       },
       "write_dic":{
         "source":"core.js",
-        "description":"Converts objects to .dic formated strings. .dic format is tab delimited, with a category index marked by %, and terms marked by category IDs:\n\n%\n1\tcategory\n%\nword*\t1\nterm*\t1",
-        "output":"A .dic formated string",
+        "description":"Converts objects to .dic formatted strings. .dic format is tab delimited, with a category index marked by %, and terms marked by category IDs:\n\n%\n1\tcategory\n%\nword*\t1\nterm*\t1",
+        "output":"A .dic formatted string",
         "arguments":{
           "obj":{
             "type":"object",
             "default":"",
-            "description":"An object with categories as entires."
+            "description":"An object with categories as entries."
           }
         },
         "examples":"Adicat.write_dic({'category':['word*','term*']})"
@@ -390,7 +400,7 @@
         "description":"Processes the innerText of the selected span (by current caret position), and checks and potentially reprocesses previous spans up to Adicat.hl.options.nback.",
         "source":"highlight/highlight.js",
         "arguments":{},
-        "output":"Updates the current and Adicat.hl.nback previous spans.",
+        "output":"Updates the current and Adicat.hl.options.nback previous spans.",
         "examples":"&lt;div contenteditable='true' onkeypress='Adicat.hl.process_span()'&gt;&lt;/div&gt;"
       },
       "spanner":{
@@ -511,7 +521,7 @@
     "source":"chat/chat.js",
     "description":"Additional properties and methods for the chat interface.",
     "properties":{
-      "indStat":"a boolean indicating whether the bot is typing.",
+      "indStat":"a Boolean indicating whether the bot is typing.",
       "log":{
         "description":"log of last messages.",
         "s":"Last message sent by the bot.",
