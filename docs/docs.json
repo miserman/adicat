@@ -22,6 +22,10 @@
         "source":"tokenize",
         "description":"Number of words."
       },
+      "unique":{
+        "source":"categorize",
+        "description":"Number of unique words."
+      },
       "vector":{
         "source":"categorize",
         "description":"Object with unique tokens as keys and their counts as values."
@@ -319,6 +323,52 @@
           }
         },
         "examples":"Adicat.dict_export({'category':['word*','term*']}, true, true, 'example')"
+      },
+      "pnorm":{
+        "source":"core.js",
+        "description":"Calculates the odds (cumulative distribution function) of an observed value from a given normal (Gaussian) distribution.",
+        "output":"Odds float.",
+        "arguments":{
+          "x":{
+            "type":"number",
+            "default":"",
+            "description":"The observed value."
+          },
+          "m":{
+            "type":"number",
+            "default":"0",
+            "description":"Mean (mu) of the distribution."
+          },
+          "sd":{
+            "type":"number",
+            "default":"1",
+            "description":"Standard deviation (sigma) of the distribution."
+          }
+        },
+        "examples":"Adicat.pnorm(1, 0, 1)"
+      },
+      "dnorm":{
+        "source":"core.js",
+        "description":"Calculates the density at an observed value in a given normal (Gaussian) distribution.",
+        "output":"Density float.",
+        "arguments":{
+          "x":{
+            "type":"number",
+            "default":"",
+            "description":"The observed value."
+          },
+          "m":{
+            "type":"number",
+            "default":"0",
+            "description":"Mean (mu) of the distribution."
+          },
+          "sd":{
+            "type":"number",
+            "default":"1",
+            "description":"Standard deviation (sigma) of the distribution."
+          }
+        },
+        "examples":"Adicat.dnorm(1, 0, 1)"
       },
       "rand":{
         "source":"core.js",

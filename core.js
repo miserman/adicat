@@ -64,7 +64,7 @@ var Adicat = {
 	loadDict:function(url){
 		var f=new XMLHttpRequest(), k
 	  f.onreadystatechange=function(){if(f.readyState===4 && f.status===200){
-	      Adicat.patterns.dict=/^%/.test(f.resonseTest) ? Adicat.read_dic(f.resonseTest) : JSON.parse(f.responseText)
+	      Adicat.patterns.dict=/^%/.test(f.responseText) ? Adicat.read_dic(f.responseText) : JSON.parse(f.responseText)
 				if(Adicat.patterns.dict) for(k in Adicat.patterns.dict) if(Adicat.patterns.dict.hasOwnProperty(k)) Adicat.patterns.dict_cats.push(k)
 	  }}
 	  f.open('GET',url,true)
@@ -211,6 +211,22 @@ var Adicat = {
 			}else throw 'Browser does not seem to support downloading.'
 		}
 		step()
+	},
+	pnorm:function(x, m, sd){
+		m = m || 0
+		sd = sd || 1
+		if(sd <= 0){
+    	return x < m ? 0 : 1
+		}else{
+		  var z = Math.abs((x - m) / sd), t = 1 / (1 + .2316419 * z), e = .3989423 * Math.exp(-z * z / 2) *
+		      t * (.3193815 + t * (-.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))))
+		  return x > 0 ? 1 - e : e
+		}
+	},
+	dnorm:function(x, m, sd){
+		m = m || 0
+		sd = sd || 1
+	  return sd <= 0 ? x < m ? 0 : 1 : Math.exp(-Math.pow(x - m, 2) / (2 * Math.pow(sd, 2))) / (sd * Math.sqrt(2 * Math.PI))
 	},
   rand:function(u,l){
 		l = l || 0
@@ -386,7 +402,7 @@ adicat.prototype={
 		return this.html
 	},
 	procmeta:function(){
-		var st=new Date().getTime(), i=0, t=0, ct=[], terms={}, c, syllables=/a+[eu]*|e+a*|i+|o+[ui]*|u+|y+[aeiou]*/g,
+		var st=new Date().getTime(), i=0, t=0, ct=[], terms={}, c, syllables=/a+[eu]*|e+[aiy]*|i+|o+[ui]*|u+|y+[aeiou]*/g,
 			apostrophes=/[\u02bc]+|[A-z][\u0027\u0060\u2019]+[A-z]/g, pp={puncts:/(^|\s)[^A-z0-9]|[^A-z0-9](\s|$)/g,numbers:/(^|\s)[0-9]/g,
 			periods:/\./g,commas:/,/g,qmarks:/\?/g,exclams:/\!/g,quotes:/(^|\s)['"]+|['"]+(\s|$)/gm,brackets:/[(\){}<>[\]]/g,orgmarks:/[-—–\\/:;]/g}
 		if(this._processLevel < 2) this.categorize()
@@ -424,7 +440,7 @@ adicat.prototype={
 			.toLowerCase().replace(Adicat.patterns.stripped,'').split(Adicat.patterns.word_breaks)).length
 		this.meta.clauses=this.meta.clauses.length
 		this.meta.WPC=this.meta.clauses ? this.meta.WPC / this.meta.clauses : 0
-		this.meta.apostrophes=Adicat.filterOut(this.string.clean.split(apostrophes)).length
+		this.meta.apostrophes=Adicat.filterOut(this.string.clean.split(apostrophes)).length - 1
 		for(c in pp) if(pp.hasOwnProperty(c)){
 			this.meta[c]=this.string.clean.match(pp[c])
 			this.meta[c]=this.meta[c] ? this.meta[c].length : 0

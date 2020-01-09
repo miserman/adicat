@@ -37,13 +37,13 @@ You can chat with the bot, and edit its response set to the included set of cues
 ## import scripts
 #### the core script is always required
 ```html
-<script type='text/javascript' src='https//miserman.github.io/adicat/core.min.js'></script>
+<script type='text/javascript' src='https://miserman.github.io/adicat/core.min.js'></script>
 ```
 
 #### the highlight and chat scripts add to the Adicat object
 ```html
-<script type='text/javascript' src='https//miserman.github.io/adicat/highlight.min.js'></script>
-<script type='text/javascript' src='https//miserman.github.io/adicat/chat.min.js'></script>
+<script type='text/javascript' src='https://miserman.github.io/adicat/highlight.min.js'></script>
+<script type='text/javascript' src='https://miserman.github.io/adicat/chat.min.js'></script>
 ```
 
 See the [introduction](https://miserman.github.io/adicat/) for complete implementation examples.
