@@ -1,0 +1,277 @@
+<!doctype html>
+<html><head>
+<title>adicat classifier</title>
+<link rel="icon" href="../icon.png">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<script type='text/javascript' src="../core.js"></script>
+<script type='text/javascript' src="../highlight/highlight.js" async></script>
+<style type="text/css">
+body, button, p, button, input, div, table{
+	margin: 0; background: #252525; color: #dcdcdc; font-size: 16px; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	outline-color: #8a8b9e; border: none; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: greyscale
+}
+button, h1, #settings a{-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+button{cursor:pointer; border-radius: 15px 15px 0 0; font-weight: bold; padding: 0 12px; font-size: 1.4em}
+button:hover{color: #fff}
+button, input, #input{background: #404040}
+tr{vertical-align: top}
+h1{margin: 0}
+#header{position: fixed; top: 0; left: 0; right: 0; padding: 5px 12px 5px 5px}
+#header div{width: 100%}
+#header button:last-of-type{float: right}
+#header div:last-of-type{width: 100%; text-align: center; height: 20px}
+#header div:last-of-type button:first-of-type{transform: rotate(90deg); border-radius: 0 15px 15px 0; padding: 15px 9px 15px 7px; margin: -18px 0 0 0}
+#header div:last-of-type button:last-of-type{padding: 0 15px; border-radius: 0 0 15px 15px}
+#header table{width: 100%}
+#input{width: 100%; height: 200px; overflow-y: auto}
+div.processed{position: absolute; top: 265px; margin: 0 0 85px 0; padding: 0 12px 0 5px; z-index: -1}
+.processed table, #summary table{width: 100%}
+.processed td{text-align: right; min-width: 60px; padding: 5px 0}
+.processed td:first-of-type{text-align: left; width: 100%}
+#sentences td:first-of-type{border-left: 3px solid; padding: 5px}
+#sentences tr:hover{background: #000}
+.none{color: #b7b7b7}
+.Culture{color: #008040; border-color: #008040}
+.Interdisciplinary{color: #2a7ab0; border-color: #2a7ab0}
+.Other{color: #9b59b6; border-color: #9b59b6}
+.Right{color: #e0c143; border-color: #e0c143}
+.Skills{color:  #ff8c00; border-color: #ff8c00}
+.Stakeholder{color: #d91e18; border-color: #d91e18}
+#summary{position: fixed; bottom: 0; left: 0; right: 0; height: 82px; text-align: center}
+.processed, #header{transition:top .4s;-webkit-transition:top .4s}
+.show{display: ''}
+.hide{display: none}
+#menu{position: relative; margin: 50px auto; max-width: 500px; border-radius: 20px; background: #404040}
+#menu div:first-of-type{padding: 5px; border-radius: 20px 20px 0 0}
+#menu div:first-of-type button{width: 45px; position: absolute; top: 0; right: 0; border-radius: 0 20px 0 0; background: #252525}
+#menu button{padding: 7px; width: 100%; text-align: center; background: #d91e18; border-radius: 0 0 20px 20px}
+#settings{margin: 20px 0}
+#settings div, #settings div:first-of-type{margin: 5px; padding: 16px 12px}
+#settings a{height: 25px}
+#settings input{float: right; width: 80px; height: 25px; padding: 0 5px}
+.escape_screen{
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0; cursor: not-allowed; background: #000;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)"; filter: alpha(opacity=60); -moz-opacity: 0.6; -khtml-opacity: 0.6; opacity: 0.6
+}
+</style>
+</head><body>
+<div id='header'>
+<div><button type='button' onclick='input.innerText=""' title='Clear input'>&#10539;</button><button type='button' onclick='process_input()' title='Reprocess'>&orarr;</button></div>
+<div contenteditable="true" id='input'></div>
+<div><button type='button' onclick='toggle_input(this)' title='Toggle input'>&#10092;</button><button type='button' onclick='toggle_menu()' title='Open menu'>&#8801;</button></div>
+<table class='processed'><tr><td>Sentence</td></tr></table>
+</div>
+<div class='processed'><table id='sentences'></table></div>
+<div id='summary'>
+  <h1>Average</h1>
+  <table><tHead><tr></tr></tHead><tBody><tr class='show'></tr><tr class='hide'></tr></tBody></table>
+</div>
+<div class='escape_screen' style='display:none' onclick='toggle_menu()'></div>
+<div id='menu' style='display:none'>
+  <div><h1>Settings</h1><button type='button' title='Close menu' onclick='toggle_menu()'>&#10539;</button></div>
+  <div id='settings'>
+    <div>
+      <a title='Minimum value for standard deviations and probabilities; anything under epsilon will be replace with threshold.'>epsilon</a>
+      <input type='number' step='.001' onblur='update_options(this)'>
+    </div>
+    <div>
+      <a title='Value to set any standard deviation or probability that is smaller than epsilon.'>threshold</a>
+      <input type='number' step='.001' onblur='update_options(this)'/>
+    </div>
+    <div>
+      <a title='If checked, terms found in any sentence are used for prediction. Otherwise, only terms appearing in the given sentence are counted.'>complete</a>
+      <input type='checkbox' onblur='update_options(this)'/>
+    </div>
+    <div>
+      <a title='Number of digits to display.'>digits</a>
+      <input type='number' min='1' max='6' onblur='update_options(this)'/>
+    </div>
+  </div>
+  <button type='button' title='Clear local storage' onclick='if(window.localStorage) store.clear(); window.location.reload()'>Clear saved settings and reload</button>
+</div>
+<script type="text/javascript">
+'use strict'
+function $(e){return document.getElementById(e)}
+var menu = $('menu'), settings = $('settings'), header = $('header'), input = $('input'), sentences = $('sentences'), summary = $('summary'),
+    colnames = '<tr><td>Sentence</td>', texts = [], complete, weights = {}, classes = [], store = window.localStorage || {}, patterns = {
+      abreviations: /((^|\s)[a-z]+\.[a-z.]+|etc|st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\.\s/gi,
+      sentence: /([.?!])(?:\s|$)+/g, pstand: /PERIOD/g, boundary: /\|/g, format: /^\d[^.]*\d{,3}/
+    }, queued = false, options = {threshold: .001, epsilon: 0, complete: 1, digits: 4}
+window.onload = function(){
+  var k, i, e, eopt
+  if(store.hasOwnProperty('options')){
+		eopt = JSON.parse(store.options)
+		for(k in options) if(eopt.hasOwnProperty(k)) options[k] = eopt[k]
+	}
+  for(i = settings.childElementCount; i--;){
+    e = settings.children[i]
+    e.lastElementChild[e.lastElementChild.type === 'checkbox' ? 'checked' : 'value'] = options[e.firstElementChild.innerText]
+  }
+  load_weights('../dict/classify.json')
+  sentences.addEventListener('mouseover', show_weights)
+  sentences.addEventListener('mouseout', show_totals)
+  input.addEventListener('keyup', function(e){if(!queued){
+    queued = true
+    setTimeout(process_input, 500)
+  }})
+  input.addEventListener('paste', function(e){
+    e.preventDefault()
+    queued = true
+    input.innerText = (event.clipboardData || window.clipboardData).getData('text')
+    process_input()
+  })
+}
+function load_weights(url){
+  var f = new XMLHttpRequest(), k
+  f.onreadystatechange = function(){
+    if(f.readyState === 4 && f.status === 200){
+      weights = JSON.parse(f.responseText)
+      if(weights && weights.hasOwnProperty('_classes')){
+        classes = weights._classes
+        for(var i = 0, n = classes.length,
+          e = header.lastElementChild.firstElementChild.firstElementChild,
+          o = summary.lastElementChild.firstElementChild.firstElementChild,
+          v = summary.lastElementChild.lastElementChild.firstElementChild,
+          tv = v.nextElementSibling, c; i < n; i++){
+          colnames += '<td>' + classes[i] + '</td>'
+          e.appendChild(c = document.createElement('td'))
+          c.innerText = classes[i]
+          c.className = classes[i]
+          o.appendChild(c = document.createElement('th'))
+          c.innerText = classes[i]
+          c.className = classes[i]
+          v.appendChild(c = document.createElement('td'))
+          c.innerText = 0
+          tv.appendChild(c = document.createElement('td'))
+          c.innerText = 0
+        }
+        colnames += '</tr>'
+      }
+      process_input()
+    }
+  }
+  f.open('GET', url, true)
+  f.send()
+}
+function process_input(){
+	texts = []
+	sentences.innerHTML = colnames
+  complete = new adicat(input.innerText).categorize()
+	var c, wc, w, i = 0,
+      sents = (input.innerText ? input.innerText : 'Paste text into the box above to classify its sentences.').replace(patterns.abreviations, '$1PERIOD ')
+      .replace(patterns.sentence, '$1|').replace(patterns.pstand, '.').split(patterns.boundary), n = sents.length
+	for(; i < n; i++) if(sents[i] !== ''){
+		texts.push(new adicat(sents[i]).categorize())
+		texts[i].display()
+    if(texts[i].WC){
+  		sentences.appendChild(texts[i].element = c = document.createElement('tr'))
+  		c.appendChild(c = document.createElement('td'))
+  		for(wc = texts[i].html.length, w = 0; w < wc; w++){
+  			c.appendChild(texts[i].html[w])
+  			c.appendChild(document.createTextNode(' '))
+  		}
+  		predict(i)
+    }
+	}
+  update_totals()
+  queued = false
+}
+function predict(index){
+  for(var text = texts[index], words = text.words, i = text.WC, n = classes.length, e, c, k, v, sd, p = {}, max = [-1, 0]; i--;){
+    text.html[i].title = words.token[i]
+    if(weights.hasOwnProperty(words.token[i])){
+      text.captured++
+      for(c = classes.length, max = [0, 0]; c--;){
+        if(weights[words.token[i]].mean[c] > max[1]) max = [c, weights[words.token[i]].mean[c]]
+      }
+      words.categories[i] = text.html[i].className = ' ' + classes[max[0]] + ' '
+    }
+  }
+  for(k in (options.complete === 1 ? complete : text).vector) if((options.complete ? complete : text).vector.hasOwnProperty(k) && weights.hasOwnProperty(k)){
+    for(c = classes.length; c--;){
+      if(!text.cats.hasOwnProperty(classes[c])) text.cats[classes[c]] = weights._priors[c]
+      sd = weights[k].sd[c]
+      v = Adicat.dnorm(options.complete !== 1 || text.vector.hasOwnProperty(k) ? text.vector[k] : 0, weights[k].mean[c], sd <= options.epsilon ? options.threshold : sd)
+      text.cats[classes[c]] += Math.log(v <= options.epsilon ? options.threshold : v)
+    }
+  }
+  p = {}
+  for(k in text.cats) if(text.cats.hasOwnProperty(k)){
+    for(p[k] = 0, c = classes.length; c--;){
+      p[k] += Math.exp(text.cats[classes[c]] - text.cats[k])
+    }
+    p[k] = 1 / p[k]
+  }
+  for(text.cats = p, text.element = sentences.children[index + 1], max = [-1, 0], c = 0, n = classes.length; c < n; c++){
+    if(text.cats[classes[c]] > max[1]) max = [c, text.cats[classes[c]]]
+    text.element.appendChild(document.createElement('td'))
+    text.element.lastElementChild.innerText = format(text.cats[classes[c]])
+  }
+  text.element.className = classes[max[0]]
+}
+function update_totals(){
+  for(var e = summary.lastElementChild.lastElementChild.firstElementChild.children, i = texts.length, c, n = e.length, v = []; i--;){
+    for(c = n; c--;) v[c] = v[c] ? v[c] + texts[i].cats[classes[c]] : texts[i].cats[classes[c]]
+  }
+  for(c = n, i = texts.length; c--;) e[c].innerText = format(v[c] / i)
+}
+function show_weights(e){
+  if(e.target.tagName === 'SPAN'){
+    var o = summary.lastElementChild.lastElementChild, ck = weights.hasOwnProperty(e.target.title),
+        v = ck ? weights[e.target.title].mean : [], c = classes.length
+    summary.firstElementChild.innerText = e.target.title
+    summary.lastElementChild.lastElementChild.firstElementChild.className = 'hide'
+    summary.lastElementChild.lastElementChild.lastElementChild.className = 'show'
+    for(o = o.lastElementChild.children; c--;) o[c].innerText = format(ck ? v[c] : 0)
+  }else show_totals()
+}
+function show_totals(){
+  var e = summary.lastElementChild.lastElementChild
+  summary.firstElementChild.innerText = 'Average'
+  e.firstElementChild.className = 'show'
+  e.lastElementChild.className = 'hide'
+}
+function toggle_input(e){
+  if(e.innerText === '❬'){
+    e.innerText = '❭'
+    header.style.top = '-236px'
+    sentences.parentElement.style.top = '29px'
+  }else{
+    e.innerText = '❬'
+    header.style.top = '0px'
+    sentences.parentElement.style.top = '265px'
+  }
+}
+function format(x){
+  var a = (Math.round(x * 1e6) / 1e6).toString().split('.'), o, i
+  a[1] = a.length === 1 ? '0' : a[1].substr(0, options.digits)
+  o = (a[0] === 'NaN' ? '0' : a[0]) + '.' + a[1]
+  if(a[1].length < options.digits) for(i = options.digits - a[1].length; i--;) o += '0'
+  return o
+}
+function toggle_menu(){
+  if(menu.style.display === ''){
+    menu.style.display = 'none'
+    menu.previousElementSibling.style.display = 'none'
+    update_options()
+    process_input()
+  }else{
+    menu.style.display = ''
+    menu.previousElementSibling.style.display = ''
+  }
+}
+function update_options(e){
+  if(e && e.tagName === 'INPUT' && e.previousElementSibling && options.hasOwnProperty(e.previousElementSibling.innerText)){
+    options[e.previousElementSibling.innerText] = e.type === 'checkbox' ? e.checked ? 1 : 0 : parseFloat(e.value)
+  }else{
+    for(var i = settings.childElementCount, e; i--;){
+      e = settings.children[i]
+      options[e.firstElementChild.innerText] = e.lastElementChild.type === 'checkbox' ? e.lastElementChild.checked ? 1 : 0 : parseFloat(e.lastElementChild.value)
+    }
+  }
+  store.options = JSON.stringify(options)
+}
+</script></body></html>
