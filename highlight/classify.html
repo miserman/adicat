@@ -6,19 +6,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"/>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<script type='text/javascript' src="../core.js"></script>
-<script type='text/javascript' src="../highlight/highlight.js" async></script>
+<script type='text/javascript' src="../core.min.js"></script>
+<script type='text/javascript' src="../highlight.min.js" async></script>
 <style type="text/css">
 body, button, p, button, input, div, table{
 	margin: 0; background: #252525; color: #dcdcdc; font-size: 16px; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-	outline-color: #8a8b9e; border: none; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: greyscale
+	outline-color: #8a8b9e; border: none; -webkit-font-smoothing: antialiased
 }
-button, h1, #settings a{-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+button, h1, h2, #settings a, text{-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
 button{cursor:pointer; border-radius: 15px 15px 0 0; font-weight: bold; padding: 0 12px; font-size: 1.4em}
 button:hover{color: #fff}
 button, input, #input{background: #404040}
 tr{vertical-align: top}
-h1{margin: 0}
+h1, h2{margin: 0}
+h2{font-weight: normal}
+svg{height: 100%}
+polygon{fill: #c5c5c5}
+polyline{stroke: #a0a0a0; fill: none}
 #header{position: fixed; top: 0; left: 0; right: 0; padding: 5px 12px 5px 5px}
 #header div{width: 100%}
 #header button:last-of-type{float: right}
@@ -27,23 +31,44 @@ h1{margin: 0}
 #header div:last-of-type button:last-of-type{padding: 0 15px; border-radius: 0 0 15px 15px}
 #header table{width: 100%}
 #input{width: 100%; height: 200px; overflow-y: auto; overflow-x: hidden}
-div.processed{position: absolute; top: 265px; margin: 0 0 85px 0; padding: 0 12px 0 5px; z-index: -1}
-.processed table, #summary table{width: 100%}
+div.processed{position: absolute; top: 265px; left: 0; right: 0; padding: 0 12px 170px 5px; z-index: -1}
+.processed table{width: 100%}
 .processed td{text-align: right; min-width: 60px; padding: 5px 0}
 .processed td:first-of-type{text-align: left; width: 100%}
-#sentences td:first-of-type{border-left: 3px solid; padding: 5px}
+#sentences{background: #1b1b1b; width: 100%}
+#sentences td:first-of-type{border-left: 5px solid; padding: 5px}
 #sentences tr:hover{background: #000}
+span{color: #d6d6d6}
 .none{color: #b7b7b7}
-.Culture{color: #008040; border-color: #008040}
-.Interdisciplinary{color: #2a7ab0; border-color: #2a7ab0}
-.Other{color: #9b59b6; border-color: #9b59b6}
-.Right{color: #e0c143; border-color: #e0c143}
-.Skills{color:  #ff8c00; border-color: #ff8c00}
-.Stakeholder{color: #d91e18; border-color: #d91e18}
-#summary{position: fixed; bottom: 0; left: 0; right: 0; height: 82px; text-align: center}
-.processed, #header{transition:top .4s;-webkit-transition:top .4s}
-.show{display: ''}
-.hide{display: none}
+.Culture{color: #00cc80; border-color: #00cc80; fill: #00cc80}
+.Interdisciplinary{color: #17b4ff; border-color: #17b4ff; fill: #17b4ff}
+.Other{color: #c665de; border-color: #c665de; fill: #c665de}
+.Right{color: #ffe57d; border-color: #ffe57d; fill: #ffe57d}
+.Skills{color: #ff8c00; border-color: #ff8c00; fill: #ff8c00}
+.Stakeholder{color: #ff4747; border-color: #ff4747; fill: #ff4747}
+div.Culture{background: #00cc80}
+div.Interdisciplinary{background: #17b4ff}
+div.Other{background: #c665de}
+div.Right{background: #ffe57d}
+div.Skills{background: #ff8c00}
+div.Stakeholder{background:#ff4747}
+#results{position: fixed; text-align: center; bottom: 0; width: 100%; overflow: hidden}
+table#results > tbody > tr > td{height: 170px}
+.processed, #header{transition: top .4s; -webkit-transition: top .4s}
+#summary table{margin: auto}
+#summary h1.fadeup, #summary table tr.show.fadeup{opacity: 1; transition: opacity .7s}
+#summary h1, #summary table tr.show{opacity: 0}
+#summary td:first-child{text-align: left; font-weight: bold}
+#summary td{text-align: right; height: 1em; min-width: 58px}
+#summary td:last-child{min-width: 100px}
+#summary td > div{height: 100%; transition: width .4s; -webkit-transition: width .4s}
+#cdiplot{height: 80%}
+#radar{transition: fill 1s; -webkit-transition: fill 1s}
+.show, #summary tr.show{display: inline-table}
+.hide, #summary tr.hide{display: none}
+.offmax{opacity: .75}
+.max{font-weight: bold}
+.menu_wrap{position: fixed; left: 0; right: 0; top: 0; background: none}
 #menu{position: relative; margin: 50px auto; max-width: 500px; border-radius: 20px; background: #404040}
 #menu div:first-of-type{padding: 5px; border-radius: 20px 20px 0 0}
 #menu div:first-of-type button{width: 45px; position: absolute; top: 0; right: 0; border-radius: 0 20px 0 0; background: #252525}
@@ -54,7 +79,13 @@ div.processed{position: absolute; top: 265px; margin: 0 0 85px 0; padding: 0 12p
 #settings input{float: right; width: 80px; height: 25px; padding: 0 5px}
 .escape_screen{
   position: fixed; top: 0; right: 0; bottom: 0; left: 0; cursor: not-allowed; background: #000;
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)"; filter: alpha(opacity=60); -moz-opacity: 0.6; -khtml-opacity: 0.6; opacity: 0.6
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)"; filter: alpha(opacity=60); -moz-opacity: .6; -khtml-opacity: .6; opacity: .6
+}
+#sentences td:first-child, .processed td:first-child{display: table-cell}
+@media screen and (max-width: 830px){
+	#sentences td, .processed td{display: none}
+	table#results > tbody > tr > td{display: inline-block; height: 130px}
+	table#results > tbody > tr > td:first-child{height: 170px}
 }
 </style>
 </head><body>
@@ -65,41 +96,65 @@ div.processed{position: absolute; top: 265px; margin: 0 0 85px 0; padding: 0 12p
 <table class='processed'><tr><td>Sentence</td></tr></table>
 </div>
 <div class='processed'><table id='sentences'></table></div>
-<div id='summary'>
-  <h1>Average</h1>
-  <table><tHead><tr></tr></tHead><tBody><tr class='show'></tr><tr class='hide'></tr></tBody></table>
-</div>
-<div class='escape_screen' style='display:none' onclick='toggle_menu()'></div>
-<div id='menu' style='display:none'>
-  <div><h1>Settings</h1><button type='button' title='Close menu' onclick='toggle_menu()'>&#10539;</button></div>
-  <div id='settings'>
-    <div>
-      <a title='Minimum value for standard deviations and probabilities; anything under epsilon will be replace with threshold.'>epsilon</a>
-      <input type='number' step='.001' onblur='update_options(this)'>
-    </div>
-    <div>
-      <a title='Value to set any standard deviation or probability that is smaller than epsilon.'>threshold</a>
-      <input type='number' step='.001' onblur='update_options(this)'/>
-    </div>
-    <div>
-      <a title='If checked, terms found in any sentence are used for prediction. Otherwise, only terms appearing in the given sentence are counted.'>complete</a>
-      <input type='checkbox' onblur='update_options(this)'/>
-    </div>
-    <div>
-      <a title='Number of digits to display.'>digits</a>
-      <input type='number' min='1' max='6' onblur='update_options(this)'/>
-    </div>
-  </div>
-  <button type='button' title='Clear local storage' onclick='if(window.localStorage) store.clear(); window.location.reload()'>Clear saved settings and reload</button>
+<table id='results'><tr>
+	<td id='summary'>
+	  <h1 class='fadeup'>Average</h1>
+	  <table></table>
+	</td>
+	<td><svg id='radarrplot' viewbox='0 0 250 180' xmlns='http://www.w3.org/2000/svg'>
+		<circle cx='125' cy='86' r='70'></circle>
+		<polygon id='radar' points=''></polygon>
+	</svg></td>
+	<td>
+		<h2 title='30 + article + prep - ppron - ipron - auxverb - conj - adverb - negation'>Analytic: <a id='cdi'>0</a></h2>
+		<svg id='cdiplot' viewbox='0 0 260 120' xmlns='http://www.w3.org/2000/svg'>
+			<polyline id='sentline' points=''></polyline><g id='sentpoints'></g>
+		</svg>
+	</td>
+</tr></table>
+<div class='menu_wrap'>
+	<div class='escape_screen' style='display:none' onclick='toggle_menu()'></div>
+	<div id='menu' style='display:none'>
+	  <div><h1>Settings</h1><button type='button' title='Close menu' onclick='toggle_menu()'>&#10539;</button></div>
+	  <div id='settings'>
+			<div>
+	      <a title='If checked, use binary probabilities for predictions; otherwise, use means and standard deviations to parameterize a probability distribution.'>binary</a>
+	      <input type='checkbox' onblur='update_options(this)'>
+	    </div>
+	    <div>
+	      <a title='Minimum value for standard deviations and probabilities; anything under epsilon will be replace with threshold.'>epsilon</a>
+	      <input type='number' step='.001' onblur='update_options(this)'>
+	    </div>
+	    <div>
+	      <a title='Value to set any standard deviation or probability that is smaller than epsilon.'>threshold</a>
+	      <input type='number' step='.001' onblur='update_options(this)'/>
+	    </div>
+	    <div>
+	      <a title='If checked, terms found in any sentence are used for prediction. Otherwise, only terms appearing in the given sentence are counted.'>complete</a>
+	      <input type='checkbox' onblur='update_options(this)'/>
+	    </div>
+	    <div>
+	      <a title='Number of digits to display.'>digits</a>
+	      <input type='number' min='1' onblur='update_options(this)'/>
+	    </div>
+			<div>
+	      <a title='Number of characters to trim sentence table headings and radar anchor names. Requires reload to take effect.'>trim</a>
+	      <input type='number' min='1' onblur='update_options(this)'/>
+	    </div>
+	  </div>
+	  <button type='button' title='Clear local storage' onclick='if(window.localStorage) store.clear(); window.location.reload()'>Reset</button>
+	</div>
 </div>
 <script type="text/javascript">
 'use strict'
 function $(e){return document.getElementById(e)}
 var menu = $('menu'), settings = $('settings'), header = $('header'), input = $('input'), sentences = $('sentences'), summary = $('summary'),
-    colnames = '<tr><td>Sentence</td>', texts = [], complete, weights = {}, classes = [], store = window.localStorage || {}, patterns = {
+    lplot = $('cdiplot'), sentline = $('sentline'), sentpoints = $('sentpoints'), cdi = $('cdi'), rplot = $('radarrplot'), radar = $('radar'),
+		ns = 'http://www.w3.org/2000/svg', colnames = '<tr><td>Sentence</td>', texts = [], complete, weights = {}, classes = [],
+		store = window.localStorage || {}, average = [], plot_positions = {_center: [125, 86]}, aframe, patterns = {
       abreviations: /((^|\s)[a-z]+\.[a-z.]+|etc|st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\.\s/gi,
-      sentence: /([.?!])(?:\s|$)+/g, pstand: /PERIOD/g, boundary: /\|/g, format: /^\d[^.]*\d{,3}/
-    }, queued = false, options = {threshold: .001, epsilon: 0, complete: 1, digits: 4}
+      sentence: /([.?!])(?:\s|$)+/g, pstand: /PERIOD/g, boundary: /\|/g, format: /^\d[^.]*\d{,3}/, none: / none/
+    }, queued = false, options = {binary: true, threshold: .001, epsilon: 0, complete: 1, digits: 3, trim: 5}
 window.onload = function(){
   var k, i, e, eopt
   if(store.hasOwnProperty('options')){
@@ -111,16 +166,17 @@ window.onload = function(){
     e.lastElementChild[e.lastElementChild.type === 'checkbox' ? 'checked' : 'value'] = options[e.firstElementChild.innerText]
   }
   load_weights('../dict/classify.json')
+	Adicat.loadDict('../dict/function.json')
   sentences.addEventListener('mouseover', show_weights)
   sentences.addEventListener('mouseout', show_totals)
+  sentpoints.addEventListener('mouseover', show_sent)
+  sentpoints.addEventListener('mouseout', show_totals)
   input.addEventListener('keyup', function(e){if(!queued){
     queued = true
     setTimeout(process_input, 500)
   }})
   input.addEventListener('paste', function(e){
-    e.preventDefault()
     queued = true
-    input.innerText = (event.clipboardData || window.clipboardData).getData('text')
     process_input()
   })
 }
@@ -131,41 +187,73 @@ function load_weights(url){
       weights = JSON.parse(f.responseText)
       if(weights && weights.hasOwnProperty('_classes')){
         classes = weights._classes
-        for(var i = 0, n = classes.length,
-          e = header.lastElementChild.firstElementChild.firstElementChild,
-          o = summary.lastElementChild.firstElementChild.firstElementChild,
-          v = summary.lastElementChild.lastElementChild.firstElementChild,
-          tv = v.nextElementSibling, c; i < n; i++){
-          colnames += '<td>' + classes[i] + '</td>'
-          e.appendChild(c = document.createElement('td'))
-          c.innerText = classes[i]
-          c.className = classes[i]
-          o.appendChild(c = document.createElement('th'))
-          c.innerText = classes[i]
-          c.className = classes[i]
-          v.appendChild(c = document.createElement('td'))
-          c.innerText = 0
-          tv.appendChild(c = document.createElement('td'))
-          c.innerText = 0
+				for(var i = 0, n = classes.length, h = header.lastElementChild.firstElementChild.firstElementChild,
+          step = 360 / n, pos = -step * n / 2, cords = [0, 0], tv, e, c, p; i < n; i++){
+          colnames += '<td>' + classes[i].substr(0, options.trim) + '</td>'
+          h.appendChild(c = document.createElement('td'))
+          c.innerText = classes[i].substr(0, options.trim)
+					c.className = classes[i]
+					summary.lastElementChild.appendChild(e = document.createElement('tr'))
+					e.appendChild(c = document.createElement('td'))
+					c.innerText = c.className = classes[i]
+					e.appendChild(c = document.createElement('td'))
+					c.innerText = 0
+					e.appendChild(c = document.createElement('td'))
+					c.appendChild(c = document.createElement('div'))
+					c.className = classes[i]
+					rplot.appendChild(tv = document.createElementNS(ns, 'circle'))
+					tv.setAttributeNS(null, 'r', 2)
+					rplot.appendChild(c = document.createElementNS(ns, 'text'))
+					pos += step
+					plot_positions[classes[i]] = cords = swing([60, -35], plot_positions._center, pos)
+					c.appendChild(document.createTextNode(classes[i].substr(0, options.trim)))
+					c.setAttributeNS(null, 'class', classes[i])
+					tv.setAttributeNS(null, 'class', classes[i])
+					c.setAttributeNS(null, 'x', Math.abs(cords[0] - plot_positions._center[0]) < 50 ?
+					  cords[0] - c.getBoundingClientRect().width / 2 :
+						cords[0] < plot_positions._center[0] ? cords[0] - c.getBoundingClientRect().width - 2 : cords[0])
+					tv.setAttributeNS(null, 'cx', cords[0])
+					c.setAttributeNS(null, 'y', cords[1] > plot_positions._center[1] ? cords[1] + c.getBoundingClientRect().height : cords[1] - 4)
+					tv.setAttributeNS(null, 'cy', cords[1])
+					p = rplot.createSVGPoint()
+					p.x = plot_positions._center[0]
+					p.y = plot_positions._center[1]
+					radar.points.appendItem(p)
         }
         colnames += '</tr>'
       }
-      process_input()
+      setTimeout(process_input, 100)
     }
   }
   f.open('GET', url, true)
   f.send()
 }
+function swing(cords, center, deg){
+	deg = center.length === 3 ? center[2] : deg
+	var r = deg / 180 * Math.PI, dc = Math.cos(r), ds = Math.sin(r)
+	return [dc * cords[0] + ds * cords[1] + center[0], ds * cords[0] - dc * cords[1] + center[1], deg]
+}
 function process_input(){
 	texts = []
 	sentences.innerHTML = colnames
-  complete = new adicat(input.innerText).categorize()
-	var c, wc, w, i = 0,
-      sents = (input.innerText ? input.innerText : 'Paste text into the box above to classify its sentences.').replace(patterns.abreviations, '$1PERIOD ')
-      .replace(patterns.sentence, '$1|').replace(patterns.pstand, '.').split(patterns.boundary), n = sents.length
+	var c, wc, w, k, p, s, y, range = [Infinity, -Infinity], i = 0, sents = (input.innerText ? input.innerText :
+			'Write about engineering ethics in the text box above. Consider the way people might be affected by the work of engineers.'
+		).replace(patterns.abreviations, '$1PERIOD ').replace(patterns.sentence, '$1|').replace(patterns.pstand, '.').split(patterns.boundary),
+		r = lplot.getBoundingClientRect(), n = sents.length, h = header.lastElementChild.firstElementChild.firstElementChild.children
+	complete = new adicat(sents.join(' ')).categorize(Adicat.patterns.dict).toPercent()
+	complete.CDI = 30 + complete.cats.article + complete.cats.prep - complete.cats.ppron - complete.cats.ipron -
+		complete.cats.auxverb - complete.cats.conj - complete.cats.adverb - complete.cats.negate
+	cdi.innerText = format(complete.CDI)
 	for(; i < n; i++) if(sents[i] !== ''){
-		texts.push(new adicat(sents[i]).categorize())
+		texts.push(new adicat(sents[i]).categorize(Adicat.patterns.dict).toPercent())
+		for(k in texts[i].cats) if(texts[i].cats.hasOwnProperty(k) && complete.cats[k]) texts[i].cats[k] /= complete.cats[k]
+		texts[i].CDI = 30 + texts[i].cats.article + texts[i].cats.prep - texts[i].cats.ppron - texts[i].cats.ipron -
+		  texts[i].cats.auxverb - texts[i].cats.conj - texts[i].cats.adverb - texts[i].cats.negate
+		if(texts[i].CDI < range[0]) range[0] = texts[i].CDI
+		if(texts[i].CDI > range[1]) range[1] = texts[i].CDI
+		texts[i].funcats = JSON.parse(JSON.stringify(texts[i].cats))
 		texts[i].display()
+		texts[i].cats = {}
     if(texts[i].WC){
   		sentences.appendChild(texts[i].element = c = document.createElement('tr'))
   		c.appendChild(c = document.createElement('td'))
@@ -176,63 +264,154 @@ function process_input(){
   		predict(i)
     }
 	}
+	sentline.points.clear()
+	sentpoints.innerHTML = ''
+	s = [(r.width - 50) / n, (r.height - 40) / (range[1] - range[0])]
+	for(n = texts.length, i = 0; i < n; i++){
+		y = (range[0] - texts[i].CDI) * s[1] + r.height - 30
+		sentpoints.appendChild(c = document.createElementNS(ns, 'circle'))
+		c.setAttributeNS(null, 'r', 5)
+		c.setAttributeNS(null, 'cx', 10 + i * s[0])
+		c.setAttributeNS(null, 'cy', y)
+		c.setAttributeNS(null, 'class', sentences.children[i + 1].className)
+		c.setAttributeNS(null, 'id', 'sentcdi' + i)
+		p = lplot.createSVGPoint()
+		p.x = 10 + i * s[0]
+		p.y = y
+		sentline.points.appendItem(p)
+	}
+	for(i = classes.length; i--;) h[i + 1].style.minWidth = sentences.children[1].children[i + 1].getBoundingClientRect().width + 'px'
   update_totals()
   queued = false
 }
 function predict(index){
-  for(var text = texts[index], words = text.words, i = text.WC, n = classes.length, e, c, k, v, sd, p = {}, max = [-1, 0]; i--;){
-    text.html[i].title = words.token[i]
+  for(var text = texts[index], words = text.words, i = text.WC, n = classes.length, mp = options.binary ? 'prob' : 'mean', e, c, k, v, sd, p = {}, max = [-1, 0]; i--;){
+    text.html[i].title = words.token[i] + (patterns.none.test(words.categories[i]) ? '' : ' (' + words.categories[i].trim() + ')')
     if(weights.hasOwnProperty(words.token[i])){
       text.captured++
-      for(c = classes.length, max = [0, 0]; c--;){
-        if(weights[words.token[i]].mean[c] > max[1]) max = [c, weights[words.token[i]].mean[c]]
-      }
-      words.categories[i] = text.html[i].className = ' ' + classes[max[0]] + ' '
+      for(c = classes.length, max = [0, 0]; c--;) if(weights[words.token[i]][mp][c] > max[1]) max = [c, weights[words.token[i]][mp][c]]
+      words.categories[i] = text.html[i].classList.add(classes[max[0]])
     }
   }
   for(k in (options.complete === 1 ? complete : text).vector) if((options.complete ? complete : text).vector.hasOwnProperty(k) && weights.hasOwnProperty(k)){
-    for(c = classes.length; c--;){
-      if(!text.cats.hasOwnProperty(classes[c])) text.cats[classes[c]] = weights._priors[c]
-      sd = weights[k].sd[c]
-      v = Adicat.dnorm(options.complete !== 1 || text.vector.hasOwnProperty(k) ? text.vector[k] : 0, weights[k].mean[c], sd <= options.epsilon ? options.threshold : sd)
-      text.cats[classes[c]] += Math.log(v <= options.epsilon ? options.threshold : v)
-    }
+		if(options.binary){
+	    for(c = classes.length; c--;){
+	      if(!text.cats.hasOwnProperty(classes[c])) text.cats[classes[c]] = weights._priors[c]
+	      v = weights[k].prob[c]
+				if(!text.vector.hasOwnProperty(k)) v = 1 - v
+	      text.cats[classes[c]] += Math.log(v <= options.epsilon ? options.threshold : v)
+	    }
+		}else{
+			for(c = classes.length; c--;){
+	      if(!text.cats.hasOwnProperty(classes[c])) text.cats[classes[c]] = weights._priors[c]
+	      sd = weights[k].sd[c]
+	      v = Adicat.dnorm(text.vector.hasOwnProperty(k) ? text.vector[k] : 0, weights[k].mean[c], sd <= options.epsilon ? options.threshold : sd)
+	      text.cats[classes[c]] += Math.log(v <= options.epsilon ? options.threshold : v)
+	    }
+		}
   }
   p = {}
   for(k in text.cats) if(text.cats.hasOwnProperty(k)){
     for(p[k] = 0, c = classes.length; c--;){
       p[k] += Math.exp(text.cats[classes[c]] - text.cats[k])
     }
-    p[k] = 1 / p[k]
+    p[k] = 1 / p[k] * 100
   }
   for(text.cats = p, text.element = sentences.children[index + 1], max = [-1, 0], c = 0, n = classes.length; c < n; c++){
     if(text.cats[classes[c]] > max[1]) max = [c, text.cats[classes[c]]]
     text.element.appendChild(document.createElement('td'))
     text.element.lastElementChild.innerText = format(text.cats[classes[c]])
+		text.element.lastElementChild.className = 'offmax'
   }
   text.element.className = classes[max[0]]
+	text.element.children[max[0] + 1].className = 'max'
 }
 function update_totals(){
-  for(var e = summary.lastElementChild.lastElementChild.firstElementChild.children, i = texts.length, c, n = e.length, v = []; i--;){
-    for(c = n; c--;) v[c] = v[c] ? v[c] + texts[i].cats[classes[c]] : texts[i].cats[classes[c]]
+	average = []
+  for(var e = summary.lastElementChild.children,
+		i = texts.length, c, v = average, adj = 1 / i; i--;){
+    for(c = classes.length; c--;) v[c] = v[c] ? v[c] + texts[i].cats[classes[c]] * adj : texts[i].cats[classes[c]] * adj
   }
-  for(c = n, i = texts.length; c--;) e[c].innerText = format(v[c] / i)
+	display_results(v, 100, 0)
+}
+function display_results(v, t, adj){
+	summary.firstElementChild.classList.remove('fadeup')
+	for(var e = summary.lastElementChild.children, max = [0, ''], points = [0, 0, 0], to = [], c = classes.length,
+	  ck = v.length >= c, p, vc = 0, a; c--;){
+		vc = 'object' === typeof v[c + adj] ? v[0].tagName === 'TD' ? parseFloat(v[c + adj].innerText) : parseFloat(v[c].children[1].innerText) : v[c + adj]
+		vc = ck ? vc / t * 100 : 0
+		e[c].children[2].firstElementChild.style.width = vc + 'px'
+		if(vc > max[0]) max = [vc, classes[c]]
+		a = Math.min(.98, Math.pow(100 - vc, 2) / 1e4)
+		points = plot_positions[classes[c]]
+		to.splice(0, 0, {
+			value: vc,
+			x: points[0] + (plot_positions._center[0] - points[0]) * a,
+			y: points[1] + (plot_positions._center[1] - points[1]) * a,
+		})
+	}
+	window.cancelAnimationFrame(aframe)
+	morphstep(to, .1)
+	radar.setAttributeNS(null, 'class', max[1] || '')
+	summary.firstElementChild.classList.add('fadeup')
+}
+function morphstep(to, by){
+	for(var e = summary.lastElementChild.children, i = classes.length, moved = false, v = 0, p; i--;){
+		v = parseFloat(e[i].children[1].innerText)
+		if(v != to[i].value){
+			if(Math.abs(to[i].value - v) < by) v = to[i].value
+			e[i].children[1].innerText = format(v + (to[i].value - v) * by * 2)
+			moved = true
+		}
+		p = radar.points.getItem(i)
+		if(to[i].x != p.x){
+			if(Math.abs(to[i].x - p.x) < by){
+				p.x = to[i].x
+			}else p.x += (to[i].x - p.x) * by
+			moved = true
+		}
+		if(to[i].y != p.y){
+			if(Math.abs(to[i].y - p.y) < by){
+				p.y = to[i].y
+			}else p.y += (to[i].y - p.y) * by
+			moved = true
+		}
+	}
+	if(moved) aframe = window.requestAnimationFrame(morphstep.bind(null, to, by))
+}
+function reset_points(){
+	for(var i = texts.length; i--;) sentpoints.childNodes[i].setAttributeNS(null, 'r', 5)
+}
+function show_sent(e){
+	if(e.target.tagName === 'circle'){
+		show_weights({target: sentences.children[parseInt(e.target.id.replace('sentcdi', '')) + 1].firstElementChild})
+	}
 }
 function show_weights(e){
-  if(e.target.tagName === 'SPAN'){
-    var o = summary.lastElementChild.lastElementChild, ck = weights.hasOwnProperty(e.target.title),
-        v = ck ? weights[e.target.title].mean : [], c = classes.length
-    summary.firstElementChild.innerText = e.target.title
-    summary.lastElementChild.lastElementChild.firstElementChild.className = 'hide'
-    summary.lastElementChild.lastElementChild.lastElementChild.className = 'show'
-    for(o = o.lastElementChild.children; c--;) o[c].innerText = format(ck ? v[c] : 0)
+  if(e.target.tagName === 'SPAN' || e.target.tagName === 'TD'){
+    var ck, v, t = 0, c = classes.length, i = e.target.parentElement.rowIndex
+		if(e.target.tagName === 'TD'){
+			if(i){
+				summary.firstElementChild.innerText = 'Sentence ' + i
+				cdi.innerText = format(texts[i - 1].CDI)
+				reset_points()
+				sentpoints.childNodes[i - 1].setAttributeNS(null, 'r', 10)
+				display_results(e.target.parentElement.children, 100, 1)
+			}
+		}else{
+			ck = weights.hasOwnProperty(e.target.title)
+			v = ck ? weights[e.target.title][options.binary ? 'prob' : 'mean'] : []
+			summary.firstElementChild.innerText = e.target.title
+			for(; c--;) t += ck ? v[c] : 0
+			display_results(v, t, 0)
+		}
   }else show_totals()
 }
 function show_totals(){
-  var e = summary.lastElementChild.lastElementChild
   summary.firstElementChild.innerText = 'Average'
-  e.firstElementChild.className = 'show'
-  e.lastElementChild.className = 'hide'
+	cdi.innerText = format(complete.CDI)
+	reset_points()
+	display_results(average, 100, 0)
 }
 function toggle_input(e){
   if(e.innerText === '❬'){
@@ -246,7 +425,7 @@ function toggle_input(e){
   }
 }
 function format(x){
-  var a = (Math.round(x * 1e6) / 1e6).toString().split('.'), o, i
+  var d = 1000 * (options.digits - 1), a = (Math.round(x * d) / d).toString().split('.'), o, i
   a[1] = a.length === 1 ? '0' : a[1].substr(0, options.digits)
   o = (a[0] === 'NaN' ? '0' : a[0]) + '.' + a[1]
   if(a[1].length < options.digits) for(i = options.digits - a[1].length; i--;) o += '0'
