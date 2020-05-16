@@ -87,6 +87,9 @@ table#results > tbody > tr > td{height: 170px}
 	table#results > tbody > tr > td{display: inline-block; height: 130px}
 	table#results > tbody > tr > td:first-child{height: 170px}
 }
+@media screen and (max-width: 410px){
+	table#results > tbody > tr > td{display: inline-block; height: 100px}
+}
 </style>
 </head><body>
 <div id='header'>
@@ -153,7 +156,7 @@ var menu = $('menu'), settings = $('settings'), header = $('header'), input = $(
 		ns = 'http://www.w3.org/2000/svg', colnames = '<tr><td>Sentence</td>', texts = [], complete, weights = {}, classes = [],
 		store = window.localStorage || {}, average = [], plot_positions = {_center: [125, 86]}, aframe, patterns = {
       abreviations: /((^|\s)[a-z]+\.[a-z.]+|etc|st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\.\s/gi,
-      sentence: /([.?!])(?:\s|$)+/g, pstand: /PERIOD/g, boundary: /\|/g, format: /^\d[^.]*\d{,3}/, none: / none/
+      sentence: /([.?!])(?:\s|$)+/g, pstand: /PERIOD/g, boundary: /\|/g, format: /^\d[^.]*\d{,3}/, none: / none/, character: /[a-z]/i
     }, queued = false, options = {binary: true, threshold: .001, epsilon: 0, complete: 1, digits: 3, trim: 5}
 window.onload = function(){
   var k, i, e, eopt
@@ -244,7 +247,7 @@ function process_input(){
 	complete.CDI = 30 + complete.cats.article + complete.cats.prep - complete.cats.ppron - complete.cats.ipron -
 		complete.cats.auxverb - complete.cats.conj - complete.cats.adverb - complete.cats.negate
 	cdi.innerText = format(complete.CDI)
-	for(; i < n; i++) if(sents[i] !== ''){
+	for(; i < n; i++) if(sents.length > i) if(patterns.character.test(sents[i])){
 		texts.push(new adicat(sents[i]).categorize(Adicat.patterns.dict).toPercent())
 		for(k in texts[i].cats) if(texts[i].cats.hasOwnProperty(k) && complete.cats[k]) texts[i].cats[k] /= complete.cats[k]
 		texts[i].CDI = 30 + texts[i].cats.article + texts[i].cats.prep - texts[i].cats.ppron - texts[i].cats.ipron -
@@ -263,11 +266,14 @@ function process_input(){
   		}
   		predict(i)
     }
+	}else{
+		sents.splice(i, 1)
+		i--
 	}
 	sentline.points.clear()
-	sentpoints.innerHTML = ''
-	s = [(r.width - 50) / n, (r.height - 40) / (range[1] - range[0])]
-	for(n = texts.length, i = 0; i < n; i++){
+	for(i = sentpoints.childElementCount; i--;) sentpoints.removeChild(sentpoints.childNodes[i])
+	s = [(r.width - 50) / n, (r.height - 40) / (1 + range[1] - range[0])]
+	for(n = sentences.childElementCount - 1, i = 0; i < n; i++){
 		y = (range[0] - texts[i].CDI) * s[1] + r.height - 30
 		sentpoints.appendChild(c = document.createElementNS(ns, 'circle'))
 		c.setAttributeNS(null, 'r', 5)
@@ -280,7 +286,8 @@ function process_input(){
 		p.y = y
 		sentline.points.appendItem(p)
 	}
-	for(i = classes.length; i--;) h[i + 1].style.minWidth = sentences.children[1].children[i + 1].getBoundingClientRect().width + 'px'
+	if(sentences.childElementCount > 1) for(i = classes.length; i--;)
+	  h[i + 1].style.minWidth = sentences.children[1].children[i + 1].getBoundingClientRect().width + 'px'
   update_totals()
   queued = false
 }
@@ -311,20 +318,29 @@ function predict(index){
 		}
   }
   p = {}
+	if(!text.cats.hasOwnProperty(classes[0])) for(c = classes.length; c--;) text.cats[classes[c]] = weights._priors[c]
   for(k in text.cats) if(text.cats.hasOwnProperty(k)){
     for(p[k] = 0, c = classes.length; c--;){
       p[k] += Math.exp(text.cats[classes[c]] - text.cats[k])
     }
     p[k] = 1 / p[k] * 100
   }
-  for(text.cats = p, text.element = sentences.children[index + 1], max = [-1, 0], c = 0, n = classes.length; c < n; c++){
-    if(text.cats[classes[c]] > max[1]) max = [c, text.cats[classes[c]]]
-    text.element.appendChild(document.createElement('td'))
-    text.element.lastElementChild.innerText = format(text.cats[classes[c]])
-		text.element.lastElementChild.className = 'offmax'
-  }
-  text.element.className = classes[max[0]]
-	text.element.children[max[0] + 1].className = 'max'
+	if(sentences.childElementCount > index + 1){
+	  for(text.cats = p, text.element = sentences.children[index + 1], max = [-1, 0], c = 0, n = classes.length; c < n; c++){
+			if(!text.element){
+				text.element
+			}else{
+		    if(text.cats[classes[c]] > max[1]) max = [c, text.cats[classes[c]]]
+		    text.element.appendChild(document.createElement('td'))
+		    text.element.lastElementChild.innerText = format(text.cats[classes[c]])
+				text.element.lastElementChild.className = 'offmax'
+			}
+	  }
+		if(max[0] !== -1){
+		  text.element.className = classes[max[0]]
+			text.element.children[max[0] + 1].className = 'max'
+		}
+	}
 }
 function update_totals(){
 	average = []
@@ -380,7 +396,7 @@ function morphstep(to, by){
 	if(moved) aframe = window.requestAnimationFrame(morphstep.bind(null, to, by))
 }
 function reset_points(){
-	for(var i = texts.length; i--;) sentpoints.childNodes[i].setAttributeNS(null, 'r', 5)
+	for(var i = sentpoints.childElementCount; i--;) sentpoints.childNodes[i].setAttributeNS(null, 'r', 5)
 }
 function show_sent(e){
 	if(e.target.tagName === 'circle'){
