@@ -29,7 +29,6 @@ polyline{stroke: #a0a0a0; fill: none}
 #header div:last-of-type{width: 100%; text-align: center; height: 20px}
 #header div:last-of-type button:first-of-type{transform: rotate(90deg); border-radius: 0 15px 15px 0; padding: 15px 9px 15px 7px; margin: -18px 0 0 0}
 #header div:last-of-type button:last-of-type{padding: 0 15px; border-radius: 0 0 15px 15px}
-#header table{width: 100%; border-spacing: 0}
 #input{width: 100%; height: 200px; overflow-y: auto; overflow-x: hidden}
 #sentences_wrap{position: absolute; top: 265px; left: 0; bottom: 175px; right: 0; overflow-y: auto}
 #sentences{background: #1b1b1b; width: 100%; border-spacing: 0; top: 0; text-align: right; padding: 0 5px 5px 0}
@@ -146,7 +145,7 @@ div.Stakeholder{background:#ff4747}
 function $(e){return document.getElementById(e)}
 var menu = $('menu'), settings = $('settings'), header = $('header'), input = $('input'), sentences = $('sentences').lastElementChild,
   summary = $('summary'), lplot = $('cdiplot'), sentline = $('sentline'), sentpoints = $('sentpoints'), cdi = $('cdi'),
-	rplot = $('radarrplot'), radar = $('radar'), ns = 'http://www.w3.org/2000/svg', colnames = '<tr><td>Sentence</td>', texts = [], complete,
+	rplot = $('radarrplot'), radar = $('radar'), ns = 'http://www.w3.org/2000/svg', texts = [], complete,
 	weights = {}, classes = [], store = window.localStorage || {}, average = [], plot_params = {_center: [0, 0]}, aframe, patterns = {
     abreviations: /((^|\s)[a-z]+\.[a-z.]+|etc|st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\.\s/gi,
     sentence: /([.?!])(?:\s|$)+/g, pstand: /PERIOD/g, boundary: /\|/g, format: /^\d[^.]*\d{,3}/, none: / none/, character: /[a-z]/i
@@ -272,7 +271,7 @@ function process_input(){
 	}
 	sentline.points.clear()
 	for(i = sentpoints.childElementCount; i--;) sentpoints.removeChild(sentpoints.childNodes[i])
-	for(n = sentences.childElementCount, s = [(plot_params._dims[0] - 20) / (n - 1),
+	for(n = sentences.childElementCount, s = [(plot_params._dims[0] - 20) / Math.max(1, n - 1),
 		range[0] === range[1] ? r.height : r.height / (range[1] - range[0])], i = 0; i < n; i++){
 		y = (range[0] - texts[i].CDI) * s[1] + r.height
 		sentpoints.appendChild(c = document.createElementNS(ns, 'circle'))

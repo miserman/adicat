@@ -43,8 +43,8 @@ var Adicat = {
 		'twitter':{'ppron':9.02,'ipron':4.6,'article':5.58,'auxverb':8.27,'adverb':5.13,'prep':11.88,'conj':4.19,'negate':1.74,'quant':1.85}
 	},
 	toRegex:function(obj,level){
-		var op, s=level ? '\\s' : '^', e=level ? '\\s' : '$', hf=/^\^|\$$/g, wildcards=level ? /(?=\\s|\s)+\*|\*(?=\\s|\s)+/g : /\^\*|\*\$/g,
-				t=level?'g':'', open=/(^|[^\\])[[(]/, close=/(^|[^\\])[)\]]/, sp=/\s/g, wr=level ? '[^\\s]*' : '', isarr, k, i, p
+		var op, s=level ? '\\s' : '^', e=level ? '\\s' : '$', hf=/^\^|\$$/g, wildcards=level ? /(?=\\s|\s)+\*|\*(?=\\s|\s)+/g : /\^\*|([^)\]])\*\$/g,
+				t=level?'g':'', open=/(^|[^\\])[[(]/, close=/(^|[^\\])[)\]]/, sp=/\s/g, wr=level ? '[^\\s]*' : '\$1', isarr, k, i, p
 		if(obj && 'object' === typeof obj) isarr = obj.hasOwnProperty('length')
 		if(isarr) obj={a:obj}
 		for(k in obj) if(obj.hasOwnProperty(k) && !obj[k].test){
