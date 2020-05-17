@@ -20,7 +20,7 @@ button, input, #input{background: #404040}
 tr{vertical-align: top}
 h1, h2{margin: 0}
 h2{font-weight: normal}
-svg{height: 100%}
+svg{height: 102%}
 polygon{fill: #c5c5c5}
 polyline{stroke: #a0a0a0; fill: none}
 #header{position: fixed; top: 0; left: 0; right: 0; padding: 5px 12px 5px 5px}
@@ -29,15 +29,15 @@ polyline{stroke: #a0a0a0; fill: none}
 #header div:last-of-type{width: 100%; text-align: center; height: 20px}
 #header div:last-of-type button:first-of-type{transform: rotate(90deg); border-radius: 0 15px 15px 0; padding: 15px 9px 15px 7px; margin: -18px 0 0 0}
 #header div:last-of-type button:last-of-type{padding: 0 15px; border-radius: 0 0 15px 15px}
-#header table{width: 100%}
+#header table{width: 100%; border-spacing: 0}
 #input{width: 100%; height: 200px; overflow-y: auto; overflow-x: hidden}
-div.processed{position: absolute; top: 265px; left: 0; right: 0; padding: 0 12px 170px 5px; z-index: -1}
-.processed table{width: 100%}
-.processed td{text-align: right; min-width: 60px; padding: 5px 0}
-.processed td:first-of-type{text-align: left; width: 100%}
-#sentences{background: #1b1b1b; width: 100%}
+#sentences_wrap{position: absolute; top: 265px; left: 0; bottom: 175px; right: 0; overflow-y: auto}
+#sentences{background: #1b1b1b; width: 100%; border-spacing: 0; top: 0; text-align: right; padding: 0 5px 5px 0}
+#sentences th{position: sticky; top: 0; padding: 5px 2px; background: #1b1b1b; z-index: 1}
+#sentences th:first-child, #sentences td:first-child{text-align: left}
 #sentences td:first-of-type{border-left: 5px solid; padding: 5px}
 #sentences tr:hover{background: #000}
+#sentences td{padding: 0 2px}
 span{color: #d6d6d6}
 .none{color: #b7b7b7}
 .Culture{color: #00cc80; border-color: #00cc80; fill: #00cc80}
@@ -52,15 +52,16 @@ div.Other{background: #c665de}
 div.Right{background: #ffe57d}
 div.Skills{background: #ff8c00}
 div.Stakeholder{background:#ff4747}
-#results{position: fixed; text-align: center; bottom: 0; width: 100%; overflow: hidden}
-table#results > tbody > tr > td{height: 170px}
-.processed, #header{transition: top .4s; -webkit-transition: top .4s}
-#summary table{margin: auto}
+#results_wrap{position: absolute; left: 0; bottom: 0; right: 0; overflow-x: auto; overflow-y: hidden}
+#results{text-align: center; width: 100%; border-spacing: 0}
+#results td{height: 160px}
+#sentences_wrap, #header{transition: top .4s; -webkit-transition: top .4s}
+#summary table{margin: auto; border-spacing: 0}
 #summary h1.fadeup, #summary table tr.show.fadeup{opacity: 1; transition: opacity .7s}
 #summary h1, #summary table tr.show{opacity: 0}
 #summary td:first-child{text-align: left; font-weight: bold}
 #summary td{text-align: right; height: 1em; min-width: 58px}
-#summary td:last-child{min-width: 100px}
+#summary td:last-child{min-width: 70px}
 #summary td > div{height: 100%; transition: width .4s; -webkit-transition: width .4s}
 #cdiplot{height: 80%}
 #radar{transition: fill 1s; -webkit-transition: fill 1s}
@@ -68,7 +69,7 @@ table#results > tbody > tr > td{height: 170px}
 .hide, #summary tr.hide{display: none}
 .offmax{opacity: .75}
 .max{font-weight: bold}
-.menu_wrap{position: fixed; left: 0; right: 0; top: 0; background: none}
+.menu_wrap{position: fixed; left: 0; right: 0; top: 0; bottom: 0; background: none; overflow-y: auto; z-index: 2}
 #menu{position: relative; margin: 50px auto; max-width: 500px; border-radius: 20px; background: #404040}
 #menu div:first-of-type{padding: 5px; border-radius: 20px 20px 0 0}
 #menu div:first-of-type button{width: 45px; position: absolute; top: 0; right: 0; border-radius: 0 20px 0 0; background: #252525}
@@ -81,41 +82,33 @@ table#results > tbody > tr > td{height: 170px}
   position: fixed; top: 0; right: 0; bottom: 0; left: 0; cursor: not-allowed; background: #000;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)"; filter: alpha(opacity=60); -moz-opacity: .6; -khtml-opacity: .6; opacity: .6
 }
-#sentences td:first-child, .processed td:first-child{display: table-cell}
-@media screen and (max-width: 830px){
-	#sentences td, .processed td{display: none}
-	table#results > tbody > tr > td{display: inline-block; height: 130px}
-	table#results > tbody > tr > td:first-child{height: 170px}
-}
-@media screen and (max-width: 410px){
-	table#results > tbody > tr > td{display: inline-block; height: 100px}
-}
+#sentences td:first-child, #sentences th:first-child{display: table-cell}
+@media screen and (max-width: 660px){#sentences td, #sentences th{display: none}}
 </style>
 </head><body>
 <div id='header'>
 <div><button type='button' onclick='input.innerText=""' title='Clear input'>&#10539;</button><button type='button' onclick='process_input()' title='Reprocess'>&orarr;</button></div>
 <div contenteditable="true" id='input'></div>
 <div><button type='button' onclick='toggle_input(this)' title='Toggle input'>&#10092;</button><button type='button' onclick='toggle_menu()' title='Open menu'>&#8801;</button></div>
-<table class='processed'><tr><td>Sentence</td></tr></table>
 </div>
-<div class='processed'><table id='sentences'></table></div>
-<table id='results'><tr>
+<div id='sentences_wrap'><table id='sentences'><thead><tr><th>Sentence</th></tr></thead><tbody></tbody></table></div>
+<div id='results_wrap'><table id='results'><tr>
 	<td id='summary'>
-	  <h1 class='fadeup'>Average</h1>
+	  <h1 class='fadeup'>Overall</h1>
 	  <table></table>
 	</td>
-	<td><svg id='radarrplot' viewbox='0 0 250 180' xmlns='http://www.w3.org/2000/svg'>
-		<circle cx='125' cy='86' r='70'></circle>
+	<td><svg id='radarrplot' xmlns='http://www.w3.org/2000/svg'>
+		<circle></circle>
 		<polygon id='radar' points=''></polygon>
 	</svg></td>
 	<td>
 		<h2 title='30 + article + prep - ppron - ipron - auxverb - conj - adverb - negation'>Analytic: <a id='cdi'>0</a></h2>
-		<svg id='cdiplot' viewbox='0 0 260 120' xmlns='http://www.w3.org/2000/svg'>
+		<svg id='cdiplot' xmlns='http://www.w3.org/2000/svg'>
 			<polyline id='sentline' points=''></polyline><g id='sentpoints'></g>
 		</svg>
 	</td>
-</tr></table>
-<div class='menu_wrap'>
+</tr></table></div>
+<div class='menu_wrap' style='display: none'>
 	<div class='escape_screen' style='display:none' onclick='toggle_menu()'></div>
 	<div id='menu' style='display:none'>
 	  <div><h1>Settings</h1><button type='button' title='Close menu' onclick='toggle_menu()'>&#10539;</button></div>
@@ -151,13 +144,13 @@ table#results > tbody > tr > td{height: 170px}
 <script type="text/javascript">
 'use strict'
 function $(e){return document.getElementById(e)}
-var menu = $('menu'), settings = $('settings'), header = $('header'), input = $('input'), sentences = $('sentences'), summary = $('summary'),
-    lplot = $('cdiplot'), sentline = $('sentline'), sentpoints = $('sentpoints'), cdi = $('cdi'), rplot = $('radarrplot'), radar = $('radar'),
-		ns = 'http://www.w3.org/2000/svg', colnames = '<tr><td>Sentence</td>', texts = [], complete, weights = {}, classes = [],
-		store = window.localStorage || {}, average = [], plot_positions = {_center: [125, 86]}, aframe, patterns = {
-      abreviations: /((^|\s)[a-z]+\.[a-z.]+|etc|st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\.\s/gi,
-      sentence: /([.?!])(?:\s|$)+/g, pstand: /PERIOD/g, boundary: /\|/g, format: /^\d[^.]*\d{,3}/, none: / none/, character: /[a-z]/i
-    }, queued = false, options = {binary: true, threshold: .001, epsilon: 0, complete: 1, digits: 3, trim: 5}
+var menu = $('menu'), settings = $('settings'), header = $('header'), input = $('input'), sentences = $('sentences').lastElementChild,
+  summary = $('summary'), lplot = $('cdiplot'), sentline = $('sentline'), sentpoints = $('sentpoints'), cdi = $('cdi'),
+	rplot = $('radarrplot'), radar = $('radar'), ns = 'http://www.w3.org/2000/svg', colnames = '<tr><td>Sentence</td>', texts = [], complete,
+	weights = {}, classes = [], store = window.localStorage || {}, average = [], plot_params = {_center: [0, 0]}, aframe, patterns = {
+    abreviations: /((^|\s)[a-z]+\.[a-z.]+|etc|st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\.\s/gi,
+    sentence: /([.?!])(?:\s|$)+/g, pstand: /PERIOD/g, boundary: /\|/g, format: /^\d[^.]*\d{,3}/, none: / none/, character: /[a-z]/i
+  }, queued = false, options = {binary: true, threshold: .001, epsilon: 0, complete: 1, digits: 3, trim: 5}
 window.onload = function(){
   var k, i, e, eopt
   if(store.hasOwnProperty('options')){
@@ -168,6 +161,14 @@ window.onload = function(){
     e = settings.children[i]
     e.lastElementChild[e.lastElementChild.type === 'checkbox' ? 'checked' : 'value'] = options[e.firstElementChild.innerText]
   }
+	plot_params._parent = rplot.parentNode.getBoundingClientRect()
+	plot_params._dims = [plot_params._parent.height * 1.5, plot_params._parent.height]
+	plot_params._center = [plot_params._dims[0] / 2, plot_params._dims[1] / 2 - 1.5]
+	rplot.setAttributeNS(null, 'viewBox', '0 0 ' + plot_params._dims.join(' '))
+	cdiplot.setAttributeNS(null, 'viewBox', '0 0 ' + plot_params._dims.join(' '))
+	rplot.childNodes[1].setAttributeNS(null, 'cx', plot_params._center[0])
+	rplot.childNodes[1].setAttributeNS(null, 'cy', plot_params._center[1])
+	rplot.childNodes[1].setAttributeNS(null, 'r', plot_params._dims[1] / 2 - 20)
   load_weights('../dict/classify.json')
 	Adicat.loadDict('../dict/function.json')
   sentences.addEventListener('mouseover', show_weights)
@@ -190,10 +191,10 @@ function load_weights(url){
       weights = JSON.parse(f.responseText)
       if(weights && weights.hasOwnProperty('_classes')){
         classes = weights._classes
-				for(var i = 0, n = classes.length, h = header.lastElementChild.firstElementChild.firstElementChild,
-          step = 360 / n, pos = -step * n / 2, cords = [0, 0], tv, e, c, p; i < n; i++){
-          colnames += '<td>' + classes[i].substr(0, options.trim) + '</td>'
-          h.appendChild(c = document.createElement('td'))
+				for(var i = 0, n = classes.length, h = sentences.previousElementSibling.firstElementChild,
+          step = 360 / n, pos = -step, start = [0, plot_params._center[1] - 20],
+					cords = [0, 0], tv, e, c, p; i < n; i++){
+          h.appendChild(c = document.createElement('th'))
           c.innerText = classes[i].substr(0, options.trim)
 					c.className = classes[i]
 					summary.lastElementChild.appendChild(e = document.createElement('tr'))
@@ -208,22 +209,21 @@ function load_weights(url){
 					tv.setAttributeNS(null, 'r', 2)
 					rplot.appendChild(c = document.createElementNS(ns, 'text'))
 					pos += step
-					plot_positions[classes[i]] = cords = swing([60, -35], plot_positions._center, pos)
+					plot_params[classes[i]] = cords = swing(start, plot_params._center, pos)
 					c.appendChild(document.createTextNode(classes[i].substr(0, options.trim)))
 					c.setAttributeNS(null, 'class', classes[i])
 					tv.setAttributeNS(null, 'class', classes[i])
-					c.setAttributeNS(null, 'x', Math.abs(cords[0] - plot_positions._center[0]) < 50 ?
+					c.setAttributeNS(null, 'x', Math.abs(cords[0] - plot_params._center[0]) < 5 ?
 					  cords[0] - c.getBoundingClientRect().width / 2 :
-						cords[0] < plot_positions._center[0] ? cords[0] - c.getBoundingClientRect().width - 2 : cords[0])
+						cords[0] < plot_params._center[0] ? cords[0] - c.getBoundingClientRect().width - 2 : cords[0])
 					tv.setAttributeNS(null, 'cx', cords[0])
-					c.setAttributeNS(null, 'y', cords[1] > plot_positions._center[1] ? cords[1] + c.getBoundingClientRect().height : cords[1] - 4)
+					c.setAttributeNS(null, 'y', cords[1] > plot_params._center[1] ? cords[1] + c.getBoundingClientRect().height : cords[1] - 4)
 					tv.setAttributeNS(null, 'cy', cords[1])
 					p = rplot.createSVGPoint()
-					p.x = plot_positions._center[0]
-					p.y = plot_positions._center[1]
+					p.x = plot_params._center[0]
+					p.y = plot_params._center[1]
 					radar.points.appendItem(p)
         }
-        colnames += '</tr>'
       }
       setTimeout(process_input, 100)
     }
@@ -238,11 +238,11 @@ function swing(cords, center, deg){
 }
 function process_input(){
 	texts = []
-	sentences.innerHTML = colnames
+	sentences.innerHTML = ''
 	var c, wc, w, k, p, s, y, range = [Infinity, -Infinity], i = 0, sents = (input.innerText ? input.innerText :
 			'Write about engineering ethics in the text box above. Consider the way people might be affected by the work of engineers.'
 		).replace(patterns.abreviations, '$1PERIOD ').replace(patterns.sentence, '$1|').replace(patterns.pstand, '.').split(patterns.boundary),
-		r = lplot.getBoundingClientRect(), n = sents.length, h = header.lastElementChild.firstElementChild.firstElementChild.children
+		r = lplot.getBoundingClientRect(), n = sents.length
 	complete = new adicat(sents.join(' ')).categorize(Adicat.patterns.dict).toPercent()
 	complete.CDI = 30 + complete.cats.article + complete.cats.prep - complete.cats.ppron - complete.cats.ipron -
 		complete.cats.auxverb - complete.cats.conj - complete.cats.adverb - complete.cats.negate
@@ -272,22 +272,20 @@ function process_input(){
 	}
 	sentline.points.clear()
 	for(i = sentpoints.childElementCount; i--;) sentpoints.removeChild(sentpoints.childNodes[i])
-	s = [(r.width - 50) / n, (r.height - 40) / (1 + range[1] - range[0])]
-	for(n = sentences.childElementCount - 1, i = 0; i < n; i++){
-		y = (range[0] - texts[i].CDI) * s[1] + r.height - 30
+	for(n = sentences.childElementCount, s = [(plot_params._dims[0] - 20) / (n - 1),
+		range[0] === range[1] ? r.height : r.height / (range[1] - range[0])], i = 0; i < n; i++){
+		y = (range[0] - texts[i].CDI) * s[1] + r.height
 		sentpoints.appendChild(c = document.createElementNS(ns, 'circle'))
 		c.setAttributeNS(null, 'r', 5)
 		c.setAttributeNS(null, 'cx', 10 + i * s[0])
-		c.setAttributeNS(null, 'cy', y)
-		c.setAttributeNS(null, 'class', sentences.children[i + 1].className)
+		c.setAttributeNS(null, 'cy', 10 + y)
+		c.setAttributeNS(null, 'class', sentences.children[i].className)
 		c.setAttributeNS(null, 'id', 'sentcdi' + i)
 		p = lplot.createSVGPoint()
 		p.x = 10 + i * s[0]
-		p.y = y
+		p.y = 10 + y
 		sentline.points.appendItem(p)
 	}
-	if(sentences.childElementCount > 1) for(i = classes.length; i--;)
-	  h[i + 1].style.minWidth = sentences.children[1].children[i + 1].getBoundingClientRect().width + 'px'
   update_totals()
   queued = false
 }
@@ -325,8 +323,8 @@ function predict(index){
     }
     p[k] = 1 / p[k] * 100
   }
-	if(sentences.childElementCount > index + 1){
-	  for(text.cats = p, text.element = sentences.children[index + 1], max = [-1, 0], c = 0, n = classes.length; c < n; c++){
+	if(sentences.childElementCount > index){
+	  for(text.cats = p, text.element = sentences.children[index], max = [-1, 0], c = 0, n = classes.length; c < n; c++){
 			if(!text.element){
 				text.element
 			}else{
@@ -356,14 +354,14 @@ function display_results(v, t, adj){
 	  ck = v.length >= c, p, vc = 0, a; c--;){
 		vc = 'object' === typeof v[c + adj] ? v[0].tagName === 'TD' ? parseFloat(v[c + adj].innerText) : parseFloat(v[c].children[1].innerText) : v[c + adj]
 		vc = ck ? vc / t * 100 : 0
-		e[c].children[2].firstElementChild.style.width = vc + 'px'
+		e[c].children[2].firstElementChild.style.width = Math.max(1, vc) + '%'
 		if(vc > max[0]) max = [vc, classes[c]]
 		a = Math.min(.98, Math.pow(100 - vc, 2) / 1e4)
-		points = plot_positions[classes[c]]
+		points = plot_params[classes[c]]
 		to.splice(0, 0, {
 			value: vc,
-			x: points[0] + (plot_positions._center[0] - points[0]) * a,
-			y: points[1] + (plot_positions._center[1] - points[1]) * a,
+			x: points[0] + (plot_params._center[0] - points[0]) * a,
+			y: points[1] + (plot_params._center[1] - points[1]) * a,
 		})
 	}
 	window.cancelAnimationFrame(aframe)
@@ -400,7 +398,7 @@ function reset_points(){
 }
 function show_sent(e){
 	if(e.target.tagName === 'circle'){
-		show_weights({target: sentences.children[parseInt(e.target.id.replace('sentcdi', '')) + 1].firstElementChild})
+		show_weights({target: sentences.children[parseInt(e.target.id.replace('sentcdi', ''))].firstElementChild})
 	}
 }
 function show_weights(e){
@@ -424,7 +422,7 @@ function show_weights(e){
   }else show_totals()
 }
 function show_totals(){
-  summary.firstElementChild.innerText = 'Average'
+  summary.firstElementChild.innerText = 'Overall'
 	cdi.innerText = format(complete.CDI)
 	reset_points()
 	display_results(average, 100, 0)
@@ -433,11 +431,11 @@ function toggle_input(e){
   if(e.innerText === '❬'){
     e.innerText = '❭'
     header.style.top = '-236px'
-    sentences.parentElement.style.top = '29px'
+    sentences.parentElement.parentElement.style.top = '29px'
   }else{
     e.innerText = '❬'
     header.style.top = '0px'
-    sentences.parentElement.style.top = '265px'
+    sentences.parentElement.parentElement.style.top = '265px'
   }
 }
 function format(x){
@@ -450,11 +448,13 @@ function format(x){
 function toggle_menu(){
   if(menu.style.display === ''){
     menu.style.display = 'none'
+    menu.parentElement.style.display = 'none'
     menu.previousElementSibling.style.display = 'none'
     update_options()
     process_input()
   }else{
     menu.style.display = ''
+    menu.parentElement.style.display = ''
     menu.previousElementSibling.style.display = ''
   }
 }
