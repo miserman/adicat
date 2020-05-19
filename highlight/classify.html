@@ -147,7 +147,7 @@ var menu = $('menu'), settings = $('settings'), header = $('header'), input = $(
   summary = $('summary'), lplot = $('cdiplot'), sentline = $('sentline'), sentpoints = $('sentpoints'), cdi = $('cdi'),
 	rplot = $('radarrplot'), radar = $('radar'), ns = 'http://www.w3.org/2000/svg', texts = [], complete,
 	weights = {}, classes = [], store = window.localStorage || {}, average = [], plot_params = {_center: [0, 0]}, aframe, patterns = {
-    abreviations: /((^|\s)[a-z]+\.[a-z.]+|etc|st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\.\s/gi,
+    abreviations: /((^|\s)[a-z]+\.[a-z.]+|etc|st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\.\s/gi, term: / \(.*$/,
     sentence: /([.?!])(?:\s|$)+/g, pstand: /PERIOD/g, boundary: /\|/g, format: /^\d[^.]*\d{,3}/, none: / none/, character: /[a-z]/i
   }, queued = false, options = {binary: true, threshold: .001, epsilon: 0, complete: 1, digits: 3, trim: 5}
 window.onload = function(){
@@ -402,7 +402,7 @@ function show_sent(e){
 }
 function show_weights(e){
   if(e.target.tagName === 'SPAN' || e.target.tagName === 'TD'){
-    var ck, v, t = 0, c = classes.length, i = e.target.parentElement.rowIndex
+    var ck, v, t = 0, w = e.target.title.replace(patterns.term, ''), c = classes.length, i = e.target.parentElement.rowIndex
 		if(e.target.tagName === 'TD'){
 			if(i){
 				summary.firstElementChild.innerText = 'Sentence ' + i
@@ -412,8 +412,8 @@ function show_weights(e){
 				display_results(e.target.parentElement.children, 100, 1)
 			}
 		}else{
-			ck = weights.hasOwnProperty(e.target.title)
-			v = ck ? weights[e.target.title][options.binary ? 'prob' : 'mean'] : []
+			ck = weights.hasOwnProperty(w)
+			v = ck ? weights[w][options.binary ? 'prob' : 'mean'] : []
 			summary.firstElementChild.innerText = e.target.title
 			for(; c--;) t += ck ? v[c] : 0
 			display_results(v, t, 0)
